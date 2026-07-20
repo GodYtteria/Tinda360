@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+<circle cx="60" cy="60" r="50" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="8"/>
+<circle id="spinner-arc" cx="60" cy="60" r="50" fill="none" stroke="#F2A23A" stroke-width="8" stroke-linecap="round" stroke-dasharray="80 235"/>
+<path d="M36 52 L42 40 H78 L84 52" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+<path d="M36 52 Q42 60 48 52 Q54 60 60 52 Q66 60 72 52 Q78 60 84 52" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+<path d="M40 58 V82 H80 V58" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+<path d="M54 82 V68 H66 V82" fill="none" stroke="#F2A23A" stroke-width="4" stroke-linejoin="round"/>
+</svg>

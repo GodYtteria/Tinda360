@@ -1,0 +1,115 @@
+{
+  "shortcuts": {
+    "mgkano": "magkano",
+    "magkanu": "magkano",
+    "cno": "sino",
+    "snu": "sino",
+    "ngaun": "ngayon",
+    "ngyn": "ngayon",
+    "lng": "lang",
+    "n": "na",
+    "wla": "wala",
+    "bnta": "benta",
+    "utng": "utang",
+    "pautng": "utang",
+    "imbntryo": "imbentaryo",
+    "ty": "thank you",
+    "tnx": "thank you",
+    "thx": "thank you",
+    "slmat": "salamat",
+    "pde": "pwede",
+    "meron": "may"
+  },
+  "timeframes": {
+    "week": ["linggo", "week", "7 days", "seven days"],
+    "month": ["buwan", "month", "30 days", "thirty days"],
+    "today": ["ngayon", "today", "araw na ito", "this day"]
+  },
+  "intents": [
+    {
+      "id": "greeting",
+      "keywords": [
+        "kumusta", "kamusta", "magandang umaga", "magandang hapon",
+        "magandang gabi", "hello", "hi", "hey", "good morning",
+        "good afternoon", "good evening"
+      ]
+    },
+    {
+      "id": "thanks",
+      "keywords": ["salamat", "maraming salamat", "thank you", "thanks"]
+    },
+    {
+      "id": "help",
+      "keywords": [
+        "help", "tulong", "ano kaya mo", "ano pwede itanong",
+        "what can you do", "how to use", "paano gamitin"
+      ]
+    },
+    {
+      "id": "top_products",
+      "keywords": [
+        "pinakamabenta", "mabenta", "best seller", "bestseller",
+        "top product", "top 3", "laging binibili", "malakas",
+        "selling fast", "popular"
+      ]
+    },
+    {
+      "id": "low_stock",
+      "keywords": [
+        "stock", "low", "mababa", "imbentaryo", "inventory",
+        "ubos", "paubos", "konti", "bibilhin", "palengke",
+        "restock", "running low", "out of stock"
+      ]
+    },
+    {
+      "id": "utang",
+      "keywords": [
+        "utang", "suki", "bayad", "credit", "sisingilin",
+        "singil", "pautang", "owes", "owe", "receivable", "debt"
+      ]
+    },
+    {
+      "id": "sales",
+      "keywords": [
+        "sale", "sales", "benta", "kita", "tubo", "profit",
+        "revenue", "income", "earn", "earned", "kumita", "naipon",
+        "magkano", "transactions"
+      ]
+    },
+    {
+      "id": "sales_compare",
+      "keywords": [
+        "kahapon", "yesterday", "kumpara", "compare", "vs",
+        "compared to", "mas malaki"
+      ]
+    },
+    {
+      "id": "slow_moving",
+      "keywords": [
+        "matumal", "hindi nabibili", "hindi mabenta", "dead stock",
+        "slow moving", "walang benta", "di mabenta"
+      ]
+    },
+    {
+      "id": "product_lookup",
+      "keywords": [
+        "presyo", "price", "halaga", "magkano ang", "magkano si",
+        "stock ng", "ilan ang"
+      ]
+    },
+    {
+      "id": "utang_risk",
+      "keywords": [
+        "naluluge", "lugi", "pautang ba", "wag pautang", "delikado",
+        "singilin muna", "credit risk", "cashflow", "risk"
+      ]
+    },
+    {
+      "id": "restock_budget",
+      "keywords": [
+        "palengke", "puhunan", "kapital", "restock budget",
+        "magkano bibilhin", "budget sa paninda"
+      ]
+    }
+  ]
+}
