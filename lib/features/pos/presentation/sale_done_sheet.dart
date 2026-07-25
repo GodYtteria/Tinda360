@@ -20,6 +20,8 @@ class SaleDoneSheet extends StatefulWidget {
     required this.paid,
     required this.change,
     required this.receiptLines,
+    required this.storeName,
+    required this.timestamp,
     super.key,
   });
 
@@ -34,6 +36,12 @@ class SaleDoneSheet extends StatefulWidget {
 
   /// Formatted line summaries included when sharing the receipt.
   final List<String> receiptLines;
+
+  /// Store name shown on the shared/printed receipt.
+  final String storeName;
+
+  /// Time the sale was recorded.
+  final DateTime timestamp;
 
   @override
   State<SaleDoneSheet> createState() => _SaleDoneSheetState();
@@ -57,14 +65,18 @@ class _SaleDoneSheetState extends State<SaleDoneSheet> {
 
   Future<void> _shareReceipt(BuildContext context) async {
     final localizations = AppLocalizations.of(context);
+    final storeLabel = widget.storeName.trim().isEmpty
+        ? localizations.appTitle
+        : widget.storeName.trim();
     final buffer = StringBuffer()
-      ..writeln(localizations.appTitle)
-      ..writeln('---');
+      ..writeln(storeLabel.toUpperCase())
+      ..writeln(_formatReceiptTimestamp(widget.timestamp))
+      ..writeln('------------------------------');
     for (final line in widget.receiptLines) {
       buffer.writeln(line);
     }
     buffer
-      ..writeln('---')
+      ..writeln('------------------------------')
       ..writeln('${localizations.saleDoneTotal}: ${formatMoney(widget.total)}')
       ..writeln('${localizations.saleDonePaid}: ${formatMoney(widget.paid)}')
       ..writeln('${localizations.saleDoneChange}: ${formatMoney(widget.change)}');
@@ -74,6 +86,16 @@ class _SaleDoneSheetState extends State<SaleDoneSheet> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(localizations.saleDoneReceiptCopied)),
     );
+  }
+
+  String _formatReceiptTimestamp(DateTime timestamp) {
+    final localTimestamp = timestamp.toLocal();
+    final year = localTimestamp.year.toString().padLeft(4, '0');
+    final month = localTimestamp.month.toString().padLeft(2, '0');
+    final day = localTimestamp.day.toString().padLeft(2, '0');
+    final hour = localTimestamp.hour.toString().padLeft(2, '0');
+    final minute = localTimestamp.minute.toString().padLeft(2, '0');
+    return '$year-$month-$day $hour:$minute';
   }
 
   @override
@@ -149,13 +171,15 @@ class _SaleDoneSheetState extends State<SaleDoneSheet> {
                 onPressed: () => unawaited(
                   ReceiptPreviewSheet.show(
                     context,
-                    storeName: localizations.appTitle,
+                    storeName: widget.storeName.trim().isEmpty
+                        ? localizations.appTitle
+                        : widget.storeName,
                     lines: widget.receiptLines,
                     total: widget.total,
                     paid: widget.paid,
                     change: widget.change,
                     paymentLabel: localizations.saleDonePaid,
-                    timestamp: DateTime.now(),
+                    timestamp: widget.timestamp,
                   ),
                 ),
               ),

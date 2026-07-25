@@ -90,11 +90,12 @@ abstract final class ReceiptPrintService {
   }) => pw.Column(
     children: [
       pw.Text(
-        storeName,
+        storeName.toUpperCase(),
         textAlign: pw.TextAlign.center,
-        style: const pw.TextStyle(
-          fontSize: 10,
+        style: pw.TextStyle(
+          fontSize: 12,
           fontWeight: pw.FontWeight.bold,
+          letterSpacing: 0.5,
         ),
       ),
       pw.SizedBox(height: 2),
