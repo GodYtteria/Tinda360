@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
@@ -144,29 +145,58 @@ class _NavTabItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final color = selected ? palette.primary : palette.textMuted;
     return Expanded(
       child: Semantics(
         button: true,
         selected: selected,
         label: label,
-        child: InkWell(
-          onTap: onTap,
+        child: InkResponse(
+          onTap: () {
+            if (!selected) unawaited(HapticFeedback.selectionClick());
+            onTap();
+          },
+          containedInkWell: true,
+          highlightShape: BoxShape.rectangle,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset(
-                svgAsset,
-                width: 22,
-                height: 22,
-                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+              AnimatedScale(
+                scale: selected ? 1.08 : 1.0,
+                duration: Duration(milliseconds: reduceMotion ? 0 : 180),
+                curve: Curves.easeOutBack,
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: reduceMotion ? 0 : 180),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s10,
+                    vertical: AppSpacing.s4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? palette.primary.withValues(alpha: 0.10)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                  child: SvgPicture.asset(
+                    svgAsset,
+                    width: 22,
+                    height: 22,
+                    colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                  ),
+                ),
               ),
-              const SizedBox(height: AppSpacing.s4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: Duration(milliseconds: reduceMotion ? 0 : 180),
+                curve: Curves.easeOut,
                 style: AppTypography.navLabel(color, active: selected),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

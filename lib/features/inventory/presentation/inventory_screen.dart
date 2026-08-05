@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/data/data_providers.dart';
@@ -302,67 +303,127 @@ class _InventoryBody extends StatelessWidget {
     final palette = AppPalette.of(context);
     final localizations = AppLocalizations.of(context);
 
-    return productsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s24),
-          child: Text(
-            localizations.homeLoadFailed,
-            style: AppTypography.body(palette.danger),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: reduceMotion ? 0 : 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: productsAsync.when(
+        loading: () => const Center(
+          key: ValueKey('inventory-loading'),
+          child: CircularProgressIndicator(),
+        ),
+        error: (_, _) => Center(
+          key: const ValueKey('inventory-error'),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.s24),
+            child: Text(
+              localizations.homeLoadFailed,
+              style: AppTypography.body(palette.danger),
+            ),
           ),
         ),
-      ),
-      data: (allProducts) {
-        return ListView(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.screenHorizontal,
-            AppSpacing.s14,
-            AppSpacing.screenHorizontal,
-            96,
-          ),
-          children: [
-            Row(
+        data: (allProducts) {
+          final listKey = ValueKey(
+            'inv-${lowStockOnly}-${filteredProducts.length}-${allProducts.length}',
+          );
+          final Widget content;
+          if (allProducts.isEmpty) {
+            content = TindaEmptyState(
+              key: const ValueKey('inv-empty-all'),
+              icon: Icons.inventory_2_outlined,
+              title: localizations.inventoryEmptyTitle,
+              body: localizations.inventoryEmptyBody,
+            );
+          } else if (filteredProducts.isEmpty) {
+            content = TindaEmptyState(
+              key: const ValueKey('inv-empty-filter'),
+              icon: Icons.search_off_rounded,
+              title: localizations.inventoryFilterEmptyTitle,
+              body: localizations.inventoryFilterEmptyBody,
+            );
+          } else {
+            content = TindaGroupedCard(
+              key: listKey,
               children: [
-                TindaFilterChip(
-                  label: localizations.commonAll,
-                  selected: !lowStockOnly,
-                  onTap: () => onFilterChanged(false),
-                ),
-                const SizedBox(width: AppSpacing.s8),
-                TindaFilterChip(
-                  label: localizations.inventoryLowFilter,
-                  selected: lowStockOnly,
-                  onTap: () => onFilterChanged(true),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s12),
-            if (allProducts.isEmpty)
-              TindaEmptyState(
-                icon: Icons.inventory_2_outlined,
-                title: localizations.inventoryEmptyTitle,
-                body: localizations.inventoryEmptyBody,
-              )
-            else if (filteredProducts.isEmpty)
-              TindaEmptyState(
-                icon: Icons.search_off_rounded,
-                title: localizations.inventoryFilterEmptyTitle,
-                body: localizations.inventoryFilterEmptyBody,
-              )
-            else
-              TindaGroupedCard(
-                children: [
-                  for (final item in filteredProducts)
-                    _InventoryProductRow(
-                      item: item,
-                      onTap: () => onTapProduct(item),
+                for (var index = 0; index < filteredProducts.length; index++)
+                  _AnimatedInventoryRow(
+                    key: ValueKey(filteredProducts[index].product.id),
+                    index: index,
+                    child: _InventoryProductRow(
+                      item: filteredProducts[index],
+                      onTap: () => onTapProduct(filteredProducts[index]),
                     ),
+                  ),
+              ],
+            );
+          }
+          return ListView(
+            key: const ValueKey('inventory-data'),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.s14,
+              AppSpacing.screenHorizontal,
+              96,
+            ),
+            children: [
+              Row(
+                children: [
+                  TindaFilterChip(
+                    label: localizations.commonAll,
+                    selected: !lowStockOnly,
+                    onTap: () => onFilterChanged(false),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  TindaFilterChip(
+                    label: localizations.inventoryLowFilter,
+                    selected: lowStockOnly,
+                    onTap: () => onFilterChanged(true),
+                  ),
                 ],
               ),
-          ],
-        );
-      },
+              const SizedBox(height: AppSpacing.s12),
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: reduceMotion ? 0 : 220),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: content,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+class _AnimatedInventoryRow extends StatelessWidget {
+  const _AnimatedInventoryRow({
+    required this.index,
+    required this.child,
+    super.key,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 180 + (index.clamp(0, 8) * 20)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, (1 - value) * 8),
+          child: child,
+        ),
+      ),
+      child: child,
     );
   }
 }
@@ -392,7 +453,10 @@ class _InventoryProductRow extends StatelessWidget {
         : stockText;
 
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        unawaited(HapticFeedback.selectionClick());
+        onTap();
+      },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 64),
         child: Padding(
@@ -450,7 +514,10 @@ class _AddProductPill extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSizes.touchTargetMin),
         child: FilledButton(
-          onPressed: onPressed,
+          onPressed: () {
+            unawaited(HapticFeedback.lightImpact());
+            onPressed();
+          },
           style: FilledButton.styleFrom(
             backgroundColor: palette.primary,
             foregroundColor: palette.onPrimary,
