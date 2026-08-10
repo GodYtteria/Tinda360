@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
@@ -346,71 +347,108 @@ class _BackupSection extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Container(
+                  AnimatedContainer(
+                    duration: Duration(
+                      milliseconds:
+                          MediaQuery.disableAnimationsOf(context) ? 0 : 220,
+                    ),
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
                       color: state.backupStatus == BackupStatus.connected ||
                               state.backupStatus == BackupStatus.choosing
                           ? palette.success
-                          : palette.textMuted,
+                          : (state.backupStatus == BackupStatus.failed
+                              ? palette.danger
+                              : palette.textMuted),
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
-                    child: Text(
-                      state.accountEmail ?? statusLabel,
-                      style: AppTypography.bodyStrong(palette.text),
+                    child: AnimatedSwitcher(
+                      duration: Duration(
+                        milliseconds:
+                            MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+                      ),
+                      child: Text(
+                        state.accountEmail ?? statusLabel,
+                        key: ValueKey<String>(
+                          '${state.backupStatus.name}:${state.accountEmail ?? ''}',
+                        ),
+                        style: AppTypography.bodyStrong(palette.text),
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.s12),
-              if (state.backupStatus == BackupStatus.choosing) ...[
-                Text(
-                  localizations.settingsBackupChooseTitle,
-                  style: AppTypography.body(palette.textMuted),
+              AnimatedSwitcher(
+                duration: Duration(
+                  milliseconds:
+                      MediaQuery.disableAnimationsOf(context) ? 0 : 220,
                 ),
-                const SizedBox(height: AppSpacing.s12),
-                TindaPrimaryButton(
-                  label: localizations.settingsBackupUsePhone,
-                  onPressed: () => unawaited(notifier.choosePhoneData()),
-                ),
-                const SizedBox(height: AppSpacing.s8),
-                TindaSecondaryButton(
-                  label: localizations.settingsBackupRestore,
-                  onPressed: () => unawaited(notifier.chooseRestoreBackup()),
-                ),
-              ] else if (state.backupStatus == BackupStatus.connected) ...[
-                if (state.syncedJustNow) ...[
-                  Text(
-                    localizations.settingsBackupLastSync(
-                      localizations.settingsBackupJustNow,
-                    ),
-                    style: AppTypography.meta(palette.textMuted, size: 13),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: KeyedSubtree(
+                  key: ValueKey(state.backupStatus),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (state.backupStatus == BackupStatus.choosing) ...[
+                        Text(
+                          localizations.settingsBackupChooseTitle,
+                          style: AppTypography.body(palette.textMuted),
+                        ),
+                        const SizedBox(height: AppSpacing.s12),
+                        TindaPrimaryButton(
+                          label: localizations.settingsBackupUsePhone,
+                          onPressed: () => unawaited(notifier.choosePhoneData()),
+                        ),
+                        const SizedBox(height: AppSpacing.s8),
+                        TindaSecondaryButton(
+                          label: localizations.settingsBackupRestore,
+                          onPressed: () =>
+                              unawaited(notifier.chooseRestoreBackup()),
+                        ),
+                      ] else if (state.backupStatus == BackupStatus.connected) ...[
+                        if (state.syncedJustNow) ...[
+                          Text(
+                            localizations.settingsBackupLastSync(
+                              localizations.settingsBackupJustNow,
+                            ),
+                            style: AppTypography.meta(
+                              palette.textMuted,
+                              size: 13,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s12),
+                        ],
+                        TindaSecondaryButton(
+                          label: localizations.settingsBackupSyncNow,
+                          onPressed: () => unawaited(notifier.syncNow()),
+                        ),
+                        const SizedBox(height: AppSpacing.s8),
+                        Center(
+                          child: TindaTextLinkButton(
+                            label: localizations.settingsBackupDisconnect,
+                            isDanger: true,
+                            onPressed: () =>
+                                unawaited(notifier.disconnectBackup()),
+                          ),
+                        ),
+                      ] else
+                        TindaGoogleButton(
+                          label: localizations.onboardingGoogleButton,
+                          onPressed: state.backupStatus == BackupStatus.connecting
+                              ? null
+                              : () => unawaited(notifier.connectBackup()),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.s12),
-                ],
-                TindaSecondaryButton(
-                  label: localizations.settingsBackupSyncNow,
-                  onPressed: () => unawaited(notifier.syncNow()),
                 ),
-                const SizedBox(height: AppSpacing.s8),
-                Center(
-                  child: TindaTextLinkButton(
-                    label: localizations.settingsBackupDisconnect,
-                    isDanger: true,
-                    onPressed: () => unawaited(notifier.disconnectBackup()),
-                  ),
-                ),
-              ] else
-                TindaGoogleButton(
-                  label: localizations.onboardingGoogleButton,
-                  onPressed: state.backupStatus == BackupStatus.connecting
-                      ? null
-                      : () => unawaited(notifier.connectBackup()),
-                ),
+              ),
             ],
           ),
         ),
@@ -425,9 +463,15 @@ class _BackupSection extends ConsumerWidget {
             ),
           ),
         ],
-        if (state.backupStatus == BackupStatus.failed) ...[
-          const SizedBox(height: AppSpacing.s10),
-          TindaCard(
+        AnimatedSwitcher(
+          duration: Duration(
+            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220,
+          ),
+          child: state.backupStatus == BackupStatus.failed
+              ? Padding(
+                  key: const ValueKey('backup-failed'),
+                  padding: const EdgeInsets.only(top: AppSpacing.s10),
+                  child: TindaCard(
             backgroundColor: palette.dangerSoft,
             borderColor: palette.danger.withValues(alpha: 0.3),
             child: Column(
@@ -454,7 +498,9 @@ class _BackupSection extends ConsumerWidget {
               ],
             ),
           ),
-        ],
+                )
+              : const SizedBox.shrink(key: ValueKey('backup-ok')),
+        ),
       ],
     );
   }
