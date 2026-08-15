@@ -225,45 +225,80 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
               PaymentMethod.utang: localizations.checkoutMethodUtang,
             },
             selected: _method,
-            onChanged: (method) => setState(() {
-              _method = method;
-              _inlineError = null;
-            }),
+            onChanged: (method) {
+              if (method == _method) return;
+              unawaited(HapticFeedback.selectionClick());
+              setState(() {
+                _method = method;
+                _inlineError = null;
+              });
+            },
           ),
           const SizedBox(height: AppSpacing.s16),
-          if (_method == PaymentMethod.cash)
-            _CashSection(
-              controller: _tenderedController,
-              quickAmounts: _quickPesoAmounts,
-              change: change,
-              errorText: _inlineError,
-              onAmountSelected: (amount) {
-                _tenderedController.text = amount.toString();
-                setState(() => _inlineError = null);
-              },
-              onChanged: (_) => setState(() => _inlineError = null),
-            )
-          else if (_method == PaymentMethod.ewallet)
-            _EwalletSection(
-              controller: _ewalletRefController,
-              errorText: _inlineError,
-            )
-          else
-            _UtangSection(
-              selectedCustomerId: _selectedCustomerId,
-              errorText: _inlineError,
-              onSelectCustomer: (customerId) => setState(() {
-                _selectedCustomerId = customerId;
-                _inlineError = null;
-              }),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220,
             ),
-          if (_method != PaymentMethod.cash && _inlineError != null) ...[
-            const SizedBox(height: AppSpacing.s8),
-            Text(
-              _inlineError!,
-              style: AppTypography.meta(palette.danger, size: 13),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
             ),
-          ],
+            child: KeyedSubtree(
+              key: ValueKey(_method),
+              child: _method == PaymentMethod.cash
+                  ? _CashSection(
+                      controller: _tenderedController,
+                      quickAmounts: _quickPesoAmounts,
+                      change: change,
+                      errorText: _inlineError,
+                      onAmountSelected: (amount) {
+                        unawaited(HapticFeedback.lightImpact());
+                        _tenderedController.text = amount.toString();
+                        setState(() => _inlineError = null);
+                      },
+                      onChanged: (_) => setState(() => _inlineError = null),
+                    )
+                  : _method == PaymentMethod.ewallet
+                      ? _EwalletSection(
+                          controller: _ewalletRefController,
+                          errorText: _inlineError,
+                        )
+                      : _UtangSection(
+                          selectedCustomerId: _selectedCustomerId,
+                          errorText: _inlineError,
+                          onSelectCustomer: (customerId) {
+                            unawaited(HapticFeedback.selectionClick());
+                            setState(() {
+                              _selectedCustomerId = customerId;
+                              _inlineError = null;
+                            });
+                          },
+                        ),
+            ),
+          ),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+            ),
+            child: (_method != PaymentMethod.cash && _inlineError != null)
+                ? Padding(
+                    key: ValueKey<String>(_inlineError!),
+                    padding: const EdgeInsets.only(top: AppSpacing.s8),
+                    child: Text(
+                      _inlineError!,
+                      style: AppTypography.meta(palette.danger, size: 13),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
@@ -477,32 +512,42 @@ class _CashSection extends StatelessWidget {
             ],
           ],
         ),
-        if (change != null && !change!.isNegative) ...[
-          const SizedBox(height: AppSpacing.s12),
-          Container(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.s16,
-              vertical: AppSpacing.s14,
-            ),
-            decoration: BoxDecoration(
-              color: palette.surfaceMuted,
-              borderRadius: BorderRadius.circular(AppRadii.input),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  localizations.checkoutChangeLabel,
-                  style: AppTypography.bodyStrong(palette.text),
-                ),
-                Text(
-                  formatMoney(change!),
-                  style: AppTypography.title(palette.primary),
-                ),
-              ],
-            ),
+        AnimatedSwitcher(
+          duration: Duration(
+            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
           ),
-        ],
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: (change != null && !change!.isNegative)
+              ? Padding(
+                  key: ValueKey<int>(change!.minorUnits),
+                  padding: const EdgeInsets.only(top: AppSpacing.s12),
+                  child: Container(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: palette.surfaceMuted,
+                      borderRadius: BorderRadius.circular(AppRadii.input),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          localizations.checkoutChangeLabel,
+                          style: AppTypography.bodyStrong(palette.text),
+                        ),
+                        Text(
+                          formatMoney(change!),
+                          style: AppTypography.title(palette.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }
@@ -612,18 +657,23 @@ class _UtangSectionState extends ConsumerState<_UtangSection> {
     final localizations = AppLocalizations.of(context);
     final customersAsync = ref.watch(checkoutCustomersProvider);
 
-    return customersAsync.when(
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.s16),
-          child: CircularProgressIndicator(),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: reduceMotion ? 0 : 200),
+      child: customersAsync.when(
+        loading: () => const Center(
+          key: ValueKey('checkout-customers-loading'),
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.s16),
+            child: CircularProgressIndicator(),
+          ),
         ),
-      ),
-      error: (_, _) => Text(
-        localizations.homeLoadFailed,
-        style: AppTypography.body(palette.danger),
-      ),
-      data: (customers) {
+        error: (_, _) => Text(
+          localizations.homeLoadFailed,
+          key: const ValueKey('checkout-customers-error'),
+          style: AppTypography.body(palette.danger),
+        ),
+        data: (customers) {
         final query = _searchQuery.trim().toLowerCase();
         final filtered = query.isEmpty
             ? customers
@@ -655,7 +705,10 @@ class _UtangSectionState extends ConsumerState<_UtangSection> {
                 ),
                 TindaTextLinkButton(
                   label: localizations.utangAddSuki,
-                  onPressed: () => UtangPaySheet.showNewSuki(context),
+                  onPressed: () {
+                    unawaited(HapticFeedback.selectionClick());
+                    unawaited(UtangPaySheet.showNewSuki(context));
+                  },
                 ),
               ],
             ),
@@ -722,6 +775,7 @@ class _UtangSectionState extends ConsumerState<_UtangSection> {
           ],
         );
       },
+      ),
     );
   }
 }
