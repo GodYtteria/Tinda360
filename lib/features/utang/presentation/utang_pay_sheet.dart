@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/customers/customer_draft.dart';
@@ -93,7 +96,7 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     if (_isPayMode) {
       return _buildPaySheet(context, localizations, widget._balance!);
     }
@@ -135,42 +138,72 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
               UtangPaymentMode.partial: localizations.utangPartialPayment,
             },
             selected: _paymentMode,
-            onChanged: (mode) => setState(() {
-              _paymentMode = mode;
-              _amountError = null;
-              _generalError = null;
-            }),
-          ),
-          if (_paymentMode == UtangPaymentMode.partial) ...[
-            const SizedBox(height: AppSpacing.s16),
-            TindaTextInput(
-              controller: _amountController,
-              label: localizations.utangPaymentAmountLabel,
-              hintText: '0.00',
-              errorText: _amountError,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              textInputAction: TextInputAction.done,
-              autofocus: true,
-              onChanged: (_) => setState(() {
+            onChanged: (mode) {
+              if (mode == _paymentMode) return;
+              unawaited(HapticFeedback.selectionClick());
+              setState(() {
+                _paymentMode = mode;
                 _amountError = null;
                 _generalError = null;
-              }),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.s16),
-          _NewBalancePreview(
-            label: localizations.utangNewBalanceLabel,
-            amount: previewBalance,
+              });
+            },
           ),
-          if (_generalError != null) ...[
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              _generalError!,
-              style: AppTypography.meta(palette.danger, size: 13),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
             ),
-          ],
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: _paymentMode == UtangPaymentMode.partial
+                ? Padding(
+                    key: const ValueKey('utang-partial'),
+                    padding: const EdgeInsets.only(top: AppSpacing.s16),
+                    child: TindaTextInput(
+                      controller: _amountController,
+                      label: localizations.utangPaymentAmountLabel,
+                      hintText: '0.00',
+                      errorText: _amountError,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      autofocus: true,
+                      onChanged: (_) => setState(() {
+                        _amountError = null;
+                        _generalError = null;
+                      }),
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('utang-full')),
+          ),
+          const SizedBox(height: AppSpacing.s16),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+            ),
+            child: KeyedSubtree(
+              key: ValueKey<int>(previewBalance.minorUnits),
+              child: _NewBalancePreview(
+                label: localizations.utangNewBalanceLabel,
+                amount: previewBalance,
+              ),
+            ),
+          ),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+            ),
+            child: _generalError == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    key: ValueKey<String>(_generalError!),
+                    padding: const EdgeInsets.only(top: AppSpacing.s12),
+                    child: Text(
+                      _generalError!,
+                      style: AppTypography.meta(palette.danger, size: 13),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -224,13 +257,21 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
               _generalError = null;
             }),
           ),
-          if (_generalError != null) ...[
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              _generalError!,
-              style: AppTypography.meta(palette.danger, size: 13),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
             ),
-          ],
+            child: _generalError == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    key: ValueKey<String>(_generalError!),
+                    padding: const EdgeInsets.only(top: AppSpacing.s12),
+                    child: Text(
+                      _generalError!,
+                      style: AppTypography.meta(palette.danger, size: 13),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -241,6 +282,7 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
     CustomerBalance balance,
   ) async {
     if (_isSubmitting) return;
+    unawaited(HapticFeedback.mediumImpact());
     final currency = balance.balance.currency;
     final amount = _paymentMode == UtangPaymentMode.full
         ? balance.balance
@@ -284,6 +326,7 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
 
   Future<void> _submitNewSuki(AppLocalizations localizations) async {
     if (_isSubmitting) return;
+    unawaited(HapticFeedback.mediumImpact());
     final currency = ref.read(storeCurrencyProvider);
     final rawLimit = _limitController.text.trim();
     Money? limit;
@@ -345,7 +388,7 @@ class _CurrentBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     return TindaCard(
       backgroundColor: palette.dangerSoft,

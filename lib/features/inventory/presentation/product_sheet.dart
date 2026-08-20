@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
@@ -90,6 +93,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
 
   Future<void> _saveProduct() async {
     if (_isSaving) return;
+    unawaited(HapticFeedback.mediumImpact());
     final currency = ref.read(storeCurrencyProvider);
     final draft = ProductFormLogic.buildDraft(
       name: _nameController.text,
@@ -148,6 +152,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
 
   Future<void> _confirmAndDelete() async {
     if (_isSaving || !_isEditMode) return;
+    unawaited(HapticFeedback.selectionClick());
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final confirmed = await showDialog<bool>(
@@ -161,7 +166,10 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             child: Text(localizations.commonCancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
+            onPressed: () {
+              unawaited(HapticFeedback.mediumImpact());
+              Navigator.of(dialogContext).pop(true);
+            },
             style: TextButton.styleFrom(foregroundColor: palette.danger),
             child: Text(localizations.commonDelete),
           ),
@@ -218,17 +226,25 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             costController: _costController,
             onChanged: (_) => setState(() => _inlineError = null),
           ),
-          if (profit != null) ...[
-            const SizedBox(height: AppSpacing.s8),
-            Text(
-              localizations.productProfitPerSale(formatMoney(profit)),
-              style: AppTypography.meta(
-                profit.isNegative ? palette.danger : palette.success,
-                size: 13,
-                weight: FontWeight.w700,
-              ),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
             ),
-          ],
+            child: profit == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    key: ValueKey<String>('${profit.minorUnits}-${profit.isNegative}'),
+                    padding: const EdgeInsets.only(top: AppSpacing.s8),
+                    child: Text(
+                      localizations.productProfitPerSale(formatMoney(profit)),
+                      style: AppTypography.meta(
+                        profit.isNegative ? palette.danger : palette.success,
+                        size: 13,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+          ),
           const SizedBox(height: AppSpacing.s16),
           _UnitSelector(
             selectedUnit: _selectedUnit,
@@ -249,9 +265,15 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
               onDecrement: widget.existing!.stock.milli +
                           (_stockDeltaWhole - 1) * Quantity.milliPerUnit >=
                       0
-                  ? () => setState(() => _stockDeltaWhole--)
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() => _stockDeltaWhole--);
+                    }
                   : null,
-              onIncrement: () => setState(() => _stockDeltaWhole++),
+              onIncrement: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _stockDeltaWhole++);
+              },
             ),
           ] else ...[
             const SizedBox(height: AppSpacing.s16),
@@ -259,9 +281,15 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
               stockCount: _initialStockWhole,
               unit: _selectedUnit,
               onDecrement: _initialStockWhole > 0
-                  ? () => setState(() => _initialStockWhole--)
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() => _initialStockWhole--);
+                    }
                   : null,
-              onIncrement: () => setState(() => _initialStockWhole++),
+              onIncrement: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _initialStockWhole++);
+              },
             ),
           ],
           const SizedBox(height: AppSpacing.s12),
@@ -289,21 +317,31 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
               ),
               tooltip: localizations.posScanBarcode,
               onPressed: () async {
+                unawaited(HapticFeedback.selectionClick());
                 final code = await BarcodeScannerSheet.show(context);
                 if (code == null || !mounted) return;
+                unawaited(HapticFeedback.lightImpact());
                 _barcodeController.text = code;
                 _clearError();
               },
             ),
             onChanged: (_) => _clearError(),
           ),
-          if (_inlineError != null) ...[
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              _inlineError!,
-              style: AppTypography.meta(palette.danger, size: 13),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
             ),
-          ],
+            child: _inlineError == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    key: ValueKey<String>(_inlineError!),
+                    padding: const EdgeInsets.only(top: AppSpacing.s12),
+                    child: Text(
+                      _inlineError!,
+                      style: AppTypography.meta(palette.danger, size: 13),
+                    ),
+                  ),
+          ),
           if (_isEditMode) ...[
             const SizedBox(height: AppSpacing.s12),
             Center(
@@ -399,7 +437,10 @@ class _UnitSelector extends StatelessWidget {
               TindaFilterChip(
                 label: localizedUnit(localizations, unit),
                 selected: unit == selectedUnit,
-                onTap: () => onSelected(unit),
+                onTap: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  onSelected(unit);
+                },
               ),
           ],
         ),
