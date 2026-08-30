@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -152,6 +153,7 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
 
   Future<void> _exportPdf() async {
     if (_isExporting) return;
+    unawaited(HapticFeedback.lightImpact());
     final localizations = AppLocalizations.of(context);
     setState(() => _isExporting = true);
     try {
@@ -182,6 +184,7 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
   }
 
   Future<void> _exportSalesCsv() async {
+    unawaited(HapticFeedback.lightImpact());
     final localizations = AppLocalizations.of(context);
     try {
       final sales = await ref
@@ -251,6 +254,7 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
           height: AppSizes.secondaryButtonHeight,
           child: FilledButton.icon(
             onPressed: () {
+              unawaited(HapticFeedback.selectionClick());
               final periodLabel = switch (widget.state.period) {
                 ReportPeriod.today => localizations.reportsToday,
                 ReportPeriod.week => localizations.reportsWeek,
@@ -645,22 +649,34 @@ class _TopProductsCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.s12),
-          if (topProducts.isEmpty)
-            TindaEmptyState(
-              icon: Icons.shopping_bag_outlined,
-              title: localizations.reportsEmptyTitlePeriod(periodLabel),
-              body: localizations.reportsEmptyBody,
-            )
-          else
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var index = 0; index < topProducts.length; index++) ...[
-                  if (index > 0) const SizedBox(height: AppSpacing.s12),
-                  _TopProductRow(rank: index + 1, item: topProducts[index]),
-                ],
-              ],
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
             ),
+            child: topProducts.isEmpty
+                ? TindaEmptyState(
+                    key: const ValueKey('top-empty'),
+                    icon: Icons.shopping_bag_outlined,
+                    title: localizations.reportsEmptyTitlePeriod(periodLabel),
+                    body: localizations.reportsEmptyBody,
+                  )
+                : Column(
+                    key: ValueKey<int>(topProducts.length),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var index = 0; index < topProducts.length; index++) ...[
+                        if (index > 0) const SizedBox(height: AppSpacing.s12),
+                        _AnimatedListEntry(
+                          index: index,
+                          child: _TopProductRow(
+                            rank: index + 1,
+                            item: topProducts[index],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+          ),
         ],
       ),
     );
@@ -728,6 +744,33 @@ class _TopProductRow extends StatelessWidget {
   }
 }
 
+
+class _AnimatedListEntry extends StatelessWidget {
+  const _AnimatedListEntry({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 160 + (index.clamp(0, 8) * 18)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, (1 - value) * 6),
+          child: child,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 class _RecentSalesSection extends ConsumerWidget {
   const _RecentSalesSection();
 
@@ -750,62 +793,89 @@ class _RecentSalesSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.s8),
-        if (sales.isEmpty)
-          TindaCard(
-            child: Text(
-              localizations.ulatNoRecentSales,
-              style: AppTypography.body(palette.textMuted),
-            ),
-          )
-        else
-          for (final sale in sales) ...[
-            TindaCard(
-              onTap: () => _showSaleDetailSheet(context, ref, sale),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            TindaBadge(
-                              label: _methodLabel(localizations, sale.method),
-                              isDanger: sale.method == PaymentMethod.utang,
-                            ),
-                            if (sale.customerName != null) ...[
-                              const SizedBox(width: AppSpacing.s8),
+        AnimatedSwitcher(
+          duration: Duration(
+            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
+          ),
+          child: sales.isEmpty
+              ? TindaCard(
+                  key: const ValueKey('recent-empty'),
+                  child: Text(
+                    localizations.ulatNoRecentSales,
+                    style: AppTypography.body(palette.textMuted),
+                  ),
+                )
+              : Column(
+                  key: ValueKey<int>(sales.length),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var index = 0; index < sales.length; index++) ...[
+                      _AnimatedListEntry(
+                        index: index,
+                        child: TindaCard(
+                          onTap: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            _showSaleDetailSheet(context, ref, sales[index]);
+                          },
+                          child: Row(
+                            children: [
                               Expanded(
-                                child: Text(
-                                  sale.customerName!,
-                                  style: AppTypography.meta(palette.textMuted),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        TindaBadge(
+                                          label: _methodLabel(
+                                            localizations,
+                                            sales[index].method,
+                                          ),
+                                          isDanger:
+                                              sales[index].method ==
+                                              PaymentMethod.utang,
+                                        ),
+                                        if (sales[index].customerName != null) ...[
+                                          const SizedBox(width: AppSpacing.s8),
+                                          Expanded(
+                                            child: Text(
+                                              sales[index].customerName!,
+                                              style: AppTypography.meta(
+                                                palette.textMuted,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppSpacing.s4),
+                                    Text(
+                                      '${DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(sales[index].createdAtMs).toLocal())} · '
+                                      '${localizations.ulatSaleItemsCount(sales[index].lines.length)}',
+                                      style: AppTypography.meta(
+                                        palette.textMuted,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                              const SizedBox(width: AppSpacing.s8),
+                              Text(
+                                formatMoney(sales[index].total),
+                                style: AppTypography.bodyStrong(palette.text),
+                              ),
                             ],
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          '${DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(sale.createdAtMs).toLocal())} · '
-                          '${localizations.ulatSaleItemsCount(sale.lines.length)}',
-                          style: AppTypography.meta(palette.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Text(
-                    formatMoney(sale.total),
-                    style: AppTypography.bodyStrong(palette.text),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
+                      ),
+                      if (index < sales.length - 1)
+                        const SizedBox(height: AppSpacing.s8),
+                    ],
+                  ],
+                ),
+        ),
       ],
     );
   }
@@ -900,6 +970,8 @@ class _RecentSalesSection extends ConsumerWidget {
                 label: localizations.receiptPrint58mm,
                 icon: Icons.print_outlined,
                 onPressed: () {
+                  unawaited(HapticFeedback.lightImpact());
+                  unawaited(HapticFeedback.lightImpact());
                   final storeName =
                       ref.read(_ulatStoreProfileProvider).asData?.value.name ?? '';
                   unawaited(
@@ -930,8 +1002,10 @@ class _RecentSalesSection extends ConsumerWidget {
               TindaTextLinkButton(
                 label: localizations.ulatVoidSaleButton,
                 isDanger: true,
-                onPressed: () =>
-                    unawaited(_confirmVoidSale(sheetContext, context, ref, sale)),
+                onPressed: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  unawaited(_confirmVoidSale(sheetContext, context, ref, sale));
+                },
               ),
             ],
           ),
@@ -1017,7 +1091,10 @@ class _ExpensesSection extends ConsumerWidget {
               ),
             ),
             TextButton(
-              onPressed: () => unawaited(_showAddExpenseDialog(context, ref)),
+              onPressed: () {
+                unawaited(HapticFeedback.lightImpact());
+                unawaited(_showAddExpenseDialog(context, ref));
+              },
               child: Text(localizations.ulatAddExpenseButton),
             ),
           ],
@@ -1056,39 +1133,61 @@ class _ExpensesSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.s8),
-        if (expenses.isEmpty)
-          TindaCard(
-            child: Text(
-              localizations.ulatNoExpenses,
-              style: AppTypography.body(palette.textMuted),
-            ),
-          )
-        else
-          for (final entry in expenses) ...[
-            TindaCard(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      entry.title,
-                      style: AppTypography.bodyStrong(palette.text),
-                    ),
+        AnimatedSwitcher(
+          duration: Duration(
+            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
+          ),
+          child: expenses.isEmpty
+              ? TindaCard(
+                  key: const ValueKey('expenses-empty'),
+                  child: Text(
+                    localizations.ulatNoExpenses,
+                    style: AppTypography.body(palette.textMuted),
                   ),
-                  Text(
-                    formatMoney(entry.amount),
-                    style: AppTypography.bodyStrong(palette.danger),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete_outline, color: palette.textMuted),
-                    onPressed: () => unawaited(
-                      ref.read(expenseRepositoryProvider).deleteExpense(entry.id),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
+                )
+              : Column(
+                  key: ValueKey<int>(expenses.length),
+                  children: [
+                    for (var index = 0; index < expenses.length; index++) ...[
+                      _AnimatedListEntry(
+                        index: index,
+                        child: TindaCard(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  expenses[index].title,
+                                  style: AppTypography.bodyStrong(palette.text),
+                                ),
+                              ),
+                              Text(
+                                formatMoney(expenses[index].amount),
+                                style: AppTypography.bodyStrong(palette.danger),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: palette.textMuted,
+                                ),
+                                onPressed: () {
+                                  unawaited(HapticFeedback.selectionClick());
+                                  unawaited(
+                                    ref
+                                        .read(expenseRepositoryProvider)
+                                        .deleteExpense(expenses[index].id),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (index < expenses.length - 1)
+                        const SizedBox(height: AppSpacing.s8),
+                    ],
+                  ],
+                ),
+        ),
       ],
     );
   }
