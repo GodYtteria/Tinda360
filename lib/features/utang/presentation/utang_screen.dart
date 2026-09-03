@@ -143,9 +143,10 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final Widget content;
     if (balancesAsync.isLoading && !balancesAsync.hasValue) {
-      content = Center(
-        key: const ValueKey('utang-loading'),
-        child: CircularProgressIndicator(color: palette.primary),
+      content = const Padding(
+        key: ValueKey('utang-loading'),
+        padding: EdgeInsets.all(AppSpacing.s16),
+        child: TindaListSkeleton(),
       );
     } else if (balancesAsync.hasError && !balancesAsync.hasValue) {
       content = TindaEmptyState(

@@ -309,9 +309,10 @@ class _InventoryBody extends StatelessWidget {
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       child: productsAsync.when(
-        loading: () => const Center(
+        loading: () => const Padding(
           key: ValueKey('inventory-loading'),
-          child: CircularProgressIndicator(),
+          padding: EdgeInsets.all(AppSpacing.s16),
+          child: TindaListSkeleton(),
         ),
         error: (_, _) => Center(
           key: const ValueKey('inventory-error'),

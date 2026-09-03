@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
@@ -179,7 +182,12 @@ class TindaTextLinkButton extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 48),
       child: TextButton(
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                unawaited(HapticFeedback.selectionClick());
+                onPressed!();
+              },
         style: TextButton.styleFrom(foregroundColor: color),
         child: Text(
           label,
@@ -217,7 +225,12 @@ class TindaGoogleButton extends StatelessWidget {
       width: double.infinity,
       height: AppSizes.touchTargetMin,
       child: OutlinedButton(
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                unawaited(HapticFeedback.lightImpact());
+                onPressed!();
+              },
         style: OutlinedButton.styleFrom(
           backgroundColor: const Color(0xFFFFFFFF),
           foregroundColor: const Color(0xFF1F1F1F),
