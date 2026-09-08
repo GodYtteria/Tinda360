@@ -210,18 +210,23 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 (value) => value != null,
                                 orElse: () => null,
                               );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              content: Text(name == null ? 'Removed' : 'Removed $name'),
-                              action: SnackBarAction(
-                                label: localizations.localeName.startsWith('fil')
-                                    ? 'Ibalik'
-                                    : 'Undo',
-                                onPressed: () => cartNotifier.increment(id),
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 4),
+                                content: Text(
+                                  name == null ? 'Removed' : 'Removed $name',
+                                ),
+                                action: SnackBarAction(
+                                  label: localizations.localeName.startsWith('fil')
+                                      ? 'Ibalik'
+                                      : 'Undo',
+                                  onPressed: () => cartNotifier.increment(id),
+                                ),
                               ),
-                            ),
-                          );
+                            );
                         }
                       },
                     ),
