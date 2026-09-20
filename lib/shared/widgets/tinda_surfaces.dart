@@ -323,7 +323,7 @@ class TindaEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    return Center(
+    final content = Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.s24),
         child: Column(
@@ -361,6 +361,17 @@ class TindaEmptyState extends StatelessWidget {
           ],
         ),
       ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedHeight) return content;
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: content,
+          ),
+        );
+      },
     );
   }
 }
