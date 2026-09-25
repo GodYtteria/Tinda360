@@ -151,7 +151,15 @@ class _StoreSwitcherSection extends ConsumerWidget {
       builder: (_) => const _AddStoreDialog(),
     );
     if (createdName == null || createdName.isEmpty) return;
-    await ref.read(storeRegistryProvider.notifier).createAndSwitchStore(createdName);
+    await ref.read(storeRegistryProvider.notifier).createStore(createdName);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${AppLocalizations.of(context).settingsAddStore}: $createdName',
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmDeleteStore(

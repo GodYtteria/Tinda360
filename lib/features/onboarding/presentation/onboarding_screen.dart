@@ -179,7 +179,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final file = await ref.read(databaseFileProvider)();
     final db = ref.read(appDatabaseProvider);
     await db.close();
-    final syncResult = await backupService.downloadDatabaseTo(file);
+    final syncResult = await backupService.downloadDatabaseTo(
+      file,
+      storeId: 'default',
+    );
     if (syncResult is BackupSyncSuccess) {
       for (final suffix in const ['-wal', '-shm']) {
         final sidecar = File('${file.path}$suffix');
