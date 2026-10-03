@@ -76,12 +76,14 @@ abstract interface class DriveBackupService {
   Future<BackupSyncResult> uploadDatabase(
     File databaseFile, {
     required String storeId,
+    bool allowPrompt = false,
   });
 
   /// Downloads the backup into [destinationFile] (replacing it atomically).
   Future<BackupSyncResult> downloadDatabaseTo(
     File destinationFile, {
     required String storeId,
+    bool allowPrompt = false,
   });
 }
 
@@ -108,6 +110,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
 
   final AppLog _log;
   bool _initialized = false;
+  bool _sessionRestoreAttempted = false;
   GoogleSignInAccount? _account;
 
   Future<void> _ensureInitialized() async {
@@ -121,6 +124,8 @@ final class GoogleDriveBackupService implements DriveBackupService {
 
   @override
   Future<String?> restoreSession() async {
+    if (_sessionRestoreAttempted) return _account?.email;
+    _sessionRestoreAttempted = true;
     try {
       await _ensureInitialized();
       final attempt = GoogleSignIn.instance.attemptLightweightAuthentication();
@@ -166,6 +171,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
       _log.error('backup.signOut', error, stack);
     } finally {
       _account = null;
+      _sessionRestoreAttempted = false;
     }
   }
 
@@ -173,6 +179,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
   Future<BackupSyncResult> uploadDatabase(
     File databaseFile, {
     required String storeId,
+    bool allowPrompt = false,
   }) async {
     if (!databaseFile.existsSync()) {
       return const BackupSyncFailed(reason: 'missing_local_database');
@@ -190,13 +197,14 @@ final class GoogleDriveBackupService implements DriveBackupService {
         await driveApi.files.create(metadata, uploadMedia: media);
       }
       return const BackupSyncSuccess();
-    });
+    }, allowPrompt: allowPrompt);
   }
 
   @override
   Future<BackupSyncResult> downloadDatabaseTo(
     File destinationFile, {
     required String storeId,
+    bool allowPrompt = false,
   }) async {
     final backupFileName = backupFileNameForStore(storeId);
     return _withDriveApi((driveApi) async {
@@ -222,12 +230,13 @@ final class GoogleDriveBackupService implements DriveBackupService {
       await destinationFile.parent.create(recursive: true);
       await stagingFile.rename(destinationFile.path);
       return const BackupSyncSuccess();
-    });
+    }, allowPrompt: allowPrompt);
   }
 
   Future<BackupSyncResult> _withDriveApi(
-    Future<BackupSyncResult> Function(drive.DriveApi driveApi) action,
-  ) async {
+    Future<BackupSyncResult> Function(drive.DriveApi driveApi) action, {
+    bool allowPrompt = false,
+  }) async {
     final account = _account;
     if (account == null) {
       return const BackupSyncFailed(reason: 'not_signed_in');
@@ -236,7 +245,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
     try {
       final headers = await account.authorizationClient.authorizationHeaders(
         _scopes,
-        promptIfNecessary: true,
+        promptIfNecessary: allowPrompt,
       );
       if (headers == null) {
         return const BackupSyncFailed(reason: 'authorization_denied');

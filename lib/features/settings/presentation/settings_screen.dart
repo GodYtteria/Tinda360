@@ -9,6 +9,7 @@ import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
 import 'package:tinda360/data/db/store_registry.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/pin_prompt_dialog.dart';
@@ -891,7 +892,10 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
         sourceFile: File(pickedPath),
         targetFile: targetFile,
         closeActiveDatabase: database.close,
-        invalidateDatabase: () => ref.invalidate(appDatabaseProvider),
+        invalidateDatabase: () {
+          ref.invalidate(appDatabaseProvider);
+          ref.invalidate(ulatNotifierProvider);
+        },
       );
       messenger.showSnackBar(
         SnackBar(content: Text(localizations.settingsLocalImportSuccess)),
