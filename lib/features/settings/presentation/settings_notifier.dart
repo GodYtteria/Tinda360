@@ -182,17 +182,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
           clearError: true,
         );
       }
-      final restoredEmail =
-          await ref.read(driveBackupServiceProvider).restoreSession();
-      if (!ref.mounted) return;
-      if (restoredEmail != null) {
-        unawaited(prefs.writeConnectedEmail(restoredEmail));
-        state = state.copyWith(
-          backupStatus: BackupStatus.connected,
-          accountEmail: restoredEmail,
-          clearError: true,
-        );
-      }
     }
   }
 

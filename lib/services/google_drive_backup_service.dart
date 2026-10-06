@@ -110,7 +110,6 @@ final class GoogleDriveBackupService implements DriveBackupService {
 
   final AppLog _log;
   bool _initialized = false;
-  bool _sessionRestoreAttempted = false;
   GoogleSignInAccount? _account;
 
   Future<void> _ensureInitialized() async {
@@ -124,8 +123,6 @@ final class GoogleDriveBackupService implements DriveBackupService {
 
   @override
   Future<String?> restoreSession() async {
-    if (_sessionRestoreAttempted) return _account?.email;
-    _sessionRestoreAttempted = true;
     try {
       await _ensureInitialized();
       final attempt = GoogleSignIn.instance.attemptLightweightAuthentication();
@@ -171,7 +168,6 @@ final class GoogleDriveBackupService implements DriveBackupService {
       _log.error('backup.signOut', error, stack);
     } finally {
       _account = null;
-      _sessionRestoreAttempted = false;
     }
   }
 
@@ -184,6 +180,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
     if (!databaseFile.existsSync()) {
       return const BackupSyncFailed(reason: 'missing_local_database');
     }
+    if (_account == null && allowPrompt) await restoreSession();
     final backupFileName = backupFileNameForStore(storeId);
     return _withDriveApi((driveApi) async {
       final existingId = await _findBackupFileId(driveApi, backupFileName);
@@ -206,6 +203,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
     required String storeId,
     bool allowPrompt = false,
   }) async {
+    if (_account == null && allowPrompt) await restoreSession();
     final backupFileName = backupFileNameForStore(storeId);
     return _withDriveApi((driveApi) async {
       final existingId = await _findBackupFileId(driveApi, backupFileName);
