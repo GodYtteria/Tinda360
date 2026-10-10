@@ -381,22 +381,16 @@ class _BackupSection extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  AnimatedContainer(
-                    duration: Duration(
-                      milliseconds:
-                          MediaQuery.disableAnimationsOf(context) ? 0 : 220,
-                    ),
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: state.backupStatus == BackupStatus.connected ||
-                              state.backupStatus == BackupStatus.choosing
-                          ? palette.success
-                          : (state.backupStatus == BackupStatus.failed
-                              ? palette.danger
-                              : palette.textMuted),
-                      shape: BoxShape.circle,
-                    ),
+                  TindaStatusDot(
+                    active: state.backupStatus == BackupStatus.connected ||
+                        state.backupStatus == BackupStatus.choosing,
+                    color: state.backupStatus == BackupStatus.connected ||
+                            state.backupStatus == BackupStatus.choosing
+                        ? palette.success
+                        : (state.backupStatus == BackupStatus.failed
+                            ? palette.danger
+                            : palette.textMuted),
+                    size: 10,
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(

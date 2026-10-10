@@ -267,18 +267,10 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
               controller: _inputController,
               enabled: !chatState.isThinking,
               onSend: () => _sendCurrentText(localizations),
-              onVoiceTap: () => _showVoiceUnavailableNotice(context),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _showVoiceUnavailableNotice(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(localizations.chatModelUnavailable)),
     );
   }
 }
@@ -325,13 +317,9 @@ class _ChatHeader extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isThinking ? palette.accent : palette.success,
-                        shape: BoxShape.circle,
-                      ),
+                    TindaStatusDot(
+                      active: true,
+                      color: isThinking ? palette.accent : palette.success,
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     Flexible(
@@ -778,13 +766,11 @@ class _ChatInputBar extends StatelessWidget {
   const _ChatInputBar({
     required this.controller,
     required this.onSend,
-    required this.onVoiceTap,
     this.enabled = true,
   });
 
   final TextEditingController controller;
   final VoidCallback onSend;
-  final VoidCallback onVoiceTap;
   final bool enabled;
 
   @override
@@ -826,12 +812,6 @@ class _ChatInputBar extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.s8),
-          TindaIconButton(
-            icon: Icons.mic_none_rounded,
-            tooltip: localizations.chatVoice,
-            onPressed: enabled ? onVoiceTap : null,
           ),
           const SizedBox(width: AppSpacing.s8),
           Semantics(
