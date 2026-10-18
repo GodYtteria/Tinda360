@@ -244,6 +244,8 @@
   "settingsDeleteStore": "Delete store",
   "settingsDeleteStoreConfirm": "Delete {name}? All its products, sales, and utang will be removed.",
   "@settingsDeleteStoreConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "settingsSwitchStoreConfirm": "Switch to {name}? Your current store stays saved.",
+  "@settingsSwitchStoreConfirm": {"placeholders": {"name": {"type": "String"}}},
   "settingsActiveBadge": "Active",
   "settingsLanguagePh": "Filipino",
   "settingsLanguageEn": "English",

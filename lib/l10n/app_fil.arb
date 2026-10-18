@@ -212,6 +212,8 @@
   "settingsAddStore": "+ Bagong tindahan",
   "settingsDeleteStore": "Burahin ang tindahan",
   "settingsDeleteStoreConfirm": "Sigurado ka bang buburahin ang {name}? Mawawala lahat ng produkto, benta, at utang nito.",
+  "settingsSwitchStoreConfirm": "Lumipat sa {name}? Mananatiling naka-save ang kasalukuyang tindahan mo.",
+  "@settingsSwitchStoreConfirm": {"placeholders": {"name": {"type": "String"}}},
   "settingsActiveBadge": "Aktibo",
   "settingsLanguagePh": "Filipino",
   "settingsLanguageEn": "English",

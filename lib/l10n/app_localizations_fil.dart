@@ -704,6 +704,11 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String settingsSwitchStoreConfirm(String name) {
+    return 'Lumipat sa $name? Mananatiling naka-save ang kasalukuyang tindahan mo.';
+  }
+
+  @override
   String get settingsActiveBadge => 'Aktibo';
 
   @override

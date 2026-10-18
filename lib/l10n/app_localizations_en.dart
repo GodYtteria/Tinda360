@@ -702,6 +702,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String settingsSwitchStoreConfirm(String name) {
+    return 'Switch to $name? Your current store stays saved.';
+  }
+
+  @override
   String get settingsActiveBadge => 'Active';
 
   @override
