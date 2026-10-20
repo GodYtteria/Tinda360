@@ -185,7 +185,7 @@ class _StoreSwitcherSection extends ConsumerWidget {
               unawaited(HapticFeedback.mediumImpact());
               Navigator.of(dialogContext).pop(true);
             },
-            child: Text(localizations.settingsSwitchStore),
+            child: Text(localizations.commonSwitch),
           ),
         ],
       ),

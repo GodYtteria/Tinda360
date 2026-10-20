@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get commonSave;
 
+  /// No description provided for @commonSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get commonSwitch;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

@@ -55,6 +55,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSave => 'Save';
 
   @override
+  String get commonSwitch => 'Switch';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

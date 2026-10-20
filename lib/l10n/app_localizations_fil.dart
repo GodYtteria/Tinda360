@@ -55,6 +55,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get commonSave => 'I-save';
 
   @override
+  String get commonSwitch => 'Lumipat';
+
+  @override
   String get commonCancel => 'Kanselahin';
 
   @override
