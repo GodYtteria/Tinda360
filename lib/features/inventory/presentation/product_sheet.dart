@@ -91,6 +91,57 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
     super.dispose();
   }
 
+  static const int _maxStock = 9999;
+
+  Future<void> _editStockValue() async {
+    final localizations = AppLocalizations.of(context);
+    final controller = TextEditingController(
+      text: (_isEditMode
+              ? (widget.existing!.stock.milli ~/ Quantity.milliPerUnit) +
+                  _stockDeltaWhole
+              : _initialStockWhole)
+          .toString(),
+    );
+    final value = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.productInitialStockLabel),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: InputDecoration(
+            labelText: localizations.productInitialStockLabel,
+            hintText: '0-$_maxStock',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(localizations.commonCancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final parsed = int.tryParse(controller.text.trim()) ?? 0;
+              Navigator.of(dialogContext).pop(parsed.clamp(0, _maxStock));
+            },
+            child: Text(localizations.commonSave),
+          ),
+        ],
+      ),
+    );
+    if (value == null) return;
+    setState(() {
+      if (_isEditMode) {
+        _stockDeltaWhole =
+            value - (widget.existing!.stock.milli ~/ Quantity.milliPerUnit);
+      } else {
+        _initialStockWhole = value;
+      }
+    });
+  }
+
   Future<void> _saveProduct() async {
     if (_isSaving) return;
     unawaited(HapticFeedback.mediumImpact());
@@ -262,6 +313,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
               currentStock: widget.existing!.stock,
               deltaWhole: _stockDeltaWhole,
               unit: _selectedUnit,
+              onValueTap: _editStockValue,
               onDecrement: widget.existing!.stock.milli +
                           (_stockDeltaWhole - 1) * Quantity.milliPerUnit >=
                       0
@@ -270,26 +322,34 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
                       setState(() => _stockDeltaWhole--);
                     }
                   : null,
-              onIncrement: () {
-                unawaited(HapticFeedback.selectionClick());
-                setState(() => _stockDeltaWhole++);
-              },
+              onIncrement:
+                  (widget.existing!.stock.milli ~/ Quantity.milliPerUnit) +
+                              _stockDeltaWhole <
+                          _maxStock
+                      ? () {
+                          unawaited(HapticFeedback.selectionClick());
+                          setState(() => _stockDeltaWhole++);
+                        }
+                      : null,
             ),
           ] else ...[
             const SizedBox(height: AppSpacing.s16),
             _InitialStockSection(
               stockCount: _initialStockWhole,
               unit: _selectedUnit,
+              onValueTap: _editStockValue,
               onDecrement: _initialStockWhole > 0
                   ? () {
                       unawaited(HapticFeedback.selectionClick());
                       setState(() => _initialStockWhole--);
                     }
                   : null,
-              onIncrement: () {
-                unawaited(HapticFeedback.selectionClick());
-                setState(() => _initialStockWhole++);
-              },
+              onIncrement: _initialStockWhole < _maxStock
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() => _initialStockWhole++);
+                    }
+                  : null,
             ),
           ],
           const SizedBox(height: AppSpacing.s12),
@@ -455,12 +515,14 @@ class _InitialStockSection extends StatelessWidget {
     required this.unit,
     required this.onDecrement,
     required this.onIncrement,
+    required this.onValueTap,
   });
 
   final int stockCount;
   final ProductUnit unit;
   final VoidCallback? onDecrement;
-  final VoidCallback onIncrement;
+  final VoidCallback? onIncrement;
+  final VoidCallback onValueTap;
 
   @override
   Widget build(BuildContext context) {
@@ -483,6 +545,7 @@ class _InitialStockSection extends StatelessWidget {
           valueLabel: '$stockCount ${localizedUnit(localizations, unit)}',
           onDecrement: onDecrement,
           onIncrement: onIncrement,
+          onValueTap: onValueTap,
           decrementTooltip: localizations.productStockDecrement,
           incrementTooltip: localizations.posAddToCart(
             localizedUnit(localizations, unit),
@@ -500,13 +563,15 @@ class _AdjustStockSection extends StatelessWidget {
     required this.unit,
     required this.onDecrement,
     required this.onIncrement,
+    required this.onValueTap,
   });
 
   final Quantity currentStock;
   final int deltaWhole;
   final ProductUnit unit;
   final VoidCallback? onDecrement;
-  final VoidCallback onIncrement;
+  final VoidCallback? onIncrement;
+  final VoidCallback onValueTap;
 
   @override
   Widget build(BuildContext context) {
@@ -543,6 +608,7 @@ class _AdjustStockSection extends StatelessWidget {
               valueLabel: valueLabel,
               onDecrement: onDecrement,
               onIncrement: onIncrement,
+              onValueTap: onValueTap,
               decrementTooltip: localizations.productStockDecrement,
               incrementTooltip: localizations.posAddToCart(unitLabel),
             ),

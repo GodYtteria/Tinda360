@@ -54,7 +54,14 @@ class TindaPrimaryButton extends StatelessWidget {
                   color: palette.onPrimary,
                 ),
               )
-            : Text(label),
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
+              ),
       ),
     );
   }
@@ -100,13 +107,26 @@ class TindaSecondaryButton extends StatelessWidget {
           ),
         ),
         child: icon == null
-            ? Text(label)
+            ? FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
+              )
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, size: 20),
                   const SizedBox(width: AppSpacing.s8),
-                  Flexible(child: Text(label)),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
       ),

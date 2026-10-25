@@ -330,10 +330,11 @@ class TindaStepper extends StatelessWidget {
   const TindaStepper({
     required this.valueLabel,
     required this.onDecrement,
-    required this.onIncrement,
     required this.decrementTooltip,
+    this.onIncrement,
     required this.incrementTooltip,
     super.key,
+    this.onValueTap,
   });
 
   /// Formatted current value.
@@ -350,6 +351,9 @@ class TindaStepper extends StatelessWidget {
 
   /// Accessibility label for increment.
   final String incrementTooltip;
+
+  /// Optional tap handler for the value label (e.g. open numeric entry).
+  final VoidCallback? onValueTap;
 
   @override
   Widget build(BuildContext context) {
@@ -376,12 +380,22 @@ class TindaStepper extends StatelessWidget {
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.s12,
             ),
-            child: Text(
-              valueLabel,
-              style: AppTypography.bodyStrong(
-                palette.text,
-                size: 18,
-                weight: FontWeight.w700,
+            child: InkWell(
+              onTap: onValueTap,
+              borderRadius: BorderRadius.circular(AppRadii.smallButton),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.s4,
+                  vertical: AppSpacing.s4,
+                ),
+                child: Text(
+                  valueLabel,
+                  style: AppTypography.bodyStrong(
+                    palette.text,
+                    size: 18,
+                    weight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ),
