@@ -192,7 +192,20 @@ class _StoreSwitcherSection extends ConsumerWidget {
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
-    unawaited(ref.read(storeRegistryProvider.notifier).switchStore(store.id));
+    try {
+      await ref.read(storeRegistryProvider.notifier).switchStore(store.id);
+    } on Exception {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizations.localeName.startsWith('fil')
+                ? 'Hindi malipat ang store. Subukan ulit.'
+                : 'Could not switch store. Try again.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _confirmDeleteStore(
@@ -225,7 +238,20 @@ class _StoreSwitcherSection extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
-    await ref.read(storeRegistryProvider.notifier).deleteStore(store.id);
+    try {
+      await ref.read(storeRegistryProvider.notifier).deleteStore(store.id);
+    } on Exception {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizations.localeName.startsWith('fil')
+                ? 'Hindi matanggal ang store. Subukan ulit.'
+                : 'Could not delete store. Try again.',
+          ),
+        ),
+      );
+    }
   }
 
   @override
