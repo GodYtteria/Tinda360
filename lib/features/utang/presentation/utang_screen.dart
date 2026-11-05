@@ -7,33 +7,29 @@ import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/data/repositories/utang_age_providers.dart';
+import 'package:tinda360/data/repositories/utang_age_repository.dart';
+import 'package:tinda360/features/utang/data/utang_csv_exporter.dart';
+import 'package:tinda360/services/service_providers.dart';
+import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 import 'package:tinda360/features/utang/presentation/suki_ledger_sheet.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
-import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
+import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
+import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Live stream of customer utang balances ordered by debt descending.
-final utangBalancesProvider =
-    StreamProvider.autoDispose<List<CustomerBalance>>(
-      (ref) => ref.watch(customerRepositoryProvider).watchBalances(),
-    );
-
-/// Computes total outstanding utang across [balances].
 Money computeTotalUtang(
   List<CustomerBalance> balances,
   Currency currency,
-) => balances.fold(
-  Money.zero(currency),
-  (runningTotal, item) => runningTotal + item.balance,
-);
+) => totalUnpaidUtang(balances, currency: currency);
 
-/// Filters [balances] by [query] against customer name or mobile number.
 List<CustomerBalance> filterUtangBalances(
   List<CustomerBalance> balances,
   String query,
@@ -48,19 +44,15 @@ List<CustomerBalance> filterUtangBalances(
   }).toList();
 }
 
-/// Utang tab showing total debt, suki balances, search, and quick actions.
 class UtangScreen extends ConsumerStatefulWidget {
-  /// Creates the utang screen.
   const UtangScreen({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
   });
 
-  /// Callback to open settings.
   final VoidCallback onOpenSettings;
 
-  /// Callback to open Tinda AI chat.
   final VoidCallback onOpenAiChat;
 
   @override
@@ -77,11 +69,43 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
     super.dispose();
   }
 
+  Future<void> _exportUtangCsv(List<CustomerBalance> balances) async {
+    unawaited(HapticFeedback.lightImpact());
+    final localizations = AppLocalizations.of(context);
+    try {
+      final ledgerByCustomer = await ref
+          .read(utangAgeRepositoryProvider)
+          .loadLedgerByCustomer();
+      final csvContent = exportUtangCsv(
+        balances: balances,
+        ledgerByCustomer: ledgerByCustomer,
+        now: ref.read(clockProvider).now(),
+      );
+      final parsed = parseCsvForPreview(csvContent);
+      if (!mounted) return;
+      await CsvPreviewSheet.show(
+        context,
+        title: localizations.utangExportCsv,
+        headers: parsed.headers,
+        rows: parsed.rows,
+        fileName: 'tinda360_utang.csv',
+        csvContent: csvContent,
+        successMessage: localizations.reportsExportCsvSuccess,
+      );
+    } on Exception {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.reportsExportPdfError)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final currency = ref.watch(storeCurrencyProvider);
+    final ageDaysByCustomer = ref.watch(utangAgeDaysProvider).value;
     final balancesAsync = ref.watch(utangBalancesProvider);
     final balances = balancesAsync.value ?? const <CustomerBalance>[];
     final totalUtang = computeTotalUtang(balances, currency);
@@ -111,17 +135,27 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
                   onChanged: (value) => setState(() => _searchQuery = value),
                 ),
               ),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    end: AppSpacing.screenHorizontal,
+                  ),
+                  child: TindaTextLinkButton(
+                    label: localizations.utangExportCsv,
+                    onPressed: () => unawaited(_exportUtangCsv(balances)),
+                  ),
+                ),
+              ),
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: _buildBody(
-                      context: context,
-                      localizations: localizations,
-                      palette: palette,
-                      balancesAsync: balancesAsync,
-                      filtered: filtered,
-                    ),
+                child: TindaScreenBody(
+                  child: _buildBody(
+                    context: context,
+                    localizations: localizations,
+                    palette: palette,
+                    balancesAsync: balancesAsync,
+                    filtered: filtered,
+                    ageDaysByCustomer: ageDaysByCustomer,
                   ),
                 ),
               ),
@@ -139,6 +173,7 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
     required AppPalette palette,
     required AsyncValue<List<CustomerBalance>> balancesAsync,
     required List<CustomerBalance> filtered,
+    required Map<String, int>? ageDaysByCustomer,
   }) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final Widget content;
@@ -169,11 +204,11 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
     } else {
       content = ListView.separated(
         key: ValueKey('utang-list-${filtered.length}'),
-        padding: const EdgeInsetsDirectional.fromSTEB(
+        padding: EdgeInsetsDirectional.fromSTEB(
           AppSpacing.screenHorizontal,
           AppSpacing.s4,
           AppSpacing.screenHorizontal,
-          96,
+          TindaScreenBody.floatingBottomPadding(context),
         ),
         itemCount: filtered.length,
         separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s10),
@@ -181,6 +216,9 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
           final item = filtered[index];
           final card = _SukiBalanceCard(
             balance: item,
+            ageDays: !item.owes || ageDaysByCustomer == null
+                ? null
+                : ageDaysByCustomer[item.customer.id],
             onTap: () => SukiLedgerSheet.show(
               context,
               balance: item,
@@ -262,7 +300,7 @@ class _UtangHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     return TindaHeaderBar(
       title: Text(localizations.utangTitle),
@@ -291,8 +329,8 @@ class _UtangHeader extends StatelessWidget {
             spacing: AppSpacing.s12,
             runSpacing: AppSpacing.s4,
             children: [
-              Text(
-                formatMoney(totalUtang),
+              MoneyText(
+                totalUtang,
                 style: AppTypography.display(palette.onHeader),
               ),
               Text(
@@ -314,17 +352,19 @@ class _UtangHeader extends StatelessWidget {
 class _SukiBalanceCard extends StatelessWidget {
   const _SukiBalanceCard({
     required this.balance,
+    required this.ageDays,
     required this.onTap,
     required this.onPay,
   });
 
   final CustomerBalance balance;
+  final int? ageDays;
   final VoidCallback onTap;
   final VoidCallback onPay;
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final customer = balance.customer;
     return TindaCard(
@@ -358,8 +398,8 @@ class _SukiBalanceCard extends StatelessWidget {
                     runSpacing: AppSpacing.s4,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Text(
-                        formatMoney(balance.balance),
+                      MoneyText(
+                        balance.balance,
                         style: AppTypography.bodyStrong(
                           balance.owes ? palette.danger : palette.textMuted,
                           size: 16,
@@ -374,6 +414,19 @@ class _SukiBalanceCard extends StatelessWidget {
                         TindaBadge(
                           label: localizations.utangOverLimit,
                           isDanger: true,
+                        ),
+                      if (ageDays != null)
+                        Text(
+                          localizations.utangAgeDays(ageDays!),
+                          key: ValueKey('utang-age-${customer.id}'),
+                          style: AppTypography.meta(
+                            ageDays! >= utangOverdueDays
+                                ? palette.danger
+                                : palette.textMuted,
+                            weight: ageDays! >= utangOverdueDays
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
                         ),
                     ],
                   ),

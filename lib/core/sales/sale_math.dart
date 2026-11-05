@@ -1,25 +1,31 @@
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/sold_line.dart';
 
-/// The one place sale amounts are computed. Pure and total.
 abstract final class SaleMath {
-  /// The amount for [quantity] at [unitPrice], rounded half-up once to the
-  /// nearest minor unit. Both inputs are expected to be non-negative.
   static Money lineTotal(Money unitPrice, Quantity quantity) {
     const half = Quantity.milliPerUnit ~/ 2;
     final scaled = unitPrice.minorUnits * quantity.milli;
     return Money((scaled + half) ~/ Quantity.milliPerUnit, unitPrice.currency);
   }
 
-  /// Change due when [tendered] is handed over for [total]. Negative means
-  /// the payment is short.
+  static const int _sequenceDigits = 3;
+
+  static String receiptNumber({required int daySerial, required int dayOrder}) {
+    final date = LocalDay(daySerial).toLocalDate();
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    final order = dayOrder.toString().padLeft(_sequenceDigits, '0');
+    return '$year$month$day-$order';
+  }
+
   static Money changeDue({required Money total, required Money tendered}) =>
       tendered - total;
 
-  /// Folds sold lines into totals. Each line is rounded once, by [lineTotal].
   static SalesSummary summarize(Iterable<SoldLine> lines, Currency currency) {
     var revenue = Money.zero(currency);
     var cost = Money.zero(currency);
@@ -29,6 +35,10 @@ abstract final class SaleMath {
       cost += lineTotal(line.unitCost, line.quantity);
       saleIds.add(line.saleId);
     }
-    return SalesSummary(revenue: revenue, cost: cost, saleCount: saleIds.length);
+    return SalesSummary(
+      revenue: revenue,
+      cost: cost,
+      saleCount: saleIds.length,
+    );
   }
 }

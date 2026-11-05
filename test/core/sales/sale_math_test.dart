@@ -9,27 +9,37 @@ void main() {
   group('SaleMath.lineTotal', () {
     test('whole units multiply exactly', () {
       expect(
-        SaleMath.lineTotal(const Money(1500, Currency.php), const Quantity.whole(3)),
+        SaleMath.lineTotal(
+          const Money(1500, Currency.php),
+          const Quantity.whole(3),
+        ),
         const Money(4500, Currency.php),
       );
     });
 
     test('a quarter kilo of ₱45.00 rice is ₱11.25', () {
       expect(
-        SaleMath.lineTotal(const Money(4500, Currency.php), const Quantity.milli(250)),
+        SaleMath.lineTotal(
+          const Money(4500, Currency.php),
+          const Quantity.milli(250),
+        ),
         const Money(1125, Currency.php),
       );
     });
 
     test('rounds half-up once to the nearest centavo', () {
-      // 999 × 0.333 = 332.667 → 333
       expect(
-        SaleMath.lineTotal(const Money(999, Currency.php), const Quantity.milli(333)),
+        SaleMath.lineTotal(
+          const Money(999, Currency.php),
+          const Quantity.milli(333),
+        ),
         const Money(333, Currency.php),
       );
-      // 100 × 0.005 = 0.5 → 1
       expect(
-        SaleMath.lineTotal(const Money(100, Currency.php), const Quantity.milli(5)),
+        SaleMath.lineTotal(
+          const Money(100, Currency.php),
+          const Quantity.milli(5),
+        ),
         const Money(1, Currency.php),
       );
     });

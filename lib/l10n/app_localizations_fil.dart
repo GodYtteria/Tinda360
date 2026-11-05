@@ -166,7 +166,39 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String posOutOfStock(String name) {
+    return 'Wala nang stock ang $name.';
+  }
+
+  @override
   String get posLowStockBadge => 'Mababa';
+
+  @override
+  String get posOutOfStockBadge => 'Ubos na';
+
+  @override
+  String get checkoutExactAmountChip => 'Eksakto';
+
+  @override
+  String get posBackupStaleTitle => 'Wala pang backup sa loob ng 7 araw';
+
+  @override
+  String get posBackupNeverTitle => 'I-backup ang data mo para hindi mawala';
+
+  @override
+  String get posBackupWarningBody =>
+      'I-tap para buksan ang Settings at mag-backup na.';
+
+  @override
+  String get posQuantityMode => 'Dami';
+
+  @override
+  String get posAmountMode => 'Halaga (₱)';
+
+  @override
+  String posAmountEquals(String quantity) {
+    return '= $quantity';
+  }
 
   @override
   String posCartItems(int count) {
@@ -218,6 +250,53 @@ class AppLocalizationsFil extends AppLocalizations {
   String get checkoutChangeLabel => 'Sukli';
 
   @override
+  String get checkoutPaidNowLabel => 'Bayad ngayon (₱, optional)';
+
+  @override
+  String checkoutPaidNowRemaining(String amount) {
+    return 'Utang sa bentang ito: $amount';
+  }
+
+  @override
+  String get checkoutPaidNowInvalid =>
+      'Ang bayad ngayon ay dapat ₱0 hanggang sa total.';
+
+  @override
+  String checkoutPriceDialogTitle(String product) {
+    return 'Presyo ng $product';
+  }
+
+  @override
+  String checkoutPriceNormal(String price) {
+    return 'Normal na presyo: $price';
+  }
+
+  @override
+  String get checkoutPriceLabel => 'Presyo ng bawat isa ngayon (₱)';
+
+  @override
+  String get checkoutPriceInvalid => 'Maglagay ng presyong ₱0 o higit pa.';
+
+  @override
+  String get checkoutPriceReset => 'Ibalik sa normal na presyo';
+
+  @override
+  String get failureSalePaidNowInvalid =>
+      'Dapat ₱0 hanggang kabuuan ang bayad ngayon.';
+
+  @override
+  String get failureSalePriceInvalid => 'Hindi puwedeng negatibo ang presyo.';
+
+  @override
+  String get receiptNumberLabel => 'Resibo no.';
+
+  @override
+  String get receiptSukiLabel => 'Suki';
+
+  @override
+  String get receiptReferenceLabel => 'Ref';
+
+  @override
   String get checkoutEwalletRefLabel => 'Reference number (optional)';
 
   @override
@@ -260,6 +339,10 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get saleDoneShareReceipt => 'I-share ang resibo';
+
+  @override
+  String get saleDoneShareFailed =>
+      'Hindi mabuksan ang pag-share. Subukan ulit.';
 
   @override
   String get saleDoneReceiptCopied => 'Handa nang i-share ang resibo.';
@@ -305,6 +388,368 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get productCostLabel => 'Puhunan (₱)';
+
+  @override
+  String get productNoCountSwitch => 'Huwag bilangin ang stock';
+
+  @override
+  String get productNoCountHint =>
+      'Para sa load, tingi at iba pang hindi binibilang.';
+
+  @override
+  String get productExpiryLabel => 'Petsa ng expiry (optional)';
+
+  @override
+  String get productExpiryClear => 'Alisin ang petsa ng expiry';
+
+  @override
+  String get productDuplicateNameWarning => 'May kapareho nang pangalan.';
+
+  @override
+  String get productPriceZeroWarning => 'Zero ang presyo. Tama ba?';
+
+  @override
+  String get inventoryNoCountLabel => 'Walang bilang';
+
+  @override
+  String inventoryExpiryDaysBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mag-expire sa $count araw',
+      one: 'Mag-expire sa 1 araw',
+      zero: 'Mag-expire ngayon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inventoryExpiredBadge => 'Expired';
+
+  @override
+  String get inventoryExpiringFilter => 'Malapit mag-expire';
+
+  @override
+  String get inventoryShareShoppingList => 'Ibahagi ang listahan ng bibilhin';
+
+  @override
+  String get shoppingListHeader => 'Bibilhin:';
+
+  @override
+  String shoppingListLine(String name, String amount, String unit) {
+    return '- $name: bumili ng $amount $unit';
+  }
+
+  @override
+  String get productRestockCostLabel =>
+      'Bagong puhunan kada piraso (₱), optional';
+
+  @override
+  String get productStockHistoryButton => 'Galaw ng stock';
+
+  @override
+  String get stockHistoryTitle => 'Galaw ng stock';
+
+  @override
+  String get stockHistoryEmpty => 'Wala pang galaw ang stock.';
+
+  @override
+  String stockHistoryAfter(String stock) {
+    return 'Natira: $stock';
+  }
+
+  @override
+  String get stockReasonInitial => 'Unang stock';
+
+  @override
+  String get stockReasonRestock => 'Restock';
+
+  @override
+  String get stockReasonAdjust => 'Inayos';
+
+  @override
+  String get stockReasonReturn => 'Isinauli';
+
+  @override
+  String get receiptRefunded => 'Naibalik';
+
+  @override
+  String get receiptNetTotal => 'Netong kabuuan';
+
+  @override
+  String get checkoutCreditNearTitle => 'Malapit na sa limit ng utang';
+
+  @override
+  String checkoutCreditNearBody(String name, String balance, String limit) {
+    return 'Si $name ay may $balance na utang na hindi pa bayad (limit: $limit).';
+  }
+
+  @override
+  String get reportsExportCsvError => 'Hindi ma-export ang CSV file.';
+
+  @override
+  String get ledgerDeleteConfirmTitle => 'Burahin ang linyang ito?';
+
+  @override
+  String ledgerDeleteConfirmBody(String kind, String amount, String date) {
+    return '$kind $amount noong $date. Mananatili ito sa listahan na binura, at aayusin ang balanse.';
+  }
+
+  @override
+  String get ledgerDeleteReasonLabel => 'Dahilan (optional)';
+
+  @override
+  String get ledgerDeleteConfirmAction => 'Burahin';
+
+  @override
+  String get ledgerDeleteDone => 'Nabura na ang linya.';
+
+  @override
+  String ledgerDeletedWithReason(String reason) {
+    return 'Binura: $reason';
+  }
+
+  @override
+  String get ledgerDeletedNoReason => 'Binura';
+
+  @override
+  String get ledgerNotDeletableHint => 'Galing sa benta. I-void ang benta.';
+
+  @override
+  String get failureLedgerEntryNotFound => 'Hindi makita ang linyang ito.';
+
+  @override
+  String get failureLedgerEntryAlreadyDeleted => 'Nabura na ang linyang ito.';
+
+  @override
+  String get failureLedgerEntryNotDeletable =>
+      'Hindi ito mabubura dito. I-void ang benta.';
+
+  @override
+  String get failureLedgerDeleteWouldGoNegative =>
+      'Hindi mabubura ang interes na ito. Sobra na ang bayad sa balanse.';
+
+  @override
+  String get checkoutInterestLabel => 'Interes';
+
+  @override
+  String get checkoutInterestPrompt => 'Tutubuan ba? Optional lang.';
+
+  @override
+  String get checkoutInterestPercentInvalid =>
+      'Maglagay ng 0.1 hanggang 50.0 na porsyento, tulad ng 5 o 2.5.';
+
+  @override
+  String get checkoutInterestAmountInvalid =>
+      'Maglagay ng tamang halaga sa peso, higit sa zero.';
+
+  @override
+  String get checkoutInterestTooMuch =>
+      'Hindi puwedeng mas malaki ang interes kaysa sa utang.';
+
+  @override
+  String checkoutInterestPreview(String utang, String interest, String total) {
+    return 'Utang $utang + interes $interest = $total';
+  }
+
+  @override
+  String get receiptInterest => 'Interes';
+
+  @override
+  String get failureSaleInterestInvalid =>
+      'Dapat higit sa zero ang interes, at para lang sa utang na may suki.';
+
+  @override
+  String get productUtangPriceLabel => 'Presyo kapag utang (₱, optional)';
+
+  @override
+  String get checkoutUtangPriceTag => 'Presyong utang';
+
+  @override
+  String get failureCustomerInterestAmountChanged =>
+      'Nagbago ang utang, kaya nagbago rin ang interes. Tingnan ulit at subukan uli.';
+
+  @override
+  String checkoutShortfallPrompt(String amount) {
+    return 'Kulang ang bayad. Ilista ang kulang na $amount sa utang? Pumili ng suki sa baba.';
+  }
+
+  @override
+  String get yumiChipLowStock => 'Ano ang mababa sa stock?';
+
+  @override
+  String get yumiChipSalesToday => 'Magkano ang benta ngayon?';
+
+  @override
+  String get yumiChipProductCount => 'Ilan ang produkto ko?';
+
+  @override
+  String get yumiChipSlowMoving => 'Ano ang matumal?';
+
+  @override
+  String get yumiChipWhoHasUtang => 'Sino ang may utang?';
+
+  @override
+  String get yumiChipUtangRisk => 'Delikado ba ang utang?';
+
+  @override
+  String get yumiChipExpensesWeek => 'Magkano ang gastos ngayong linggo?';
+
+  @override
+  String get yumiChipCompareYesterday => 'Kumpara sa kahapon';
+
+  @override
+  String get yumiChipWhatCanYouDo => 'What can you do?';
+
+  @override
+  String get yumiHintPos =>
+      'Nasa Benta ka. Tanungin mo ako kung ano ang mababa sa stock o kumusta ang benta.';
+
+  @override
+  String get yumiHintInventory =>
+      'Nasa Imbentaryo ka. Tanungin mo ako kung ano ang mababa o matumal.';
+
+  @override
+  String get yumiHintUtang =>
+      'Nasa Utang ka. Tanungin mo ako kung sino ang may utang at magkano.';
+
+  @override
+  String get yumiHintReports =>
+      'Nasa Ulat ka. Tanungin mo ako tungkol sa benta, gastos, o kahapon.';
+
+  @override
+  String get yumiHintSettings =>
+      'Nasa Settings ka. Tanungin mo ako kung ano ang kaya kong gawin.';
+
+  @override
+  String get sukiTuboLabel => 'Interes % (hindi kailangan)';
+
+  @override
+  String get sukiTuboHint => 'hal. 5 o 2.5';
+
+  @override
+  String get sukiTuboInvalid =>
+      'Ang interes ay dapat 0.1 hanggang 50.0 porsyento.';
+
+  @override
+  String get ledgerKindTubo => 'Interes';
+
+  @override
+  String get ledgerAddTubo => 'Dagdag interes';
+
+  @override
+  String get ledgerTuboConfirmTitle => 'Dagdagan ng interes?';
+
+  @override
+  String ledgerTuboConfirmBody(String balance, String percent, String amount) {
+    return '$balance + $percent% = $amount interes';
+  }
+
+  @override
+  String get ledgerTuboConfirmAction => 'Dagdag interes';
+
+  @override
+  String ledgerTuboAdded(String amount) {
+    return 'Nadagdag na ang interes na $amount.';
+  }
+
+  @override
+  String ledgerReminderTuboMessage(
+    String customerName,
+    String storeName,
+    String utang,
+    String tubo,
+    String total,
+  ) {
+    return 'Magandang araw, $customerName! Paalala po mula sa $storeName: Utang $utang + interes $tubo = $total. Salamat po!';
+  }
+
+  @override
+  String get failureCustomerInterestRateNotSet =>
+      'Walang interes na naka-set para sa suki na ito.';
+
+  @override
+  String get failureCustomerInterestNoBalance =>
+      'Walang utang, kaya walang madadagdagan ng interes.';
+
+  @override
+  String get stockReasonSale => 'Benta';
+
+  @override
+  String get reportPdfMetricHeader => 'Sukat';
+
+  @override
+  String get reportPdfValueHeader => 'Halaga';
+
+  @override
+  String get reportPdfProductHeader => 'Produkto';
+
+  @override
+  String get reportPdfQuantitySoldHeader => 'Dami ng Nabenta';
+
+  @override
+  String get reportPdfRevenueHeader => 'Benta';
+
+  @override
+  String reportPdfPreparedBy(String storeName) {
+    return '$storeName - Inihanda ng May-ari ng Tindahan';
+  }
+
+  @override
+  String get sukiEditAction => 'I-edit';
+
+  @override
+  String get sukiDeleteAction => 'Burahin';
+
+  @override
+  String get sukiEditTitle => 'I-edit ang suki';
+
+  @override
+  String get sukiSaveChanges => 'I-save ang changes';
+
+  @override
+  String get sukiDeleteConfirmTitle => 'Burahin ang suki?';
+
+  @override
+  String sukiDeleteConfirmBody(String name) {
+    return 'Aalisin si $name sa listahan ng suki. Puwede lang ito kapag zero na ang balanse.';
+  }
+
+  @override
+  String get failureCustomerHasBalance =>
+      'Hindi mabubura ang suki na may utang pa.';
+
+  @override
+  String get ledgerShareReminder => 'I-share ang paalala';
+
+  @override
+  String get ledgerCopyReminder => 'Kopyahin';
+
+  @override
+  String get ledgerEmptyEntries => 'Wala pang nakasulat sa listahan.';
+
+  @override
+  String get ledgerKindUtang => 'Utang';
+
+  @override
+  String get ledgerKindPayment => 'Bayad';
+
+  @override
+  String get ledgerReminderDefaultStore => 'aming tindahan';
+
+  @override
+  String ledgerReminderMessage(
+    String customerName,
+    String storeName,
+    String balance,
+  ) {
+    return 'Magandang araw, $customerName! Paalala po mula sa $storeName: ang utang mo ay $balance. Salamat po!';
+  }
+
+  @override
+  String inventoryCostSummary(String amount) {
+    return 'Puhunan $amount';
+  }
 
   @override
   String productProfitPerSale(String amount) {
@@ -387,7 +832,23 @@ class AppLocalizationsFil extends AppLocalizations {
   String get utangNewSukiTitle => 'Bagong suki';
 
   @override
-  String get utangCurrentBalance => 'Kasalukuyang balanse';
+  String get utangCurrentBalance => 'Utang ngayon';
+
+  @override
+  String utangAgeDays(int count) {
+    return '$count araw na';
+  }
+
+  @override
+  String get utangExportCsv => 'I-export ang utang (CSV)';
+
+  @override
+  String checkoutCreditLimitExceeded(String limit) {
+    return 'Lampas na sa limit ng utang ($limit)';
+  }
+
+  @override
+  String get checkoutCreditLimitOverride => 'Pahintulutan ng may-ari';
 
   @override
   String get utangFullPayment => 'Buong bayad';
@@ -435,10 +896,10 @@ class AppLocalizationsFil extends AppLocalizations {
   String get reportsProfitCard => 'Tubo';
 
   @override
-  String get reportsTransactionsCard => 'Transactions';
+  String get reportsTransactionsCard => 'Mga transaksyon';
 
   @override
-  String get reportsNewUtangCard => 'Bagong utang';
+  String get reportsNewUtangCard => 'Natitirang utang';
 
   @override
   String get reportsChartTitle => 'Takbo ng benta';
@@ -480,7 +941,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get chatTitle => 'Smart Store Assistant';
 
   @override
-  String get chatStatusOffline => 'On-device · Offline';
+  String get chatStatusOffline => 'Sa phone · Offline';
 
   @override
   String get chatStatusThinking => 'Nag-iisip…';
@@ -600,7 +1061,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get settingsSectionBackup => 'BACKUP';
 
   @override
-  String get settingsSectionAi => 'SMART STORE ASSISTANT';
+  String get settingsSectionAi => 'MATALINONG KATULONG SA TINDAHAN';
 
   @override
   String get settingsSectionStore => 'TINDAHAN';
@@ -675,7 +1136,7 @@ class AppLocalizationsFil extends AppLocalizations {
       'Hindi natapos ang backup. Ligtas pa rin ang data sa phone.';
 
   @override
-  String get settingsAiOfflineBadge => '100% On-device · Offline';
+  String get settingsAiOfflineBadge => '100% sa phone · Offline';
 
   @override
   String get settingsPrivacyTracking => 'Walang tracking o ads';
@@ -697,6 +1158,23 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get settingsAddStore => '+ Bagong tindahan';
+
+  @override
+  String get settingsAddStoreFailed =>
+      'Hindi maidagdag ang store. Subukan ulit.';
+
+  @override
+  String get settingsLocalBackupFailed =>
+      'Hindi natapos ang backup file. Subukan ulit.';
+
+  @override
+  String get ulatExpenseDeleteFailed =>
+      'Hindi mabura ang gastos. Subukan ulit.';
+
+  @override
+  String pinLockedOut(int seconds) {
+    return 'Sobrang daming maling subok. Maghintay ng $seconds segundo.';
+  }
 
   @override
   String get settingsDeleteStore => 'Burahin ang tindahan';
@@ -766,6 +1244,17 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get failureSalePaymentTooLow =>
       'Kulang ang ibinigay na cash para sa kabuuan.';
+
+  @override
+  String get failureSaleNotFound => 'Na-void na o wala na ang bentang ito.';
+
+  @override
+  String get failureSaleVoidAfterPayment =>
+      'Hindi ma-void: may naibayad na ang suki sa utang na ito.';
+
+  @override
+  String get failureSaleInsufficientStock =>
+      'Kulang ang stock ng isang item sa cart.';
 
   @override
   String get failureSaleStoreUnavailable =>
@@ -900,10 +1389,218 @@ class AppLocalizationsFil extends AppLocalizations {
   String get ulatSalePaidLabel => 'Binayad';
 
   @override
+  String scannerScannedCount(int count) {
+    return 'Na-scan: $count';
+  }
+
+  @override
+  String get ulatShareButton => 'Ibahagi ang ulat (text)';
+
+  @override
+  String get ulatShareRevenueLabel => 'Benta';
+
+  @override
+  String get ulatShareProfitLabel => 'Tubo';
+
+  @override
+  String get ulatShareTransactionsLabel => 'Mga transaksyon';
+
+  @override
+  String get ulatShareExpensesLabel => 'Gastos';
+
+  @override
+  String get ulatShareNetIncomeLabel => 'Netong kita';
+
+  @override
+  String get ulatShareUtangLabel => 'Natitirang utang';
+
+  @override
+  String get ulatShareTopProductsLabel => 'Top 3 produkto';
+
+  @override
+  String ulatShareCashCountLine(
+    String expected,
+    String counted,
+    String difference,
+  ) {
+    return 'Bilang ng pera: Dapat $expected · Binilang $counted · $difference';
+  }
+
+  @override
+  String get reportsCustom => 'Pasadya';
+
+  @override
+  String get reportsThisMonth => 'Ngayong buwan';
+
+  @override
+  String get reportsLastMonth => 'Nakaraang buwan';
+
+  @override
+  String get reportsPickDates => 'Pumili ng petsa';
+
+  @override
+  String get reportsRangeInvalid =>
+      'Pumili ng hanggang 366 araw, hanggang ngayon lang.';
+
+  @override
+  String reportsRangeLabel(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get cashCountTitle => 'Bilangin ang kaha ngayong araw';
+
+  @override
+  String get cashCountExpectedLabel => 'Dapat laman ng kaha';
+
+  @override
+  String get cashCountCountedLabel => 'Pera na nabilang mo';
+
+  @override
+  String get cashCountNoteLabel => 'Tala (opsyonal)';
+
+  @override
+  String get cashCountSaveButton => 'I-save ang bilang';
+
+  @override
+  String get cashCountSaved => 'Na-save na ang bilang ng kaha.';
+
+  @override
+  String get cashCountInvalidAmount => 'Ilagay kung magkano ang nabilang mo.';
+
+  @override
+  String get cashCountSaveFailed => 'Hindi ma-save ang bilang. Subukan ulit.';
+
+  @override
+  String cashCountOver(String amount) {
+    return 'Sobra ng $amount';
+  }
+
+  @override
+  String cashCountShort(String amount) {
+    return 'Kulang ng $amount';
+  }
+
+  @override
+  String get cashCountExact => 'Tama';
+
+  @override
+  String get cashCountTodayHeading => 'Bilang ngayong araw';
+
+  @override
+  String get cashCountHistoryHeading => 'Nakaraang 7 araw';
+
+  @override
+  String cashCountRowSummary(String counted, String expected) {
+    return 'Nabilang $counted · Dapat $expected';
+  }
+
+  @override
+  String get cashCountNoHistory => 'Wala pang bilang ng kaha.';
+
+  @override
   String get ulatSaleReferenceLabel => 'Reference';
 
   @override
   String get ulatVoidSaleButton => 'I-void / Burahin ang Benta';
+
+  @override
+  String get receiptBantayLabel => 'Bantay';
+
+  @override
+  String get bantayChipEmpty => 'Ilagay ang Bantay';
+
+  @override
+  String bantayChipLabel(String name) {
+    return 'Bantay: $name';
+  }
+
+  @override
+  String get bantayDialogTitle => 'Sino ang bantay ng tindahan?';
+
+  @override
+  String get bantayFieldHint => 'Pangalan (optional)';
+
+  @override
+  String get settingsAddressLabel => 'Address';
+
+  @override
+  String get settingsPhoneLabel => 'Telepono';
+
+  @override
+  String ledgerDeletedByNoReason(String name) {
+    return 'Binura ni $name';
+  }
+
+  @override
+  String ledgerDeletedByWithReason(String name, String reason) {
+    return 'Binura ni $name: $reason';
+  }
+
+  @override
+  String get ulatReturnTitle => 'Isauli ang item';
+
+  @override
+  String ulatReturnAvailable(String quantity) {
+    return 'Pwedeng isauli: $quantity';
+  }
+
+  @override
+  String get ulatReturnQuantityLabel => 'Ilan ang isasauli';
+
+  @override
+  String get ulatReturnReasonLabel => 'Dahilan (opsyonal)';
+
+  @override
+  String get ulatReturnRefundTotal => 'Isasauli na pera';
+
+  @override
+  String get ulatReturnConfirmButton => 'I-save ang pagsauli';
+
+  @override
+  String get ulatReturnNothingReturnable =>
+      'Naisauli na lahat ng item sa benta na ito.';
+
+  @override
+  String ulatReturnSuccessCash(String amount) {
+    return 'Isauli ang $amount sa customer';
+  }
+
+  @override
+  String ulatReturnSuccessUtang(String amount) {
+    return 'Binawas ang $amount sa utang ng customer';
+  }
+
+  @override
+  String ulatReturnSuccessUtangPartial(String credit, String cash) {
+    return 'Binawas ang $credit sa utang. Ibalik ang $cash na pera sa customer.';
+  }
+
+  @override
+  String get failureSaleVoidAfterReturn =>
+      'May naibalik nang item sa bentang ito kaya hindi ito mai-void.';
+
+  @override
+  String get failureSaleReturnNothingSelected =>
+      'Maglagay ng dami na ibabalik.';
+
+  @override
+  String get failureSaleReturnQuantityInvalid =>
+      'Hindi tama ang dami ng ibabalik.';
+
+  @override
+  String get failureSaleReturnTooMany => 'Hindi pwedeng lumampas sa naibenta.';
+
+  @override
+  String get failureSaleReturnSaleVoided =>
+      'Na-void na ang bentang ito kaya wala nang maibabalik.';
+
+  @override
+  String get failureSaleReturnNotFound => 'Hindi nahanap ang benta.';
+
+  @override
+  String get failureSaleReturnStoreUnavailable =>
+      'Hindi na-save ang balik. Subukan ulit.';
 
   @override
   String get ulatVoidSaleConfirmTitle => 'I-void ang bentang ito?';
@@ -1001,5 +1698,135 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String chatWelcomeMessage(String greeting) {
     return '$greeting Ako si Yumi, ang iyong Smart Store Assistant. Halika, magtanong tungkol sa benta, stock, o utang ng tindahan mo!';
+  }
+
+  @override
+  String get pinRecoveryTitle => 'I-save ang Recovery Code';
+
+  @override
+  String get pinRecoveryBody =>
+      'Isulat o kopyahin ang one-time code na ito. Magagamit mo ito para i-reset ang PIN kapag nakalimutan mo, kahit offline.';
+
+  @override
+  String get pinRecoveryCopied => 'Nakopya ang recovery code.';
+
+  @override
+  String get pinCopy => 'Kopyahin';
+
+  @override
+  String get pinDone => 'Tapos';
+
+  @override
+  String get pinEnterFourDigits => 'Ilagay ang 4-digit na PIN.';
+
+  @override
+  String get pinIncorrect => 'Mali ang PIN. Subukan ulit.';
+
+  @override
+  String get pinInvalidRecoveryCode => 'Mali ang recovery code.';
+
+  @override
+  String get pinBiometricFailed =>
+      'Hindi gumana o kinansela ang fingerprint/screen lock.';
+
+  @override
+  String get pinGoogleMismatch => 'Hindi tugma ang Google account.';
+
+  @override
+  String get pinResetTitle => 'I-reset ang Store PIN';
+
+  @override
+  String get pinUseBiometric => 'Gamitin ang Fingerprint / Screen Lock';
+
+  @override
+  String get pinForgot => 'Nakalimutan ang PIN?';
+
+  @override
+  String get pinRecoveryCodeLabel => 'Recovery code (hal. T360-XXXX)';
+
+  @override
+  String get pinVerifyGoogle => 'I-verify gamit ang Google Account';
+
+  @override
+  String get pinBackToPin => 'Bumalik sa PIN';
+
+  @override
+  String get pinResetButton => 'I-reset ang PIN';
+
+  @override
+  String get pinUnlock => 'I-unlock';
+
+  @override
+  String get pinDamaged =>
+      'Sira ang PIN data. Mag-unlock gamit ang fingerprint, screen lock o Google, tapos gumawa ng bagong PIN.';
+
+  @override
+  String get pinRemoveDamaged => 'Tanggalin ang sirang PIN';
+
+  @override
+  String get pinMustBeFourDigits => 'Dapat eksaktong 4 na numero ang PIN.';
+
+  @override
+  String get pinMismatch => 'Hindi magkapareho ang mga PIN.';
+
+  @override
+  String get pinNewLabel => 'Bagong 4-digit na PIN';
+
+  @override
+  String get pinConfirmLabel => 'Ulitin ang 4-digit na PIN';
+
+  @override
+  String get ledgerHistoryTitle => 'Listahan ng Utang';
+
+  @override
+  String get ledgerReminderCopied => 'Nakopya ang paalala';
+
+  @override
+  String get receiptPrintDialogFailed => 'Hindi mabuksan ang print dialog.';
+
+  @override
+  String get ulatExpenseInvalid =>
+      'Ilagay ang tamang pangalan at halaga ng gastos.';
+
+  @override
+  String get commonUndo => 'Ibalik';
+
+  @override
+  String get settingsSwitchStoreFailed =>
+      'Hindi malipat ang store. Subukan ulit.';
+
+  @override
+  String get settingsDeleteStoreFailed =>
+      'Hindi matanggal ang store. Subukan ulit.';
+
+  @override
+  String posRemovedFromCart(String name) {
+    return 'Tinanggal ang $name';
+  }
+
+  @override
+  String get receiptTotal => 'KABUUAN';
+
+  @override
+  String get receiptPayment => 'Paraan ng bayad';
+
+  @override
+  String get receiptPaid => 'Bayad';
+
+  @override
+  String get receiptChange => 'Sukli';
+
+  @override
+  String get receiptUtang => 'Utang';
+
+  @override
+  String get receiptThankYou => 'Salamat po!';
+
+  @override
+  String get receiptNoItems => '(Walang item)';
+
+  @override
+  String inventoryImportSkippedRows(String rows) {
+    return 'Tingnan ang rows: $rows (walang pangalan o presyo, maling numero, hindi kilalang unit, o dobleng barcode).';
   }
 }

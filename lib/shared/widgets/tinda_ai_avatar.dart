@@ -1,38 +1,29 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Emotional states for the Tinda AI character.
 enum TindaAvatarMood {
-  /// Waiting on FAB or chat header.
   idle,
 
-  /// Reading store data.
   thinking,
 
-  /// Streaming/showing answer.
   talking,
 
-  /// Sale done, good news, or tapped.
   happy,
 }
 
-/// SVG-backed Tinda AI avatar (`assets/avatar/*.svg`) supporting 4 moods,
-/// blink/talk timers, and system reduce-motion compliance.
 class TindaAiAvatar extends StatefulWidget {
-  /// Creates the avatar.
   const TindaAiAvatar({
     super.key,
     this.mood = TindaAvatarMood.idle,
     this.size = 44,
   });
 
-  /// Active expression.
   final TindaAvatarMood mood;
 
-  /// Diameter in logical pixels.
   final double size;
 
   @override
@@ -121,9 +112,10 @@ class _TindaAiAvatarState extends State<TindaAiAvatar> {
     return switch (widget.mood) {
       TindaAvatarMood.idle => 'assets/avatar/avatar_idle.svg',
       TindaAvatarMood.thinking => 'assets/avatar/avatar_thinking.svg',
-      TindaAvatarMood.talking => _isMouthOpen
-          ? 'assets/avatar/avatar_talking.svg'
-          : 'assets/avatar/avatar_idle.svg',
+      TindaAvatarMood.talking =>
+        _isMouthOpen
+            ? 'assets/avatar/avatar_talking.svg'
+            : 'assets/avatar/avatar_idle.svg',
       TindaAvatarMood.happy => 'assets/avatar/avatar_happy.svg',
     };
   }
@@ -141,9 +133,7 @@ class _TindaAiAvatarState extends State<TindaAiAvatar> {
   }
 }
 
-/// 60x60 circular mango FAB showing [TindaAiAvatar].
 class TindaAiFab extends StatelessWidget {
-  /// Creates the AI FAB.
   const TindaAiFab({
     required this.onPressed,
     required this.tooltip,
@@ -151,13 +141,10 @@ class TindaAiFab extends StatelessWidget {
     this.mood = TindaAvatarMood.idle,
   });
 
-  /// Tap callback.
   final VoidCallback onPressed;
 
-  /// Accessibility label.
   final String tooltip;
 
-  /// Avatar mood.
   final TindaAvatarMood mood;
 
   @override
@@ -193,12 +180,7 @@ class TindaAiFab extends StatelessWidget {
   }
 }
 
-
-/// Status indicator dot with a gentle breathing pulse while active.
-///
-/// Respects the system "disable animations" setting.
 class TindaStatusDot extends StatefulWidget {
-  /// Creates a status dot.
   const TindaStatusDot({
     required this.active,
     required this.color,
@@ -206,13 +188,10 @@ class TindaStatusDot extends StatefulWidget {
     this.size = 8,
   });
 
-  /// Whether the pulse animation runs.
   final bool active;
 
-  /// Dot fill color.
   final Color color;
 
-  /// Dot diameter.
   final double size;
 
   @override
@@ -245,8 +224,7 @@ class _TindaStatusDotState extends State<TindaStatusDot>
   }
 
   void _sync() {
-    if (widget.active &&
-        !MediaQuery.disableAnimationsOf(context)) {
+    if (widget.active && !MediaQuery.disableAnimationsOf(context)) {
       _controller.repeat(reverse: true);
     } else {
       _controller.stop();

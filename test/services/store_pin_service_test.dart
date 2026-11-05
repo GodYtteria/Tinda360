@@ -94,29 +94,219 @@ void main() {
     expect(await pinService.verifyPin('9012'), isFalse);
   });
 
-  test('resetWithRecoveryCode returns false for wrong code or no PIN', () async {
-    expect(await pinService.resetWithRecoveryCode('T360-AAAA'), isFalse);
+  test(
+    'resetWithRecoveryCode returns false for wrong code or no PIN',
+    () async {
+      expect(await pinService.resetWithRecoveryCode('T360-AAAA'), isFalse);
 
-    await pinService.setPin('5678');
+      await pinService.setPin('5678');
 
-    expect(await pinService.resetWithRecoveryCode(''), isFalse);
-    expect(await pinService.resetWithRecoveryCode('WRONG-CODE'), isFalse);
-    expect(await pinService.hasPin(), isTrue);
-    expect(await pinService.verifyPin('5678'), isTrue);
+      expect(await pinService.resetWithRecoveryCode(''), isFalse);
+      expect(await pinService.resetWithRecoveryCode('WRONG-CODE'), isFalse);
+      expect(await pinService.hasPin(), isTrue);
+      expect(await pinService.verifyPin('5678'), isTrue);
+    },
+  );
+
+  test(
+    'resetWithRecoveryCode clears PIN with exact or normalized code',
+    () async {
+      final firstRecoveryCode = await pinService.setPin('2468');
+      expect(await pinService.resetWithRecoveryCode(firstRecoveryCode), isTrue);
+      expect(await pinService.hasPin(), isFalse);
+      expect(await pinService.verifyPin('2468'), isFalse);
+      expect(
+        await pinService.resetWithRecoveryCode(firstRecoveryCode),
+        isFalse,
+      );
+
+      final secondRecoveryCode = await pinService.setPin('1357');
+      final normalizedInput =
+          ' ${secondRecoveryCode.toLowerCase().replaceAll('-', ' ')} ';
+      expect(await pinService.resetWithRecoveryCode(normalizedInput), isTrue);
+      expect(await pinService.hasPin(), isFalse);
+      expect(await pinService.verifyPin('1357'), isFalse);
+    },
+  );
+
+  test(
+    'a damaged PIN file still counts as a PIN so actions stay locked',
+    () async {
+      await pinService.setPin('4829');
+      File('${tempDirectory.path}/tinda360_pin.json').writeAsStringSync('{bro');
+
+      expect(await pinService.hasPin(), isTrue);
+      expect(await pinService.verifyPin('4829'), isFalse);
+    },
+  );
+
+  test('isPinDamaged is true only for an unreadable PIN file', () async {
+    expect(await pinService.isPinDamaged(), isFalse);
+    await pinService.setPin('4829');
+    expect(await pinService.isPinDamaged(), isFalse);
+    File('${tempDirectory.path}/tinda360_pin.json').writeAsStringSync('{bro');
+    expect(await pinService.isPinDamaged(), isTrue);
+    await pinService.clearPin();
+    expect(await pinService.isPinDamaged(), isFalse);
+    expect(await pinService.hasPin(), isFalse);
   });
 
-  test('resetWithRecoveryCode clears PIN with exact or normalized code', () async {
-    final firstRecoveryCode = await pinService.setPin('2468');
-    expect(await pinService.resetWithRecoveryCode(firstRecoveryCode), isTrue);
-    expect(await pinService.hasPin(), isFalse);
-    expect(await pinService.verifyPin('2468'), isFalse);
-    expect(await pinService.resetWithRecoveryCode(firstRecoveryCode), isFalse);
+  test(
+    'a corrupt attempts file that vanishes mid-check never throws',
+    () async {
+      await pinService.setPin('4829');
+      final attemptsFile = File(
+        '${tempDirectory.path}/tinda360_pin_attempts.json',
+      )..writeAsStringSync('{bro');
+      expect(await pinService.lockoutRemaining(), isNotNull);
+      attemptsFile.deleteSync();
+      expect(await pinService.verifyPin('1111'), isFalse);
+    },
+  );
 
-    final secondRecoveryCode = await pinService.setPin('1357');
-    final normalizedInput =
-        ' ${secondRecoveryCode.toLowerCase().replaceAll('-', ' ')} ';
-    expect(await pinService.resetWithRecoveryCode(normalizedInput), isTrue);
-    expect(await pinService.hasPin(), isFalse);
-    expect(await pinService.verifyPin('1357'), isFalse);
+  test('an unreadable attempts file never makes PIN checks throw', () async {
+    await pinService.setPin('4829');
+    Directory('${tempDirectory.path}/tinda360_pin_attempts.json').createSync();
+
+    expect(await pinService.verifyPin('1111'), isFalse);
+    expect(await pinService.lockoutRemaining(), isNotNull);
+  });
+
+  test('locks out after five wrong guesses, even for the right PIN', () async {
+    var clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+
+    for (var attempt = 0; attempt < 4; attempt++) {
+      expect(await lockingService.verifyPin('0000'), isFalse);
+      expect(await lockingService.lockoutRemaining(), isNull);
+    }
+    expect(await lockingService.verifyPin('0000'), isFalse);
+    expect(
+      await lockingService.lockoutRemaining(),
+      const Duration(seconds: 30),
+    );
+    expect(await lockingService.verifyPin('4829'), isFalse);
+
+    clock = clock.add(const Duration(seconds: 31));
+    expect(await lockingService.lockoutRemaining(), isNull);
+    expect(await lockingService.verifyPin('4829'), isTrue);
+    expect(await lockingService.verifyPin('0000'), isFalse);
+    expect(await lockingService.lockoutRemaining(), isNull);
+  });
+
+  test('lockout doubles after each further wrong guess', () async {
+    var clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await lockingService.verifyPin('0000');
+    }
+    clock = clock.add(const Duration(seconds: 31));
+    expect(await lockingService.verifyPin('1111'), isFalse);
+    expect(
+      await lockingService.lockoutRemaining(),
+      const Duration(seconds: 60),
+    );
+  });
+
+  test('setting a new PIN clears an earlier lockout', () async {
+    final clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await lockingService.verifyPin('0000');
+    }
+    expect(await lockingService.lockoutRemaining(), isNotNull);
+
+    await lockingService.clearPin();
+    await lockingService.setPin('7315');
+
+    expect(await lockingService.lockoutRemaining(), isNull);
+    expect(await lockingService.verifyPin('7315'), isTrue);
+  });
+
+  test('wrong recovery codes count toward the same lockout', () async {
+    final clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    final recoveryCode = await lockingService.setPin('4829');
+    for (var attempt = 0; attempt < 5; attempt++) {
+      expect(await lockingService.resetWithRecoveryCode('T360-0000'), isFalse);
+    }
+    expect(await lockingService.resetWithRecoveryCode(recoveryCode), isFalse);
+    expect(await lockingService.hasPin(), isTrue);
+  });
+
+  test('a corrupt attempts file locks only briefly, never forever', () async {
+    var clock = DateTime.now();
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+    File(path.join(tempDirectory.path, 'tinda360_pin_attempts.json'))
+        .writeAsStringSync('{not json');
+
+    expect(await lockingService.verifyPin('4829'), isFalse);
+    clock = clock.add(const Duration(minutes: 1));
+    expect(await lockingService.lockoutRemaining(), isNull);
+    expect(await lockingService.verifyPin('4829'), isTrue);
+  });
+
+  test('a lockout far in the future is capped at one hour', () async {
+    final clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+    File(path.join(tempDirectory.path, 'tinda360_pin_attempts.json'))
+        .writeAsStringSync(
+          jsonEncode(<String, int>{
+            'failures': 6,
+            'lockedUntilMs': clock
+                .add(const Duration(days: 3))
+                .millisecondsSinceEpoch,
+          }),
+        );
+
+    final remaining = await lockingService.lockoutRemaining();
+    expect(remaining, isNotNull);
+    expect(remaining! <= const Duration(hours: 1), isTrue);
+  });
+
+  test('a lockout far in the future ends one hour after it is seen', () async {
+    var clock = DateTime(2026, 11, 18, 9);
+    final lockingService = StorePinService(
+      directoryProvider: () async => tempDirectory,
+      now: () => clock,
+    );
+    await lockingService.setPin('4829');
+    File(path.join(tempDirectory.path, 'tinda360_pin_attempts.json'))
+        .writeAsStringSync(
+          jsonEncode(<String, int>{
+            'failures': 6,
+            'lockedUntilMs': clock
+                .add(const Duration(days: 3))
+                .millisecondsSinceEpoch,
+          }),
+        );
+
+    expect(await lockingService.lockoutRemaining(), const Duration(hours: 1));
+    clock = clock.add(const Duration(hours: 1, seconds: 1));
+    expect(await lockingService.lockoutRemaining(), isNull);
+    expect(await lockingService.verifyPin('4829'), isTrue);
   });
 }

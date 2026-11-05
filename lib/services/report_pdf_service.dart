@@ -8,7 +8,6 @@ import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 
-/// Builds shareable PDF summaries of [UlatState] reports.
 abstract final class ReportPdfService {
   static const String _logoAssetPath = 'assets/app_icon/app_icon_full.png';
   static final PdfColor _headerColor = PdfColor.fromHex('#0F5C4A');
@@ -16,12 +15,12 @@ abstract final class ReportPdfService {
   static final PdfColor _mutedTextColor = PdfColor.fromHex('#5A6863');
   static final PdfColor _stripeColor = PdfColor.fromHex('#F4F7F6');
 
-  /// Generates an A4 PDF document for the given [state] and [storeName].
   static Future<Uint8List> buildReportPdf({
     required String storeName,
     required String periodLabel,
     required UlatState state,
     required AppLocalizations localizations,
+    required Money totalExpenses,
     Uint8List? logoBytes,
   }) async {
     final resolvedLogoBytes = await _loadLogoBytes(logoBytes);
@@ -44,7 +43,11 @@ abstract final class ReportPdfService {
           pw.SizedBox(height: 20),
           _buildSectionTitle(localizations.reportsTitle),
           pw.SizedBox(height: 8),
-          _buildSummaryTable(state: state, localizations: localizations),
+          _buildSummaryTable(
+            state: state,
+            localizations: localizations,
+            totalExpenses: totalExpenses,
+          ),
           pw.SizedBox(height: 20),
           _buildSectionTitle(localizations.reportsTopProductsTitle),
           pw.SizedBox(height: 8),
@@ -54,7 +57,10 @@ abstract final class ReportPdfService {
             localizations: localizations,
           ),
           pw.SizedBox(height: 40),
-          _buildSignatureSection(storeName: effectiveStoreName),
+          _buildSignatureSection(
+            storeName: effectiveStoreName,
+            localizations: localizations,
+          ),
         ],
       ),
     );
@@ -159,6 +165,7 @@ abstract final class ReportPdfService {
   static pw.Widget _buildSummaryTable({
     required UlatState state,
     required AppLocalizations localizations,
+    required Money totalExpenses,
   }) {
     final summary = state.summary;
     final rows = <List<String>>[
@@ -166,10 +173,18 @@ abstract final class ReportPdfService {
       [localizations.reportsProfitCard, _formatPdfMoney(summary.profit)],
       [localizations.reportsTransactionsCard, '${summary.saleCount}'],
       [localizations.reportsNewUtangCard, _formatPdfMoney(state.totalUtang)],
+      [localizations.ulatExpensesTitle, _formatPdfMoney(totalExpenses)],
+      [
+        localizations.ulatNetIncomeLabel,
+        _formatPdfMoney(summary.profit - totalExpenses),
+      ],
     ];
 
     return pw.TableHelper.fromTextArray(
-      headers: const ['Metric', 'Value'],
+      headers: [
+        localizations.reportPdfMetricHeader,
+        localizations.reportPdfValueHeader,
+      ],
       data: rows,
       headerStyle: const pw.TextStyle(
         fontSize: 10,
@@ -220,7 +235,12 @@ abstract final class ReportPdfService {
           ];
 
     return pw.TableHelper.fromTextArray(
-      headers: const ['#', 'Product', 'Qty Sold', 'Revenue'],
+      headers: [
+        '#',
+        localizations.reportPdfProductHeader,
+        localizations.reportPdfQuantitySoldHeader,
+        localizations.reportPdfRevenueHeader,
+      ],
       data: rows,
       headerStyle: const pw.TextStyle(
         fontSize: 10,
@@ -247,28 +267,30 @@ abstract final class ReportPdfService {
     );
   }
 
-  static pw.Widget _buildSignatureSection({required String storeName}) =>
-      pw.Center(
-        child: pw.Column(
-          children: [
-            pw.Text(
-              '______________________________',
-              style: pw.TextStyle(
-                fontSize: 11,
-                color: _mutedTextColor,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              '$storeName - Prepared by Store Owner',
-              style: pw.TextStyle(
-                fontSize: 10,
-                color: _mutedTextColor,
-              ),
-            ),
-          ],
+  static pw.Widget _buildSignatureSection({
+    required String storeName,
+    required AppLocalizations localizations,
+  }) => pw.Center(
+    child: pw.Column(
+      children: [
+        pw.Text(
+          '______________________________',
+          style: pw.TextStyle(
+            fontSize: 11,
+            color: _mutedTextColor,
+          ),
         ),
-      );
+        pw.SizedBox(height: 4),
+        pw.Text(
+          localizations.reportPdfPreparedBy(storeName),
+          style: pw.TextStyle(
+            fontSize: 10,
+            color: _mutedTextColor,
+          ),
+        ),
+      ],
+    ),
+  );
 
   static String _formatPdfMoney(Money money) =>
       formatMoney(money).replaceAll('₱', 'PHP ');

@@ -1,30 +1,34 @@
 import 'package:tinda360/core/money/currency.dart';
 
-/// The store's own settings. There is exactly one.
 final class StoreProfile {
-  /// Creates a profile.
   const StoreProfile({
     required this.name,
     required this.currency,
     required this.onboardingDone,
+    this.address,
+    this.phone,
   });
 
-  /// The store name shown in reports; empty until setup.
   final String name;
 
-  /// The currency every amount in the store uses.
   final Currency currency;
 
-  /// Whether first-run setup has been completed.
   final bool onboardingDone;
+
+  final String? address;
+
+  final String? phone;
 
   @override
   bool operator ==(Object other) =>
       other is StoreProfile &&
       other.name == name &&
       other.currency == currency &&
-      other.onboardingDone == onboardingDone;
+      other.onboardingDone == onboardingDone &&
+      other.address == address &&
+      other.phone == phone;
 
   @override
-  int get hashCode => Object.hash(name, currency, onboardingDone);
+  int get hashCode =>
+      Object.hash(name, currency, onboardingDone, address, phone);
 }

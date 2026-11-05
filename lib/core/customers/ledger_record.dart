@@ -1,38 +1,46 @@
 import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/money.dart';
 
-/// A single debt or payment entry on a customer's utang ledger.
 @immutable
 final class LedgerRecord {
-  /// Creates a ledger record.
   const LedgerRecord({
     required this.id,
     required this.createdAtMs,
     required this.kind,
     required this.amount,
     this.saleId,
+    this.isDeleted = false,
+    this.deleteReason,
+    this.deletedAtMs,
+    this.deletedByName,
   });
 
-  /// Unique identifier of the ledger entry.
+  final String? deletedByName;
+
   final String id;
 
-  /// Creation timestamp in UTC milliseconds since epoch.
   final int createdAtMs;
 
-  /// Entry type: `'debt'` or `'payment'`.
   final String kind;
 
-  /// Positive monetary amount of this entry.
   final Money amount;
 
-  /// Optional associated sale identifier when [kind] is `'debt'`.
   final String? saleId;
 
-  /// Whether this entry increased the customer's utang.
+  final bool isDeleted;
+
+  final String? deleteReason;
+
+  final int? deletedAtMs;
+
+  bool get isDeletable =>
+      !isDeleted && saleId == null && (isPayment || isInterest);
+
   bool get isDebt => kind == 'debt';
 
-  /// Whether this entry reduced the customer's utang.
   bool get isPayment => kind == 'payment';
+
+  bool get isInterest => kind == 'interest';
 
   @override
   bool operator ==(Object other) =>
@@ -41,8 +49,22 @@ final class LedgerRecord {
       other.createdAtMs == createdAtMs &&
       other.kind == kind &&
       other.amount == amount &&
-      other.saleId == saleId;
+      other.saleId == saleId &&
+      other.isDeleted == isDeleted &&
+      other.deleteReason == deleteReason &&
+      other.deletedAtMs == deletedAtMs &&
+      other.deletedByName == deletedByName;
 
   @override
-  int get hashCode => Object.hash(id, createdAtMs, kind, amount, saleId);
+  int get hashCode => Object.hash(
+    id,
+    createdAtMs,
+    kind,
+    amount,
+    saleId,
+    isDeleted,
+    deleteReason,
+    deletedAtMs,
+    deletedByName,
+  );
 }

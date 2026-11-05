@@ -18,12 +18,15 @@ import 'package:tinda360/features/utang/presentation/utang_screen.dart';
 
 import '../../support/test_repositories.dart';
 
-T _ok<T, F extends Failure>(Result<T, F> result) => switch (result) {
-  Ok(:final value) => value,
-  Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
-};
+T _ok<T, FailureType extends Failure>(Result<T, FailureType> result) =>
+    switch (result) {
+      Ok(:final value) => value,
+      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+    };
 
-F _err<T, F extends Failure>(Result<T, F> result) => switch (result) {
+FailureType _err<T, FailureType extends Failure>(
+  Result<T, FailureType> result,
+) => switch (result) {
   Ok(:final value) => fail('Expected Err, got $value'),
   Err(:final failure) => failure,
 };
@@ -136,7 +139,8 @@ void main() {
     expect(filterUtangBalances(balances, ''), hasLength(2));
 
     expect(computeRemainingBalance(_php(2500), _php(1000)), _php(1500));
-    expect(computeRemainingBalance(_php(2500), _php(3000)), _php(0));
+    expect(computeRemainingBalance(_php(2500), _php(3000)), _php(2500));
+    expect(computeRemainingBalance(_php(2500), _php(2500)), _php(0));
     expect(computeRemainingBalance(_php(2500), null), _php(2500));
   });
 }

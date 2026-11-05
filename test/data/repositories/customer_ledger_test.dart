@@ -21,10 +21,11 @@ import '../../support/recording_app_log.dart';
 import '../../support/sequential_ids.dart';
 import '../../support/test_database.dart';
 
-T _requireOk<T, F extends Failure>(Result<T, F> result) => switch (result) {
-  Ok(:final value) => value,
-  Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
-};
+T _requireOk<T, FailureType extends Failure>(Result<T, FailureType> result) =>
+    switch (result) {
+      Ok(:final value) => value,
+      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+    };
 
 Money _php(int minorUnits) => Money(minorUnits, Currency.php);
 
@@ -127,7 +128,6 @@ void main() {
     expect(afterPayment[1].amount, _php(5000));
     expect(afterPayment[1].saleId, saleId);
 
-    // Soft-deleted entries and other customers' entries are excluded.
     await (database.update(database.ledgerEntries)
           ..where((entry) => entry.id.equals(afterPayment[0].id)))
         .write(const LedgerEntriesCompanion(isDeleted: Value(true)));
@@ -135,8 +135,14 @@ void main() {
     final afterSoftDelete = await customerRepository
         .watchLedger(customerId)
         .first;
-    expect(afterSoftDelete, hasLength(1));
-    expect(afterSoftDelete.single.kind, 'debt');
-    expect(await customerRepository.watchLedger(otherCustomerId).first, isEmpty);
+    expect(afterSoftDelete, hasLength(2));
+    expect(afterSoftDelete[0].kind, 'payment');
+    expect(afterSoftDelete[0].isDeleted, isTrue);
+    expect(afterSoftDelete[1].kind, 'debt');
+    expect(afterSoftDelete[1].isDeleted, isFalse);
+    expect(
+      await customerRepository.watchLedger(otherCustomerId).first,
+      isEmpty,
+    );
   });
 }

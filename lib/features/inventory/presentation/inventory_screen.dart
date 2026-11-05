@@ -6,13 +6,20 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tinda360/core/calendar/local_day.dart';
+import 'package:tinda360/core/catalog/expiry_status.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/inventory/data/product_csv_exporter.dart';
 import 'package:tinda360/features/inventory/data/product_csv_importer.dart';
 import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
+import 'package:tinda360/features/inventory/presentation/inventory_rules.dart';
 import 'package:tinda360/features/inventory/presentation/product_sheet.dart';
+import 'package:tinda360/features/pos/presentation/pos_screen.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -21,26 +28,22 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Watches active stocked products for the Inventory screen.
 final inventoryProductsProvider =
     StreamProvider.autoDispose<List<StockedProduct>>(
       (ref) => ref.watch(productRepositoryProvider).watchActive(),
     );
 
-/// Inventory management screen with search, low-stock filter, and product
-/// add/edit sheet triggers.
+enum InventoryFilter { all, lowStock, expiring }
+
 class InventoryScreen extends ConsumerStatefulWidget {
-  /// Creates the inventory screen.
   const InventoryScreen({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
   });
 
-  /// Opens the settings screen.
   final VoidCallback onOpenSettings;
 
-  /// Opens the Tinda AI chat sheet.
   final VoidCallback onOpenAiChat;
 
   @override
@@ -50,7 +53,9 @@ class InventoryScreen extends ConsumerStatefulWidget {
 class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _lowStockOnly = false;
+  InventoryFilter _filter = InventoryFilter.all;
+
+  LocalDay get _today => LocalDay.fromLocal(ref.read(clockProvider).now());
 
   @override
   void dispose() {
@@ -61,7 +66,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   List<StockedProduct> _filterProducts(List<StockedProduct> products) {
     final query = _searchQuery.trim().toLowerCase();
     return products.where((item) {
-      if (_lowStockOnly && !item.isLowOnStock) return false;
+      if (_filter == InventoryFilter.lowStock && !item.isLowOnStock) {
+        return false;
+      }
+      if (_filter == InventoryFilter.expiring &&
+          !InventoryRules.isExpiringSoon(item, _today)) {
+        return false;
+      }
       if (query.isEmpty) return true;
       final product = item.product;
       final matchesName = product.name.toLowerCase().contains(query);
@@ -72,15 +83,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   void _openProductSheet([StockedProduct? existing]) {
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: AppPalette.of(context).scrim,
-        builder: (_) => ProductSheet(existing: existing),
-      ),
+    unawaited(ProductSheet.show(context, existing: existing));
+  }
+
+  Future<void> _shareShoppingList(List<StockedProduct> products) async {
+    final localizations = AppLocalizations.of(context);
+    final storeName = ref.read(posStoreProfileProvider).value?.name ?? '';
+    final text = InventoryRules.buildShoppingListText(
+      localizations: localizations,
+      storeName: storeName,
+      products: products,
     );
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   void _openCsvImportSheet() {
@@ -133,22 +147,26 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
+  static const int _maxListedSkippedRows = 10;
+
   Future<void> _pickAndImportCsv() async {
     final localizations = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final repository = ref.read(productRepositoryProvider);
+    final currency = ref.read(storeCurrencyProvider);
     final pickedFiles = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const <String>['csv', 'txt'],
     );
-    final pickedPath = pickedFiles?.firstOrNull?.path;
+    final pickedPath = pickedFiles.firstOrNull?.path;
     if (pickedPath == null) return;
 
     try {
       final csvContent = await File(pickedPath).readAsString();
       final report = await const ProductCsvImporter().importCsv(
         csvContent: csvContent,
-        repository: ref.read(productRepositoryProvider),
-        currency: ref.read(storeCurrencyProvider),
+        repository: repository,
+        currency: currency,
       );
       if (report.importedCount == 0 && report.skippedCount == 0) {
         messenger.showSnackBar(
@@ -156,13 +174,22 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         );
         return;
       }
+      final summary = localizations.inventoryImportCsvSuccess(
+        report.importedCount,
+        report.skippedCount,
+      );
+      final skippedRows = report.errors
+          .take(_maxListedSkippedRows)
+          .map((error) => error.rowNumber)
+          .join(', ');
       messenger.showSnackBar(
         SnackBar(
+          duration: Duration(seconds: report.errors.isEmpty ? 4 : 8),
           content: Text(
-            localizations.inventoryImportCsvSuccess(
-              report.importedCount,
-              report.skippedCount,
-            ),
+            report.errors.isEmpty
+                ? summary
+                : '$summary\n'
+                      '${localizations.inventoryImportSkippedRows(skippedRows)}',
           ),
         ),
       );
@@ -189,7 +216,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   Future<void> _exportProductsCsv() async {
     final localizations = AppLocalizations.of(context);
-    final products = ref.read(inventoryProductsProvider).value ?? const [];
+    final products = await ref.read(inventoryProductsProvider.future);
     final csvContent = exportProductsCsv(products);
     final parsed = parseCsvForPreview(csvContent);
     if (!mounted) return;
@@ -210,7 +237,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final localizations = AppLocalizations.of(context);
     final productsAsync = ref.watch(inventoryProductsProvider);
     final allProducts = productsAsync.value ?? const <StockedProduct>[];
-    final lowStockCount = allProducts.where((item) => item.isLowOnStock).length;
+    final lowStockCount = InventoryRules.lowStockCount(allProducts);
 
     return Scaffold(
       backgroundColor: palette.background,
@@ -225,6 +252,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   lowStockCount,
                 ),
                 actions: [
+                  if (InventoryRules.shoppingItems(allProducts).isNotEmpty)
+                    TindaIconButton(
+                      icon: Icons.shopping_cart_outlined,
+                      tooltip: localizations.inventoryShareShoppingList,
+                      onHeader: true,
+                      onPressed: () =>
+                          unawaited(_shareShoppingList(allProducts)),
+                    ),
                   TindaIconButton(
                     icon: Icons.upload_file_rounded,
                     tooltip: localizations.inventoryImportCsvTooltip,
@@ -245,17 +280,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 ),
               ),
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: _InventoryBody(
-                      productsAsync: productsAsync,
-                      filteredProducts: _filterProducts(allProducts),
-                      lowStockOnly: _lowStockOnly,
-                      onFilterChanged: (lowOnly) =>
-                          setState(() => _lowStockOnly = lowOnly),
-                      onTapProduct: _openProductSheet,
-                    ),
+                child: TindaScreenBody(
+                  child: _InventoryBody(
+                    productsAsync: productsAsync,
+                    filteredProducts: _filterProducts(allProducts),
+                    filter: _filter,
+                    today: _today,
+                    onFilterChanged: (filter) =>
+                        setState(() => _filter = filter),
+                    onTapProduct: _openProductSheet,
                   ),
                 ),
               ),
@@ -287,15 +320,17 @@ class _InventoryBody extends StatelessWidget {
   const _InventoryBody({
     required this.productsAsync,
     required this.filteredProducts,
-    required this.lowStockOnly,
+    required this.filter,
+    required this.today,
     required this.onFilterChanged,
     required this.onTapProduct,
   });
 
   final AsyncValue<List<StockedProduct>> productsAsync;
   final List<StockedProduct> filteredProducts;
-  final bool lowStockOnly;
-  final ValueChanged<bool> onFilterChanged;
+  final InventoryFilter filter;
+  final LocalDay today;
+  final ValueChanged<InventoryFilter> onFilterChanged;
   final ValueChanged<StockedProduct> onTapProduct;
 
   @override
@@ -326,7 +361,7 @@ class _InventoryBody extends StatelessWidget {
         ),
         data: (allProducts) {
           final listKey = ValueKey(
-            'inv-${lowStockOnly}-${filteredProducts.length}-${allProducts.length}',
+            'inv-${filter.name}-${filteredProducts.length}-${allProducts.length}',
           );
           final Widget content;
           if (allProducts.isEmpty) {
@@ -353,6 +388,7 @@ class _InventoryBody extends StatelessWidget {
                     index: index,
                     child: _InventoryProductRow(
                       item: filteredProducts[index],
+                      today: today,
                       onTap: () => onTapProduct(filteredProducts[index]),
                     ),
                   ),
@@ -361,25 +397,31 @@ class _InventoryBody extends StatelessWidget {
           }
           return ListView(
             key: const ValueKey('inventory-data'),
-            padding: const EdgeInsetsDirectional.fromSTEB(
+            padding: EdgeInsetsDirectional.fromSTEB(
               AppSpacing.screenHorizontal,
               AppSpacing.s14,
               AppSpacing.screenHorizontal,
-              96,
+              TindaScreenBody.floatingBottomPadding(context),
             ),
             children: [
-              Row(
+              Wrap(
+                spacing: AppSpacing.s8,
+                runSpacing: AppSpacing.s8,
                 children: [
                   TindaFilterChip(
                     label: localizations.commonAll,
-                    selected: !lowStockOnly,
-                    onTap: () => onFilterChanged(false),
+                    selected: filter == InventoryFilter.all,
+                    onTap: () => onFilterChanged(InventoryFilter.all),
                   ),
-                  const SizedBox(width: AppSpacing.s8),
                   TindaFilterChip(
                     label: localizations.inventoryLowFilter,
-                    selected: lowStockOnly,
-                    onTap: () => onFilterChanged(true),
+                    selected: filter == InventoryFilter.lowStock,
+                    onTap: () => onFilterChanged(InventoryFilter.lowStock),
+                  ),
+                  TindaFilterChip(
+                    label: localizations.inventoryExpiringFilter,
+                    selected: filter == InventoryFilter.expiring,
+                    onTap: () => onFilterChanged(InventoryFilter.expiring),
                   ),
                 ],
               ),
@@ -397,7 +439,6 @@ class _InventoryBody extends StatelessWidget {
     );
   }
 }
-
 
 class _AnimatedInventoryRow extends StatelessWidget {
   const _AnimatedInventoryRow({
@@ -432,10 +473,12 @@ class _AnimatedInventoryRow extends StatelessWidget {
 class _InventoryProductRow extends StatelessWidget {
   const _InventoryProductRow({
     required this.item,
+    required this.today,
     required this.onTap,
   });
 
   final StockedProduct item;
+  final LocalDay today;
   final VoidCallback onTap;
 
   @override
@@ -446,9 +489,19 @@ class _InventoryProductRow extends StatelessWidget {
     final stockFormatted = formatQuantity(item.stock, product.unit);
     final subtitle =
         '${formatMoney(product.price)} ${localizedUnit(localizations, product.unit)}'
-        ' · Puhunan ${formatMoney(product.cost)}';
+        ' · ${localizations.inventoryCostSummary(formatMoney(product.cost))}';
 
-    final stockText = localizations.posStockLabel(stockFormatted);
+    final stockText = item.tracksStock
+        ? localizations.posStockLabel(stockFormatted)
+        : localizations.inventoryNoCountLabel;
+    final expiryStatus = ExpiryRules.statusFor(product.expiryDay, today);
+    final expiryLabel = switch (expiryStatus) {
+      ExpiryExpired() => localizations.inventoryExpiredBadge,
+      ExpiryNear(:final daysLeft) => localizations.inventoryExpiryDaysBadge(
+        daysLeft,
+      ),
+      null => null,
+    };
     final badgeLabel = item.isLowOnStock
         ? '$stockText · ${localizations.posLowStockBadge}'
         : stockText;
@@ -465,30 +518,33 @@ class _InventoryProductRow extends StatelessWidget {
             horizontal: AppSpacing.s16,
             vertical: AppSpacing.s12,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      product.name,
-                      style: AppTypography.bodyStrong(palette.text),
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-                    Text(
-                      subtitle,
-                      style: AppTypography.meta(palette.textMuted),
-                    ),
-                  ],
+          child: AdaptiveBadges(
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  product.name,
+                  style: AppTypography.bodyStrong(palette.text),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s12),
+                const SizedBox(height: AppSpacing.s4),
+                Text(
+                  subtitle,
+                  style: AppTypography.meta(palette.textMuted),
+                ),
+              ],
+            ),
+            badges: [
               TindaBadge(
                 label: badgeLabel,
                 isWarning: item.isLowOnStock,
               ),
+              if (expiryLabel != null)
+                TindaBadge(
+                  label: expiryLabel,
+                  isWarning: expiryStatus is ExpiryNear,
+                  isDanger: expiryStatus is ExpiryExpired,
+                ),
             ],
           ),
         ),

@@ -11,21 +11,16 @@ import 'package:tinda360/shared/widgets/tinda_logo.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Watches the store profile so the splash screen knows whether onboarding is
-/// complete.
 final splashStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
   (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
 );
 
-/// Full-screen launch splash matching `Main.dc.html`.
 class SplashScreen extends ConsumerStatefulWidget {
-  /// Creates the splash screen.
   const SplashScreen({
     required this.onDone,
     super.key,
   });
 
-  /// Called once the store profile loads with `onboardingDone`.
   final void Function(bool onboardingDone) onDone;
 
   @override
@@ -100,37 +95,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
             child: Column(
               children: [
-              const Spacer(),
-              _SpinningSplashLogo(
-                size: 104,
-                controller: _spinController,
-                ringColor: palette.onHeader.withValues(alpha: 0.18),
-                arcColor: palette.accent,
-              ),
-              const SizedBox(height: AppSpacing.s20),
-              const TindaWordmark(fontSize: 32),
-              const SizedBox(height: 6),
-              Text(
-                localizations.splashTagline,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodyStrong(
-                  palette.onHeader.withValues(alpha: 0.85),
-                  size: 15,
-                  weight: FontWeight.w500,
+                const Spacer(),
+                _SpinningSplashLogo(
+                  size: 104,
+                  controller: _spinController,
+                  ringColor: palette.onHeader.withValues(alpha: 0.18),
+                  arcColor: palette.accent,
                 ),
-              ),
-              const Spacer(),
-              if (profileAsync.hasError)
-                _SplashErrorView(
-                  message: localizations.homeLoadFailed,
-                  retryLabel: localizations.commonRetry,
-                  onRetry: () => ref.invalidate(splashStoreProfileProvider),
-                )
-              else
-                _SplashProgress(label: localizations.splashPreparingAi),
-            ],
+                const SizedBox(height: AppSpacing.s20),
+                const TindaWordmark(fontSize: 32),
+                const SizedBox(height: 6),
+                Text(
+                  localizations.splashTagline,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyStrong(
+                    palette.onHeader.withValues(alpha: 0.85),
+                    size: 15,
+                    weight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                if (profileAsync.hasError)
+                  _SplashErrorView(
+                    message: localizations.homeLoadFailed,
+                    retryLabel: localizations.commonRetry,
+                    onRetry: () => ref.invalidate(splashStoreProfileProvider),
+                  )
+                else
+                  _SplashProgress(label: localizations.splashPreparingAi),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -225,41 +220,6 @@ class _SpinningSplashLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final logo = SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: size,
-            height: size,
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              value: reduceMotion ? null : null,
-              backgroundColor: ringColor,
-              valueColor: AlwaysStoppedAnimation<Color>(arcColor.withValues(alpha: 0.0)),
-            ),
-          ),
-          if (!reduceMotion)
-            SizedBox(
-              width: size,
-              height: size,
-              child: CircularProgressIndicator(
-                strokeWidth: 5,
-                backgroundColor: Colors.transparent,
-                valueColor: AlwaysStoppedAnimation<Color>(arcColor),
-              ),
-            ),
-          RotationTransition(
-            turns: reduceMotion
-                ? const AlwaysStoppedAnimation(0)
-                : controller,
-            child: TindaLogoMark(size: size * 0.72, onDarkHeader: true),
-          ),
-        ],
-      ),
-    );
     if (reduceMotion) {
       return SizedBox(
         width: size,

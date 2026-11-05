@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Standard card (`surface`, 1 px `border`, 16 dp radius).
 class TindaCard extends StatelessWidget {
-  /// Creates a card.
   const TindaCard({
     required this.child,
     super.key,
@@ -18,19 +17,14 @@ class TindaCard extends StatelessWidget {
     this.onTap,
   });
 
-  /// Card content.
   final Widget child;
 
-  /// Inner padding.
   final EdgeInsetsGeometry padding;
 
-  /// Optional background override (e.g. `dangerSoft`).
   final Color? backgroundColor;
 
-  /// Optional border override.
   final Color? borderColor;
 
-  /// Optional tap handler.
   final VoidCallback? onTap;
 
   @override
@@ -72,9 +66,7 @@ class TindaCard extends StatelessWidget {
   }
 }
 
-/// List row (min 64 dp height) with title, meta, and trailing widget.
 class TindaListRow extends StatelessWidget {
-  /// Creates a list row.
   const TindaListRow({
     required this.title,
     super.key,
@@ -84,19 +76,14 @@ class TindaListRow extends StatelessWidget {
     this.onTap,
   });
 
-  /// Primary label.
   final String title;
 
-  /// Secondary meta text.
   final String? subtitle;
 
-  /// Optional leading widget.
   final Widget? leading;
 
-  /// Optional trailing action or badge.
   final Widget? trailing;
 
-  /// Optional row tap handler.
   final VoidCallback? onTap;
 
   @override
@@ -146,9 +133,7 @@ class TindaListRow extends StatelessWidget {
   }
 }
 
-/// Top header bar for tabs (`header` fill, title 20/800, action icons).
 class TindaHeaderBar extends StatelessWidget {
-  /// Creates a header bar.
   const TindaHeaderBar({
     required this.title,
     super.key,
@@ -156,21 +141,19 @@ class TindaHeaderBar extends StatelessWidget {
     this.subtitle,
     this.actions = const [],
     this.bottom,
+    this.belowSubtitle,
   });
 
-  /// Screen title.
   final Widget title;
 
-  /// Optional leading widget (e.g. logo mark).
   final Widget? leading;
 
-  /// Optional subtitle (e.g. store name).
   final String? subtitle;
 
-  /// Trailing icon buttons.
+  final Widget? belowSubtitle;
+
   final List<Widget> actions;
 
-  /// Optional extra widget below the title row (e.g. segmented control).
   final Widget? bottom;
 
   @override
@@ -223,6 +206,7 @@ class TindaHeaderBar extends StatelessWidget {
                               palette.onHeader.withValues(alpha: 0.85),
                             ),
                           ),
+                        ?belowSubtitle,
                       ],
                     ),
                   ),
@@ -244,9 +228,7 @@ class TindaHeaderBar extends StatelessWidget {
   }
 }
 
-/// Status badge (normal = `surfaceMuted`, low = `accentSoft`, danger = `dangerSoft`).
 class TindaBadge extends StatelessWidget {
-  /// Creates a badge.
   const TindaBadge({
     required this.label,
     super.key,
@@ -254,13 +236,10 @@ class TindaBadge extends StatelessWidget {
     this.isDanger = false,
   });
 
-  /// Badge text.
   final String label;
 
-  /// Uses `accentSoft` / `onAccentSoft`.
   final bool isWarning;
 
-  /// Uses `dangerSoft` / `danger`.
   final bool isDanger;
 
   @override
@@ -269,13 +248,13 @@ class TindaBadge extends StatelessWidget {
     final background = isDanger
         ? palette.dangerSoft
         : isWarning
-            ? palette.accentSoft
-            : palette.surfaceMuted;
+        ? palette.accentSoft
+        : palette.surfaceMuted;
     final foreground = isDanger
         ? palette.danger
         : isWarning
-            ? palette.onAccentSoft
-            : palette.textMuted;
+        ? palette.onAccentSoft
+        : palette.textMuted;
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.s10,
@@ -297,9 +276,7 @@ class TindaBadge extends StatelessWidget {
   }
 }
 
-/// Centered empty state with 72 dp icon circle, title, and muted explanation.
 class TindaEmptyState extends StatelessWidget {
-  /// Creates an empty state.
   const TindaEmptyState({
     required this.icon,
     required this.title,
@@ -308,16 +285,12 @@ class TindaEmptyState extends StatelessWidget {
     this.action,
   });
 
-  /// Center icon.
   final IconData icon;
 
-  /// Headline.
   final String title;
 
-  /// Supporting text.
   final String body;
 
-  /// Optional CTA widget.
   final Widget? action;
 
   @override
@@ -376,9 +349,7 @@ class TindaEmptyState extends StatelessWidget {
   }
 }
 
-/// Warning banner (`accentSoft` fill, 14 dp radius).
 class TindaBanner extends StatelessWidget {
-  /// Creates a banner.
   const TindaBanner({
     required this.icon,
     required this.title,
@@ -387,16 +358,12 @@ class TindaBanner extends StatelessWidget {
     this.trailing,
   });
 
-  /// Leading icon.
   final IconData icon;
 
-  /// Banner title.
   final String title;
 
-  /// Banner explanation.
   final String body;
 
-  /// Optional trailing action.
   final Widget? trailing;
 
   @override
@@ -441,9 +408,7 @@ class TindaBanner extends StatelessWidget {
   }
 }
 
-/// Floating dark cart bar on POS (`text` fill, 16 dp radius).
 class TindaCartBar extends StatelessWidget {
-  /// Creates a cart bar.
   const TindaCartBar({
     required this.itemsLabel,
     required this.totalLabel,
@@ -452,16 +417,12 @@ class TindaCartBar extends StatelessWidget {
     super.key,
   });
 
-  /// e.g. "3 items".
   final String itemsLabel;
 
-  /// Formatted total e.g. "₱125.00".
   final String totalLabel;
 
-  /// Pay button label.
   final String payLabel;
 
-  /// Pay tap handler.
   final VoidCallback onPay;
 
   @override
@@ -505,10 +466,13 @@ class TindaCartBar extends StatelessWidget {
                   ),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 180),
-                    child: Text(
-                      totalLabel,
+                    child: SizedBox(
                       key: ValueKey(totalLabel),
-                      style: AppTypography.title(foreground),
+                      width: double.infinity,
+                      child: MoneyText.text(
+                        totalLabel,
+                        style: AppTypography.title(foreground),
+                      ),
                     ),
                   ),
                 ],
@@ -522,12 +486,9 @@ class TindaCartBar extends StatelessWidget {
   }
 }
 
-/// Single rounded card grouping list rows separated by hairline dividers.
 class TindaGroupedCard extends StatelessWidget {
-  /// Creates a grouped list card.
   const TindaGroupedCard({required this.children, super.key});
 
-  /// Row widgets placed inside the card.
   final List<Widget> children;
 
   @override
@@ -552,7 +513,8 @@ class TindaGroupedCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (var index = 0; index < children.length; index++) ...[
-            if (index > 0) Divider(height: 1, thickness: 1, color: palette.surfaceMuted),
+            if (index > 0)
+              Divider(height: 1, thickness: 1, color: palette.surfaceMuted),
             children[index],
           ],
         ],
@@ -561,9 +523,7 @@ class TindaGroupedCard extends StatelessWidget {
   }
 }
 
-/// Bottom sheet wrapper with handle, title, close button, and optional footer.
 class TindaBottomSheet extends StatelessWidget {
-  /// Creates a bottom sheet container.
   const TindaBottomSheet({
     required this.title,
     required this.closeTooltip,
@@ -572,16 +532,12 @@ class TindaBottomSheet extends StatelessWidget {
     this.footer,
   });
 
-  /// Sheet title.
   final String title;
 
-  /// Close button tooltip.
   final String closeTooltip;
 
-  /// Scrollable body content.
   final Widget child;
 
-  /// Pinned footer (typically `TindaPrimaryButton`).
   final Widget? footer;
 
   @override
@@ -620,7 +576,12 @@ class TindaBottomSheet extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(title, style: AppTypography.title(palette.text)),
+                    child: Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.title(palette.text),
+                    ),
                   ),
                   TindaIconButton(
                     icon: Icons.close,
@@ -644,7 +605,14 @@ class TindaBottomSheet extends StatelessWidget {
                 padding: const EdgeInsetsDirectional.all(
                   AppSpacing.sheetPadding,
                 ),
-                child: footer,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight:
+                        MediaQuery.sizeOf(context).height *
+                        _sheetFooterMaxHeightFraction,
+                  ),
+                  child: SingleChildScrollView(child: footer),
+                ),
               ),
           ],
         ),
@@ -653,10 +621,9 @@ class TindaBottomSheet extends StatelessWidget {
   }
 }
 
+const double _sheetFooterMaxHeightFraction = 0.4;
 
-/// Rounded skeleton placeholder block with subtle shimmer.
 class TindaSkeleton extends StatefulWidget {
-  /// Creates a skeleton block.
   const TindaSkeleton({
     super.key,
     this.width,
@@ -664,13 +631,10 @@ class TindaSkeleton extends StatefulWidget {
     this.borderRadius,
   });
 
-  /// Optional fixed width.
   final double? width;
 
-  /// Block height.
   final double height;
 
-  /// Optional corner radius.
   final BorderRadius? borderRadius;
 
   @override
@@ -702,8 +666,8 @@ class _TindaSkeletonState extends State<TindaSkeleton>
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final base = palette.surfaceMuted;
     final highlight = palette.surface;
-    final radius = widget.borderRadius ??
-        BorderRadius.circular(AppRadii.smallButton);
+    final radius =
+        widget.borderRadius ?? BorderRadius.circular(AppRadii.smallButton);
 
     if (reduceMotion) {
       return Container(
@@ -735,12 +699,9 @@ class _TindaSkeletonState extends State<TindaSkeleton>
   }
 }
 
-/// Simple list-loading skeleton for card/list screens.
 class TindaListSkeleton extends StatelessWidget {
-  /// Creates a list skeleton.
   const TindaListSkeleton({super.key, this.rows = 5});
 
-  /// Number of placeholder rows.
   final int rows;
 
   @override

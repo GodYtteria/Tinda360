@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/calendar/day_range.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
+import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/core/expenses/expense_entry.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
@@ -14,29 +15,28 @@ import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/services/service_providers.dart';
 
-/// Timeframe selector for the Reports (Ulat) tab.
 enum ReportPeriod {
-  /// Only today's local calendar day.
   today,
 
-  /// Last 7 local days inclusive.
   week,
 
-  /// Last 30 local days inclusive.
   month,
+
+  custom,
 }
 
-/// Computes the inclusive [DayRange] for [period] ending on [today].
-DayRange dayRangeForPeriod(ReportPeriod period, LocalDay today) =>
-    switch (period) {
-      ReportPeriod.today => DayRange.single(today),
-      ReportPeriod.week => DayRange(today.plusDays(-6), today),
-      ReportPeriod.month => DayRange(today.plusDays(-29), today),
-    };
+DayRange dayRangeForPeriod(
+  ReportPeriod period,
+  LocalDay today, {
+  DayRange? customRange,
+}) => switch (period) {
+  ReportPeriod.today => DayRange.single(today),
+  ReportPeriod.week => DayRange(today.plusDays(-6), today),
+  ReportPeriod.month => DayRange(today.plusDays(-29), today),
+  ReportPeriod.custom => customRange ?? DayRange.single(today),
+};
 
-/// View state for the Reports (Ulat) screen.
 final class UlatState {
-  /// Creates an immutable report state.
   const UlatState({
     required this.period,
     required this.range,
@@ -46,22 +46,16 @@ final class UlatState {
     required this.topProducts,
   });
 
-  /// Selected report period.
   final ReportPeriod period;
 
-  /// Inclusive local day range for [period].
   final DayRange range;
 
-  /// Aggregated sales summary for [range].
   final SalesSummary summary;
 
-  /// Total outstanding utang across all suki.
   final Money totalUtang;
 
-  /// Number of suki with a positive utang balance.
   final int sukiWithUtangCount;
 
-  /// Top-selling products for [range].
   final List<TopProduct> topProducts;
 
   @override
@@ -85,43 +79,68 @@ final class UlatState {
   );
 }
 
-/// Holds the currently selected [ReportPeriod].
 final ulatPeriodProvider =
     NotifierProvider.autoDispose<UlatPeriodNotifier, ReportPeriod>(
       UlatPeriodNotifier.new,
     );
 
-/// Notifier managing [ReportPeriod] selection.
 class UlatPeriodNotifier extends Notifier<ReportPeriod> {
   @override
   ReportPeriod build() => ReportPeriod.today;
 
-  /// Switches the active report period.
   void select(ReportPeriod period) {
     state = period;
   }
 }
 
-/// Live report projection combining sales summary and utang balances.
+final ulatCustomRangeProvider =
+    NotifierProvider.autoDispose<UlatCustomRangeNotifier, DayRange?>(
+      UlatCustomRangeNotifier.new,
+    );
+
+class UlatCustomRangeNotifier extends Notifier<DayRange?> {
+  @override
+  DayRange? build() => null;
+
+  void choose(DayRange range) {
+    state = range;
+    ref.read(ulatPeriodProvider.notifier).select(ReportPeriod.custom);
+  }
+}
+
+final ulatTodayProvider = Provider.autoDispose<LocalDay>((ref) {
+  final now = ref.watch(clockProvider).now();
+  final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+  final timer = Timer(nextMidnight.difference(now), ref.invalidateSelf);
+  ref.onDispose(timer.cancel);
+  return LocalDay.fromLocal(now);
+});
+
+final ulatRangeProvider = Provider.autoDispose<DayRange>((ref) {
+  final period = ref.watch(ulatPeriodProvider);
+  final today = ref.watch(ulatTodayProvider);
+  final customRange = ref.watch(ulatCustomRangeProvider);
+  return dayRangeForPeriod(period, today, customRange: customRange);
+});
+
 final ulatNotifierProvider =
     StreamNotifierProvider.autoDispose<UlatNotifier, UlatState>(
       UlatNotifier.new,
     );
 
-/// Re-emits whenever the selected period, sales, or utang balances change.
 class UlatNotifier extends StreamNotifier<UlatState> {
   @override
   Stream<UlatState> build() {
     final period = ref.watch(ulatPeriodProvider);
-    final clock = ref.watch(clockProvider);
     final currency = ref.watch(storeCurrencyProvider);
-    final today = LocalDay.fromLocal(clock.now());
-    final range = dayRangeForPeriod(period, today);
+    final range = ref.watch(ulatRangeProvider);
 
     final saleRepository = ref.watch(saleRepositoryProvider);
     final summaryStream = saleRepository.watchSummary(range);
     final topProductsStream = saleRepository.watchTopProducts(range);
-    final balancesStream = ref.watch(customerRepositoryProvider).watchBalances();
+    final balancesStream = ref
+        .watch(customerRepositoryProvider)
+        .watchBalances();
 
     return _combineStreams(
       period: period,
@@ -161,10 +180,7 @@ Stream<UlatState> _combineStreams({
         controller.isClosed) {
       return;
     }
-    final totalUtang = balances.fold(
-      Money.zero(currency),
-      (runningTotal, item) => runningTotal + item.balance,
-    );
+    final totalUtang = totalUnpaidUtang(balances, currency: currency);
     final sukiWithUtang = balances.where((item) => item.owes).length;
     controller.add(
       UlatState(
@@ -212,22 +228,16 @@ Stream<UlatState> _combineStreams({
   return controller.stream;
 }
 
-/// Live recent sales list for the currently selected [ulatPeriodProvider].
 final ulatRecentSalesProvider = StreamProvider.autoDispose<List<SaleRecord>>((
   ref,
 ) {
-  final period = ref.watch(ulatPeriodProvider);
-  final today = LocalDay.fromLocal(ref.watch(clockProvider).now());
-  final range = dayRangeForPeriod(period, today);
+  final range = ref.watch(ulatRangeProvider);
   return ref.watch(saleRepositoryProvider).watchRecentSales(range);
 });
 
-/// Live expenses (gastos) list for the currently selected [ulatPeriodProvider].
 final ulatExpensesProvider = StreamProvider.autoDispose<List<ExpenseEntry>>((
   ref,
 ) {
-  final period = ref.watch(ulatPeriodProvider);
-  final today = LocalDay.fromLocal(ref.watch(clockProvider).now());
-  final range = dayRangeForPeriod(period, today);
+  final range = ref.watch(ulatRangeProvider);
   return ref.watch(expenseRepositoryProvider).watchInRange(range);
 });

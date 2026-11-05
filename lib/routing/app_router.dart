@@ -1,26 +1,28 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:tinda360/features/onboarding/presentation/splash_screen.dart';
 import 'package:tinda360/features/settings/presentation/settings_screen.dart';
 import 'package:tinda360/features/shell/main_shell.dart';
 
-/// Route paths for the Tinda 360 app.
 abstract final class AppRoutes {
-  /// Launch splash route.
   static const String splash = '/';
 
-  /// First-run store onboarding route.
   static const String onboarding = '/onboarding';
 
-  /// Main 4-tab POS shell.
   static const String main = '/app';
 
-  /// Store and AI settings route.
   static const String settings = '/settings';
 }
 
-/// The app's single router. Each feature registers its route here.
+Future<void> leaveScreensReadingDatabase(GoRouter router) async {
+  router.go(AppRoutes.splash);
+  await WidgetsBinding.instance.endOfFrame;
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.splash,
@@ -53,6 +55,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-  ref.onDispose(router.dispose);
+  ref
+    ..listen<AppDatabase>(appDatabaseProvider, (previous, next) {
+      if (previous != null && !identical(previous, next)) {
+        router.go(AppRoutes.splash);
+      }
+    })
+    ..onDispose(router.dispose);
   return router;
 });

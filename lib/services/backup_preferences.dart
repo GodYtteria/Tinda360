@@ -1,44 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-/// Persists device-level backup preferences (auto-backup and connection flag).
 abstract interface class BackupPreferencesStore {
-  /// Returns whether auto-backup is enabled (defaults to true).
   Future<bool> readAutoBackupEnabled();
 
-  /// Saves the auto-backup enabled preference.
   Future<void> writeAutoBackupEnabled(bool enabled);
 
-  /// Returns whether Google Drive backup was previously connected.
   Future<bool> readBackupConnected();
 
-  /// Saves whether Google Drive backup is connected.
   Future<void> writeBackupConnected(bool connected);
 
-  /// Returns the saved Google account email, or null if unset.
   Future<String?> readConnectedEmail();
 
-  /// Saves the Google account email.
   Future<void> writeConnectedEmail(String? email);
 
-  /// Returns saved app language code (`'en'` or `'fil'`), or null if unset.
   Future<String?> readLocaleCode();
 
-  /// Saves the app language code (`'en'` or `'fil'`).
   Future<void> writeLocaleCode(String code);
 }
 
-/// JSON file implementation of [BackupPreferencesStore].
 final class FileBackupPreferencesStore implements BackupPreferencesStore {
-  /// Creates a file-backed backup preferences store.
   FileBackupPreferencesStore({Future<Directory> Function()? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   static const String _fileName = 'tinda360_backup_prefs.json';
   final Future<Directory> Function() _directoryProvider;
+  Future<void> _lastWrite = Future<void>.value();
 
   @override
   Future<bool> readAutoBackupEnabled() async =>
@@ -64,17 +55,13 @@ final class FileBackupPreferencesStore implements BackupPreferencesStore {
   }
 
   @override
-  Future<void> writeConnectedEmail(String? email) async {
+  Future<void> writeConnectedEmail(String? email) => _updateMap((map) {
     if (email == null) {
-      final file = await _resolveFile();
-      final map = await _readMap();
       map.remove('connectedEmail');
-      await file.parent.create(recursive: true);
-      await file.writeAsString(jsonEncode(map));
-      return;
+    } else {
+      map['connectedEmail'] = email;
     }
-    await _writeField('connectedEmail', email);
-  }
+  });
 
   @override
   Future<String?> readLocaleCode() async {
@@ -93,16 +80,23 @@ final class FileBackupPreferencesStore implements BackupPreferencesStore {
     return value is bool ? value : defaultValue;
   }
 
-  Future<void> _writeField(String key, Object value) async {
-    try {
+  Future<void> _writeField(String key, Object value) =>
+      _updateMap((map) => map[key] = value);
+
+  Future<void> _updateMap(void Function(Map<String, dynamic> map) change) {
+    final write = _lastWrite.then((_) async {
       final file = await _resolveFile();
       final map = await _readMap();
-      map[key] = value;
+      change(map);
       await file.parent.create(recursive: true);
-      await file.writeAsString(jsonEncode(map));
-    } on Object {
-      // Ignore storage errors in environments without writable support dir.
-    }
+      final stagedFile = File('${file.path}.tmp');
+      await stagedFile.writeAsString(jsonEncode(map), flush: true);
+      await stagedFile.rename(file.path);
+    });
+    _lastWrite = write.catchError((Object error) {
+      debugPrint('backup_preferences write failed: $error');
+    });
+    return write;
   }
 
   Future<Map<String, dynamic>> _readMap() async {

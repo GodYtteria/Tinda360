@@ -167,7 +167,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String posOutOfStock(String name) {
+    return 'No more stock for $name.';
+  }
+
+  @override
   String get posLowStockBadge => 'Low';
+
+  @override
+  String get posOutOfStockBadge => 'Out of stock';
+
+  @override
+  String get checkoutExactAmountChip => 'Exact';
+
+  @override
+  String get posBackupStaleTitle => 'No backup in the last 7 days';
+
+  @override
+  String get posBackupNeverTitle => 'Back up your data so it is not lost';
+
+  @override
+  String get posBackupWarningBody => 'Tap to open Settings and back up now.';
+
+  @override
+  String get posQuantityMode => 'Quantity';
+
+  @override
+  String get posAmountMode => 'Amount (₱)';
+
+  @override
+  String posAmountEquals(String quantity) {
+    return '= $quantity';
+  }
 
   @override
   String posCartItems(int count) {
@@ -218,6 +249,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutChangeLabel => 'Change';
 
   @override
+  String get checkoutPaidNowLabel => 'Paid now (₱, optional)';
+
+  @override
+  String checkoutPaidNowRemaining(String amount) {
+    return 'Utang for this sale: $amount';
+  }
+
+  @override
+  String get checkoutPaidNowInvalid =>
+      'Paid now must be from ₱0 up to the total.';
+
+  @override
+  String checkoutPriceDialogTitle(String product) {
+    return 'Price for $product';
+  }
+
+  @override
+  String checkoutPriceNormal(String price) {
+    return 'Normal price: $price';
+  }
+
+  @override
+  String get checkoutPriceLabel => 'Price per unit this sale (₱)';
+
+  @override
+  String get checkoutPriceInvalid => 'Enter a price of ₱0 or more.';
+
+  @override
+  String get checkoutPriceReset => 'Back to normal price';
+
+  @override
+  String get failureSalePaidNowInvalid =>
+      'Paid now must be from ₱0 up to the total.';
+
+  @override
+  String get failureSalePriceInvalid => 'Price cannot be negative.';
+
+  @override
+  String get receiptNumberLabel => 'Receipt no.';
+
+  @override
+  String get receiptSukiLabel => 'Suki';
+
+  @override
+  String get receiptReferenceLabel => 'Ref';
+
+  @override
   String get checkoutEwalletRefLabel => 'Reference number (optional)';
 
   @override
@@ -262,6 +340,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleDoneShareReceipt => 'Share receipt';
 
   @override
+  String get saleDoneShareFailed => 'Could not open sharing. Try again.';
+
+  @override
   String get saleDoneReceiptCopied => 'Receipt summary ready to share.';
 
   @override
@@ -284,7 +365,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String inventorySummary(int total, int low) {
-    return '$total products · $low low';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total products',
+      one: '1 product',
+    );
+    return '$_temp0 · $low low';
   }
 
   @override
@@ -304,6 +391,366 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productCostLabel => 'Cost / puhunan (₱)';
+
+  @override
+  String get productNoCountSwitch => 'Don\'t count stock';
+
+  @override
+  String get productNoCountHint =>
+      'For load, tingi and other items you don\'t count.';
+
+  @override
+  String get productExpiryLabel => 'Expiry date (optional)';
+
+  @override
+  String get productExpiryClear => 'Clear expiry date';
+
+  @override
+  String get productDuplicateNameWarning =>
+      'A product with the same name already exists.';
+
+  @override
+  String get productPriceZeroWarning => 'Price is 0. Is that right?';
+
+  @override
+  String get inventoryNoCountLabel => 'Not counted';
+
+  @override
+  String inventoryExpiryDaysBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expires in $count days',
+      one: 'Expires in 1 day',
+      zero: 'Expires today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inventoryExpiredBadge => 'Expired';
+
+  @override
+  String get inventoryExpiringFilter => 'Expiring soon';
+
+  @override
+  String get inventoryShareShoppingList => 'Share shopping list';
+
+  @override
+  String get shoppingListHeader => 'Shopping list:';
+
+  @override
+  String shoppingListLine(String name, String amount, String unit) {
+    return '- $name: buy $amount $unit';
+  }
+
+  @override
+  String get productRestockCostLabel => 'New cost per unit (₱), optional';
+
+  @override
+  String get productStockHistoryButton => 'Stock history';
+
+  @override
+  String get stockHistoryTitle => 'Stock history';
+
+  @override
+  String get stockHistoryEmpty => 'No stock changes yet.';
+
+  @override
+  String stockHistoryAfter(String stock) {
+    return 'Stock after: $stock';
+  }
+
+  @override
+  String get stockReasonInitial => 'Initial stock';
+
+  @override
+  String get stockReasonRestock => 'Restock';
+
+  @override
+  String get stockReasonAdjust => 'Adjustment';
+
+  @override
+  String get stockReasonReturn => 'Return';
+
+  @override
+  String get receiptRefunded => 'Refunded';
+
+  @override
+  String get receiptNetTotal => 'Net total';
+
+  @override
+  String get checkoutCreditNearTitle => 'Utang near credit limit';
+
+  @override
+  String checkoutCreditNearBody(String name, String balance, String limit) {
+    return '$name already has $balance unpaid utang (credit limit: $limit).';
+  }
+
+  @override
+  String get reportsExportCsvError => 'Could not export the CSV file.';
+
+  @override
+  String get ledgerDeleteConfirmTitle => 'Delete this line?';
+
+  @override
+  String ledgerDeleteConfirmBody(String kind, String amount, String date) {
+    return '$kind $amount on $date. The line stays in the history as deleted and the balance is fixed.';
+  }
+
+  @override
+  String get ledgerDeleteReasonLabel => 'Reason (optional)';
+
+  @override
+  String get ledgerDeleteConfirmAction => 'Delete line';
+
+  @override
+  String get ledgerDeleteDone => 'Line deleted.';
+
+  @override
+  String ledgerDeletedWithReason(String reason) {
+    return 'Deleted: $reason';
+  }
+
+  @override
+  String get ledgerDeletedNoReason => 'Deleted';
+
+  @override
+  String get ledgerNotDeletableHint => 'From a sale. Void the sale instead.';
+
+  @override
+  String get failureLedgerEntryNotFound => 'This line was not found.';
+
+  @override
+  String get failureLedgerEntryAlreadyDeleted =>
+      'This line is already deleted.';
+
+  @override
+  String get failureLedgerEntryNotDeletable =>
+      'This line cannot be deleted here. Void the sale instead.';
+
+  @override
+  String get failureLedgerDeleteWouldGoNegative =>
+      'Cannot delete this interest. Payments already went over the balance.';
+
+  @override
+  String get checkoutInterestLabel => 'Interest';
+
+  @override
+  String get checkoutInterestPrompt => 'Tutubuan ba? Optional.';
+
+  @override
+  String get checkoutInterestPercentInvalid =>
+      'Enter a percent from 0.1 to 50.0, for example 5 or 2.5.';
+
+  @override
+  String get checkoutInterestAmountInvalid =>
+      'Enter a valid peso amount above zero.';
+
+  @override
+  String get checkoutInterestTooMuch =>
+      'Interest cannot be more than the utang.';
+
+  @override
+  String checkoutInterestPreview(String utang, String interest, String total) {
+    return 'Utang $utang + interest $interest = $total';
+  }
+
+  @override
+  String get receiptInterest => 'Interest';
+
+  @override
+  String get failureSaleInterestInvalid =>
+      'Interest must be more than zero, and only for utang with a suki.';
+
+  @override
+  String get productUtangPriceLabel => 'Utang price (₱, optional)';
+
+  @override
+  String get checkoutUtangPriceTag => 'Utang price';
+
+  @override
+  String get failureCustomerInterestAmountChanged =>
+      'The utang changed, so the interest changed too. Please check and try again.';
+
+  @override
+  String checkoutShortfallPrompt(String amount) {
+    return 'Payment is short. Put the missing $amount on utang? Pick a suki below.';
+  }
+
+  @override
+  String get yumiChipLowStock => 'What is low on stock?';
+
+  @override
+  String get yumiChipSalesToday => 'How are sales today?';
+
+  @override
+  String get yumiChipProductCount => 'How many products do I have?';
+
+  @override
+  String get yumiChipSlowMoving => 'Slow-moving products?';
+
+  @override
+  String get yumiChipWhoHasUtang => 'Who has utang?';
+
+  @override
+  String get yumiChipUtangRisk => 'Utang risk?';
+
+  @override
+  String get yumiChipExpensesWeek => 'Expenses this week?';
+
+  @override
+  String get yumiChipCompareYesterday => 'Compare with yesterday';
+
+  @override
+  String get yumiChipWhatCanYouDo => 'What can you do?';
+
+  @override
+  String get yumiHintPos =>
+      'You\'re on Sales. Ask me what is low on stock or how today is going.';
+
+  @override
+  String get yumiHintInventory =>
+      'You\'re on Inventory. Ask me what is low or slow-moving.';
+
+  @override
+  String get yumiHintUtang => 'You\'re on Utang. Ask me who owes and how much.';
+
+  @override
+  String get yumiHintReports =>
+      'You\'re on Reports. Ask me about sales, expenses, or yesterday.';
+
+  @override
+  String get yumiHintSettings => 'You\'re on Settings. Ask me what I can do.';
+
+  @override
+  String get sukiTuboLabel => 'Interest % (optional)';
+
+  @override
+  String get sukiTuboHint => 'e.g. 5 or 2.5';
+
+  @override
+  String get sukiTuboInvalid => 'Interest must be from 0.1 to 50.0 percent.';
+
+  @override
+  String get ledgerKindTubo => 'Interest';
+
+  @override
+  String get ledgerAddTubo => 'Add interest';
+
+  @override
+  String get ledgerTuboConfirmTitle => 'Add interest?';
+
+  @override
+  String ledgerTuboConfirmBody(String balance, String percent, String amount) {
+    return '$balance + $percent% = $amount interest';
+  }
+
+  @override
+  String get ledgerTuboConfirmAction => 'Add interest';
+
+  @override
+  String ledgerTuboAdded(String amount) {
+    return 'Interest of $amount added.';
+  }
+
+  @override
+  String ledgerReminderTuboMessage(
+    String customerName,
+    String storeName,
+    String utang,
+    String tubo,
+    String total,
+  ) {
+    return 'Hi $customerName! Friendly reminder from $storeName: Utang $utang + interest $tubo = $total. Salamat po!';
+  }
+
+  @override
+  String get failureCustomerInterestRateNotSet =>
+      'This suki has no interest rate set.';
+
+  @override
+  String get failureCustomerInterestNoBalance =>
+      'No balance to add interest to.';
+
+  @override
+  String get stockReasonSale => 'Sale';
+
+  @override
+  String get reportPdfMetricHeader => 'Metric';
+
+  @override
+  String get reportPdfValueHeader => 'Value';
+
+  @override
+  String get reportPdfProductHeader => 'Product';
+
+  @override
+  String get reportPdfQuantitySoldHeader => 'Qty Sold';
+
+  @override
+  String get reportPdfRevenueHeader => 'Revenue';
+
+  @override
+  String reportPdfPreparedBy(String storeName) {
+    return '$storeName - Prepared by Store Owner';
+  }
+
+  @override
+  String get sukiEditAction => 'Edit';
+
+  @override
+  String get sukiDeleteAction => 'Delete';
+
+  @override
+  String get sukiEditTitle => 'Edit suki';
+
+  @override
+  String get sukiSaveChanges => 'Save changes';
+
+  @override
+  String get sukiDeleteConfirmTitle => 'Delete suki?';
+
+  @override
+  String sukiDeleteConfirmBody(String name) {
+    return '$name will be removed from your suki list. This only works when the balance is zero.';
+  }
+
+  @override
+  String get failureCustomerHasBalance =>
+      'Cannot delete a suki who still has utang.';
+
+  @override
+  String get ledgerShareReminder => 'Share reminder';
+
+  @override
+  String get ledgerCopyReminder => 'Copy';
+
+  @override
+  String get ledgerEmptyEntries => 'No ledger entries yet.';
+
+  @override
+  String get ledgerKindUtang => 'Utang';
+
+  @override
+  String get ledgerKindPayment => 'Payment';
+
+  @override
+  String get ledgerReminderDefaultStore => 'our store';
+
+  @override
+  String ledgerReminderMessage(
+    String customerName,
+    String storeName,
+    String balance,
+  ) {
+    return 'Hi $customerName! Friendly reminder from $storeName: your utang balance is $balance. Salamat po!';
+  }
+
+  @override
+  String inventoryCostSummary(String amount) {
+    return 'Cost $amount';
+  }
 
   @override
   String productProfitPerSale(String amount) {
@@ -388,6 +835,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get utangCurrentBalance => 'Current balance';
 
   @override
+  String utangAgeDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get utangExportCsv => 'Export utang (CSV)';
+
+  @override
+  String checkoutCreditLimitExceeded(String limit) {
+    return 'Over the utang limit ($limit)';
+  }
+
+  @override
+  String get checkoutCreditLimitOverride => 'Owner approval';
+
+  @override
   String get utangFullPayment => 'Full payment';
 
   @override
@@ -436,7 +899,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsTransactionsCard => 'Transactions';
 
   @override
-  String get reportsNewUtangCard => 'New utang';
+  String get reportsNewUtangCard => 'Unpaid utang';
 
   @override
   String get reportsChartTitle => 'Sales trend';
@@ -697,6 +1160,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAddStore => '+ New store';
 
   @override
+  String get settingsAddStoreFailed => 'Could not add the store. Try again.';
+
+  @override
+  String get settingsLocalBackupFailed =>
+      'Could not complete the backup file action. Try again.';
+
+  @override
+  String get ulatExpenseDeleteFailed =>
+      'Could not delete the expense. Try again.';
+
+  @override
+  String pinLockedOut(int seconds) {
+    return 'Too many wrong tries. Wait $seconds seconds.';
+  }
+
+  @override
   String get settingsDeleteStore => 'Delete store';
 
   @override
@@ -764,6 +1243,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get failureSalePaymentTooLow =>
       'Cash received is less than the total.';
+
+  @override
+  String get failureSaleNotFound =>
+      'This sale was already voided or no longer exists.';
+
+  @override
+  String get failureSaleVoidAfterPayment =>
+      'Cannot void: the customer already paid part of this utang.';
+
+  @override
+  String get failureSaleInsufficientStock =>
+      'Not enough stock for an item in the cart.';
 
   @override
   String get failureSaleStoreUnavailable =>
@@ -902,10 +1393,218 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ulatSalePaidLabel => 'Paid';
 
   @override
+  String scannerScannedCount(int count) {
+    return 'Scanned: $count';
+  }
+
+  @override
+  String get ulatShareButton => 'Share report (text)';
+
+  @override
+  String get ulatShareRevenueLabel => 'Sales';
+
+  @override
+  String get ulatShareProfitLabel => 'Profit';
+
+  @override
+  String get ulatShareTransactionsLabel => 'Transactions';
+
+  @override
+  String get ulatShareExpensesLabel => 'Expenses';
+
+  @override
+  String get ulatShareNetIncomeLabel => 'Net income';
+
+  @override
+  String get ulatShareUtangLabel => 'Unpaid utang';
+
+  @override
+  String get ulatShareTopProductsLabel => 'Top 3 products';
+
+  @override
+  String ulatShareCashCountLine(
+    String expected,
+    String counted,
+    String difference,
+  ) {
+    return 'Cash count: Expected $expected · Counted $counted · $difference';
+  }
+
+  @override
+  String get reportsCustom => 'Custom';
+
+  @override
+  String get reportsThisMonth => 'This month';
+
+  @override
+  String get reportsLastMonth => 'Last month';
+
+  @override
+  String get reportsPickDates => 'Pick dates';
+
+  @override
+  String get reportsRangeInvalid =>
+      'Pick up to 366 days, ending today or earlier.';
+
+  @override
+  String reportsRangeLabel(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get cashCountTitle => 'Close day · Cash count';
+
+  @override
+  String get cashCountExpectedLabel => 'Expected cash in drawer';
+
+  @override
+  String get cashCountCountedLabel => 'Counted cash';
+
+  @override
+  String get cashCountNoteLabel => 'Note (optional)';
+
+  @override
+  String get cashCountSaveButton => 'Save cash count';
+
+  @override
+  String get cashCountSaved => 'Cash count saved.';
+
+  @override
+  String get cashCountInvalidAmount => 'Enter the cash you counted.';
+
+  @override
+  String get cashCountSaveFailed =>
+      'Could not save the cash count. Please try again.';
+
+  @override
+  String cashCountOver(String amount) {
+    return 'Over $amount';
+  }
+
+  @override
+  String cashCountShort(String amount) {
+    return 'Short $amount';
+  }
+
+  @override
+  String get cashCountExact => 'Exact';
+
+  @override
+  String get cashCountTodayHeading => 'Counts today';
+
+  @override
+  String get cashCountHistoryHeading => 'Last 7 days';
+
+  @override
+  String cashCountRowSummary(String counted, String expected) {
+    return 'Counted $counted · Expected $expected';
+  }
+
+  @override
+  String get cashCountNoHistory => 'No cash counts yet.';
+
+  @override
   String get ulatSaleReferenceLabel => 'Reference';
 
   @override
   String get ulatVoidSaleButton => 'Void / Delete Sale';
+
+  @override
+  String get receiptBantayLabel => 'Bantay';
+
+  @override
+  String get bantayChipEmpty => 'Set Bantay';
+
+  @override
+  String bantayChipLabel(String name) {
+    return 'Bantay: $name';
+  }
+
+  @override
+  String get bantayDialogTitle => 'Who is minding the store?';
+
+  @override
+  String get bantayFieldHint => 'Name (optional)';
+
+  @override
+  String get settingsAddressLabel => 'Address';
+
+  @override
+  String get settingsPhoneLabel => 'Phone';
+
+  @override
+  String ledgerDeletedByNoReason(String name) {
+    return 'Deleted by $name';
+  }
+
+  @override
+  String ledgerDeletedByWithReason(String name, String reason) {
+    return 'Deleted by $name: $reason';
+  }
+
+  @override
+  String get ulatReturnTitle => 'Return items';
+
+  @override
+  String ulatReturnAvailable(String quantity) {
+    return 'Can return: $quantity';
+  }
+
+  @override
+  String get ulatReturnQuantityLabel => 'Quantity to return';
+
+  @override
+  String get ulatReturnReasonLabel => 'Reason (optional)';
+
+  @override
+  String get ulatReturnRefundTotal => 'Refund total';
+
+  @override
+  String get ulatReturnConfirmButton => 'Save return';
+
+  @override
+  String get ulatReturnNothingReturnable =>
+      'Everything in this sale was already returned.';
+
+  @override
+  String ulatReturnSuccessCash(String amount) {
+    return 'Refund $amount';
+  }
+
+  @override
+  String ulatReturnSuccessUtang(String amount) {
+    return '$amount taken off the customer\'s utang';
+  }
+
+  @override
+  String ulatReturnSuccessUtangPartial(String credit, String cash) {
+    return '$credit taken off utang. Give $cash back to the customer in cash.';
+  }
+
+  @override
+  String get failureSaleVoidAfterReturn =>
+      'This sale has returned items, so it cannot be voided.';
+
+  @override
+  String get failureSaleReturnNothingSelected => 'Enter a quantity to return.';
+
+  @override
+  String get failureSaleReturnQuantityInvalid =>
+      'That return quantity is not valid.';
+
+  @override
+  String get failureSaleReturnTooMany => 'Cannot return more than was sold.';
+
+  @override
+  String get failureSaleReturnSaleVoided =>
+      'This sale was voided, so nothing can be returned.';
+
+  @override
+  String get failureSaleReturnNotFound => 'Sale not found.';
+
+  @override
+  String get failureSaleReturnStoreUnavailable =>
+      'Could not save the return. Please try again.';
 
   @override
   String get ulatVoidSaleConfirmTitle => 'Void this sale?';
@@ -1003,5 +1702,131 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String chatWelcomeMessage(String greeting) {
     return '$greeting I\'m Yumi, your Smart Store Assistant. Ask me anything about your store\'s sales, stock, or utang!';
+  }
+
+  @override
+  String get pinRecoveryTitle => 'Save Your Recovery Code';
+
+  @override
+  String get pinRecoveryBody =>
+      'Write down or copy this one-time code. You can use it to reset your PIN if you forget it offline.';
+
+  @override
+  String get pinRecoveryCopied => 'Recovery code copied.';
+
+  @override
+  String get pinCopy => 'Copy';
+
+  @override
+  String get pinDone => 'Done';
+
+  @override
+  String get pinEnterFourDigits => 'Enter a 4-digit PIN.';
+
+  @override
+  String get pinIncorrect => 'Incorrect PIN. Try again.';
+
+  @override
+  String get pinInvalidRecoveryCode => 'Invalid recovery code.';
+
+  @override
+  String get pinBiometricFailed => 'Biometric unlock failed or cancelled.';
+
+  @override
+  String get pinGoogleMismatch => 'Google account did not match.';
+
+  @override
+  String get pinResetTitle => 'Reset Store PIN';
+
+  @override
+  String get pinUseBiometric => 'Use Fingerprint / Screen Lock';
+
+  @override
+  String get pinForgot => 'Forgot PIN?';
+
+  @override
+  String get pinRecoveryCodeLabel => 'Recovery code (e.g. T360-XXXX)';
+
+  @override
+  String get pinVerifyGoogle => 'Verify with Google Account';
+
+  @override
+  String get pinBackToPin => 'Back to PIN';
+
+  @override
+  String get pinResetButton => 'Reset PIN';
+
+  @override
+  String get pinUnlock => 'Unlock';
+
+  @override
+  String get pinDamaged =>
+      'PIN data is damaged. Unlock with fingerprint, screen lock or Google, then set a new PIN.';
+
+  @override
+  String get pinRemoveDamaged => 'Remove damaged PIN';
+
+  @override
+  String get pinMustBeFourDigits => 'PIN must be exactly 4 digits.';
+
+  @override
+  String get pinMismatch => 'PINs do not match.';
+
+  @override
+  String get pinNewLabel => 'New 4-digit PIN';
+
+  @override
+  String get pinConfirmLabel => 'Confirm 4-digit PIN';
+
+  @override
+  String get ledgerHistoryTitle => 'Ledger History';
+
+  @override
+  String get ledgerReminderCopied => 'Reminder copied to clipboard';
+
+  @override
+  String get receiptPrintDialogFailed => 'Could not open print dialog.';
+
+  @override
+  String get ulatExpenseInvalid => 'Enter a valid expense name and amount.';
+
+  @override
+  String get commonUndo => 'Undo';
+
+  @override
+  String get settingsSwitchStoreFailed => 'Could not switch store. Try again.';
+
+  @override
+  String get settingsDeleteStoreFailed => 'Could not delete store. Try again.';
+
+  @override
+  String posRemovedFromCart(String name) {
+    return 'Removed $name';
+  }
+
+  @override
+  String get receiptTotal => 'TOTAL';
+
+  @override
+  String get receiptPayment => 'Payment';
+
+  @override
+  String get receiptPaid => 'Paid';
+
+  @override
+  String get receiptChange => 'Change';
+
+  @override
+  String get receiptUtang => 'Utang';
+
+  @override
+  String get receiptThankYou => 'Thank you!';
+
+  @override
+  String get receiptNoItems => '(No items)';
+
+  @override
+  String inventoryImportSkippedRows(String rows) {
+    return 'Check rows: $rows (missing name or price, bad number, unknown unit, or duplicate barcode).';
   }
 }

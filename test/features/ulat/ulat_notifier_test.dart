@@ -20,10 +20,11 @@ import 'package:tinda360/services/service_providers.dart';
 
 import '../../support/test_repositories.dart';
 
-T _ok<T, F extends Failure>(Result<T, F> result) => switch (result) {
-  Ok(:final value) => value,
-  Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
-};
+T _ok<T, FailureType extends Failure>(Result<T, FailureType> result) =>
+    switch (result) {
+      Ok(:final value) => value,
+      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+    };
 
 Money _php(int minor) => Money(minor, Currency.php);
 
@@ -50,7 +51,10 @@ void main() {
   test('dayRangeForPeriod computes today, week, and month ranges', () {
     final today = LocalDay.fromLocal(DateTime(2026, 11, 17));
 
-    expect(dayRangeForPeriod(ReportPeriod.today, today), DayRange.single(today));
+    expect(
+      dayRangeForPeriod(ReportPeriod.today, today),
+      DayRange.single(today),
+    );
     expect(
       dayRangeForPeriod(ReportPeriod.week, today),
       DayRange(today.plusDays(-6), today),
@@ -61,74 +65,77 @@ void main() {
     );
   });
 
-  test('ulatNotifierProvider projects sales summary and utang balances', () async {
-    final subscription = container.listen(ulatNotifierProvider, (_, _) {});
-    addTearDown(subscription.close);
+  test(
+    'ulatNotifierProvider projects sales summary and utang balances',
+    () async {
+      final subscription = container.listen(ulatNotifierProvider, (_, _) {});
+      addTearDown(subscription.close);
 
-    final initial = await container.read(ulatNotifierProvider.future);
-    expect(initial.period, ReportPeriod.today);
-    expect(initial.summary.revenue, _php(0));
-    expect(initial.summary.saleCount, 0);
-    expect(initial.totalUtang, _php(0));
+      final initial = await container.read(ulatNotifierProvider.future);
+      expect(initial.period, ReportPeriod.today);
+      expect(initial.summary.revenue, _php(0));
+      expect(initial.summary.saleCount, 0);
+      expect(initial.totalUtang, _php(0));
 
-    final productId = _ok(
-      await repos.products.create(
-        ProductDraft(
-          name: 'Coffee sachet',
-          unit: ProductUnit.sachet,
-          price: _php(1500),
-          cost: _php(1000),
-          initialStock: const Quantity.whole(30),
+      final productId = _ok(
+        await repos.products.create(
+          ProductDraft(
+            name: 'Coffee sachet',
+            unit: ProductUnit.sachet,
+            price: _php(1500),
+            cost: _php(1000),
+            initialStock: const Quantity.whole(30),
+          ),
         ),
-      ),
-    );
-    final sukiId = _ok(
-      await repos.customers.create(const CustomerDraft(name: 'Ate Glo')),
-    );
+      );
+      final sukiId = _ok(
+        await repos.customers.create(const CustomerDraft(name: 'Ate Glo')),
+      );
 
-    _ok(
-      await repos.sales.record(
-        SaleDraft(
-          lines: [
-            SaleLineDraft(
-              productId: productId,
-              quantity: const Quantity.whole(2),
-            ),
-          ],
-          method: PaymentMethod.cash,
-          cashTendered: _php(5000),
+      _ok(
+        await repos.sales.record(
+          SaleDraft(
+            lines: [
+              SaleLineDraft(
+                productId: productId,
+                quantity: const Quantity.whole(2),
+              ),
+            ],
+            method: PaymentMethod.cash,
+            cashTendered: _php(5000),
+          ),
         ),
-      ),
-    );
-    _ok(
-      await repos.sales.record(
-        SaleDraft(
-          lines: [
-            SaleLineDraft(
-              productId: productId,
-              quantity: const Quantity.whole(1),
-            ),
-          ],
-          method: PaymentMethod.utang,
-          customerId: sukiId,
+      );
+      _ok(
+        await repos.sales.record(
+          SaleDraft(
+            lines: [
+              SaleLineDraft(
+                productId: productId,
+                quantity: const Quantity.whole(1),
+              ),
+            ],
+            method: PaymentMethod.utang,
+            customerId: sukiId,
+          ),
         ),
-      ),
-    );
+      );
 
-    await pumpEventQueue();
-    final updated = await container.read(ulatNotifierProvider.future);
-    expect(updated.summary.saleCount, 2);
-    expect(updated.summary.revenue, _php(4500));
-    expect(updated.summary.profit, _php(1500));
-    expect(updated.totalUtang, _php(1500));
-    expect(updated.sukiWithUtangCount, 1);
+      await pumpEventQueue();
+      final updated = await container.read(ulatNotifierProvider.future);
+      expect(updated.summary.saleCount, 2);
+      expect(updated.summary.revenue, _php(4500));
+      expect(updated.summary.profit, _php(1500));
+      expect(updated.totalUtang, _php(1500));
+      expect(updated.sukiWithUtangCount, 1);
 
-    container.read(ulatPeriodProvider.notifier).select(ReportPeriod.week);
-    await pumpEventQueue();
-    final weekState = await container.read(ulatNotifierProvider.future);
-    expect(weekState.period, ReportPeriod.week);
-    expect(weekState.summary.saleCount, 2);
-  });
+      container.read(ulatPeriodProvider.notifier).select(ReportPeriod.week);
+      await pumpEventQueue();
+      final weekState = await container.read(ulatNotifierProvider.future);
+      expect(weekState.period, ReportPeriod.week);
+      expect(weekState.summary.saleCount, 2);
+    },
+  );
 
   test(
     'ulatNotifierProvider projects top 3 products ordered by revenue then quantity',

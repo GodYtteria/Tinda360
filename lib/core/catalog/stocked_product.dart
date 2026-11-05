@@ -1,19 +1,28 @@
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
+import 'package:tinda360/core/money/money.dart';
 
-/// A product together with its current stock, derived from stock movements.
 final class StockedProduct {
-  /// Pairs [product] with its derived [stock].
   const StockedProduct({required this.product, required this.stock});
 
-  /// The product.
   final Product product;
 
-  /// Current stock; can be negative if sales were recorded beyond stock.
   final Quantity stock;
 
-  /// Whether stock is at or below the product's alert level.
+  Money? get utangPrice => product.utangPrice;
+
+  bool get tracksStock => product.tracksStock;
+
+  bool get isSellable => !tracksStock || stock.isPositive;
+
+  Quantity? get sellLimit => tracksStock ? stock : null;
+
+  static const Quantity untrackedSellCap = Quantity.whole(999999);
+
+  Quantity get sellCap => tracksStock ? stock : untrackedSellCap;
+
   bool get isLowOnStock {
+    if (!tracksStock) return false;
     final threshold = product.lowStockAt;
     return threshold != null && stock.compareTo(threshold) <= 0;
   }

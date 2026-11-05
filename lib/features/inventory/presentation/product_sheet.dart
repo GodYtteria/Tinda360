@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
@@ -11,7 +12,13 @@ import 'package:tinda360/core/failures/product_failure.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/features/inventory/presentation/product_form_logic.dart';
+import 'package:tinda360/features/inventory/presentation/inventory_rules.dart';
+import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
+import 'package:tinda360/features/inventory/presentation/product_sheet_extras.dart';
+import 'package:tinda360/features/inventory/presentation/stock_history_sheet.dart';
+import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -21,16 +28,29 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Bottom sheet for adding a new product or editing/deleting an existing one.
 class ProductSheet extends ConsumerStatefulWidget {
-  /// Creates the product sheet. Pass [existing] to open in edit mode.
   const ProductSheet({
     super.key,
     this.existing,
+    this.initialBarcode,
   });
 
-  /// Existing stocked product when editing; null when adding.
   final StockedProduct? existing;
+
+  final String? initialBarcode;
+
+  static Future<void> show(
+    BuildContext context, {
+    StockedProduct? existing,
+    String? initialBarcode,
+  }) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: AppPalette.of(context).scrim,
+    builder: (_) =>
+        ProductSheet(existing: existing, initialBarcode: initialBarcode),
+  );
 
   @override
   ConsumerState<ProductSheet> createState() => _ProductSheetState();
@@ -40,13 +60,17 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
   late final TextEditingController _costController;
+  late final TextEditingController _utangPriceController;
+  final TextEditingController _restockCostController = TextEditingController();
   late final TextEditingController _categoryController;
   late final TextEditingController _lowStockController;
   late final TextEditingController _barcodeController;
 
   late ProductUnit _selectedUnit;
-  int _initialStockWhole = 0;
-  int _stockDeltaWhole = 0;
+  Quantity _initialStock = Quantity.zero;
+  Quantity _stockDelta = Quantity.zero;
+  bool _noCount = false;
+  LocalDay? _expiryDay;
   bool _isSaving = false;
   String? _inlineError;
 
@@ -63,15 +87,23 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
     _costController = TextEditingController(
       text: product == null ? '' : _plainMoney(product.cost),
     );
+    final utangPrice = product?.utangPrice;
+    _utangPriceController = TextEditingController(
+      text: utangPrice == null ? '' : _plainMoney(utangPrice),
+    );
     _categoryController = TextEditingController(
       text: product?.categoryId ?? '',
     );
     _lowStockController = TextEditingController(
       text: product?.lowStockAt == null
           ? ''
-          : (product!.lowStockAt!.milli ~/ Quantity.milliPerUnit).toString(),
+          : ProductFormLogic.decimalText(product!.lowStockAt!),
     );
-    _barcodeController = TextEditingController(text: product?.barcode ?? '');
+    _barcodeController = TextEditingController(
+      text: product?.barcode ?? widget.initialBarcode ?? '',
+    );
+    _noCount = product != null && !product.tracksStock;
+    _expiryDay = product?.expiryDay;
     _selectedUnit = product?.unit ?? ProductUnit.piece;
   }
 
@@ -85,6 +117,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
     _nameController.dispose();
     _priceController.dispose();
     _costController.dispose();
+    _utangPriceController.dispose();
+    _restockCostController.dispose();
     _categoryController.dispose();
     _lowStockController.dispose();
     _barcodeController.dispose();
@@ -94,68 +128,66 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
   static const int _maxStock = 9999;
 
   Future<void> _editStockValue() async {
-    final localizations = AppLocalizations.of(context);
-    final controller = TextEditingController(
-      text: (_isEditMode
-              ? (widget.existing!.stock.milli ~/ Quantity.milliPerUnit) +
-                  _stockDeltaWhole
-              : _initialStockWhole)
-          .toString(),
-    );
-    final value = await showDialog<int>(
+    final target = await showDialog<Quantity>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.productInitialStockLabel),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: InputDecoration(
-            labelText: localizations.productInitialStockLabel,
-            hintText: '0-$_maxStock',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(localizations.commonCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              final parsed = int.tryParse(controller.text.trim()) ?? 0;
-              Navigator.of(dialogContext).pop(parsed.clamp(0, _maxStock));
-            },
-            child: Text(localizations.commonSave),
-          ),
-        ],
+      builder: (dialogContext) => _StockTargetDialog(
+        startingQuantity: _isEditMode
+            ? widget.existing!.stock + _stockDelta
+            : _initialStock,
+        allowsFraction: _selectedUnit.allowsFraction,
+        maxStock: _maxStock,
+        parseStockTarget: _parseStockTarget,
       ),
     );
-    if (value == null) return;
+    if (target == null || !mounted) return;
     setState(() {
       if (_isEditMode) {
-        _stockDeltaWhole =
-            value - (widget.existing!.stock.milli ~/ Quantity.milliPerUnit);
+        _stockDelta = target - widget.existing!.stock;
       } else {
-        _initialStockWhole = value;
+        _initialStock = target;
       }
     });
+  }
+
+  static Quantity? _parseStockTarget(String rawInput, bool allowsFraction) {
+    if (rawInput.trim().isEmpty) return Quantity.zero;
+    final parsed = ProductFormLogic.parseQuantity(
+      rawInput,
+      allowsFraction: allowsFraction,
+    );
+    if (parsed == null) return null;
+    const maxQuantity = Quantity.whole(_maxStock);
+    return parsed.compareTo(maxQuantity) > 0 ? maxQuantity : parsed;
   }
 
   Future<void> _saveProduct() async {
     if (_isSaving) return;
     unawaited(HapticFeedback.mediumImpact());
     final currency = ref.read(storeCurrencyProvider);
+    final restockCostText = _restockCostController.text.trim();
+    final isRestock = _isEditMode && !_noCount && _stockDelta.isPositive;
+    final usesRestockCost = isRestock && restockCostText.isNotEmpty;
+    if (usesRestockCost && parseMoneyInput(restockCostText, currency) == null) {
+      setState(
+        () => _inlineError = AppLocalizations.of(
+          context,
+        ).failureProductAmountInvalid,
+      );
+      return;
+    }
     final draft = ProductFormLogic.buildDraft(
       name: _nameController.text,
       unit: _selectedUnit,
       priceInput: _priceController.text,
-      costInput: _costController.text,
+      costInput: usesRestockCost ? restockCostText : _costController.text,
       currency: currency,
       categoryInput: _categoryController.text,
       barcodeInput: _barcodeController.text,
       lowStockInput: _lowStockController.text,
-      initialStock: Quantity.whole(_initialStockWhole),
+      initialStock: _initialStock,
+      utangPriceInput: _utangPriceController.text,
+      tracksStock: !_noCount,
+      expiryDay: _expiryDay,
     );
 
     setState(() {
@@ -163,24 +195,28 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
       _inlineError = null;
     });
 
+    if (_isEditMode && !_noCount && _stockDelta.isNegative) {
+      final verified = await confirmStorePinIfSet(
+        context,
+        ref,
+        title: AppLocalizations.of(context).settingsPinPromptTitle,
+      );
+      if (!mounted) return;
+      if (!verified) {
+        setState(() => _isSaving = false);
+        return;
+      }
+    }
+
     final repository = ref.read(productRepositoryProvider);
     if (_isEditMode) {
-      final productId = widget.existing!.product.id;
-      final updateResult = await repository.update(productId, draft);
-      switch (updateResult) {
-        case Ok<void, ProductFailure>():
-          if (_stockDeltaWhole != 0) {
-            final adjustResult = await repository.adjustStock(
-              productId,
-              Quantity.whole(_stockDeltaWhole),
-            );
-            _handleSaveResult(adjustResult);
-            return;
-          }
-          _handleSaveResult(updateResult);
-        case Err<void, ProductFailure>():
-          _handleSaveResult(updateResult);
-      }
+      final result = await repository.update(
+        widget.existing!.product.id,
+        draft,
+        stockChange: _noCount ? Quantity.zero : _stockDelta,
+        stockReason: isRestock ? 'restock' : 'adjust',
+      );
+      _handleSaveResult(result);
     } else {
       final result = await repository.create(draft);
       _handleSaveResult(result);
@@ -228,6 +264,12 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
       ),
     );
     if (confirmed != true || !mounted) return;
+    final verified = await confirmStorePinIfSet(
+      context,
+      ref,
+      title: AppLocalizations.of(context).settingsPinPromptTitle,
+    );
+    if (!verified || !mounted) return;
 
     setState(() {
       _isSaving = true;
@@ -244,6 +286,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
     final palette = AppPalette.of(context);
     final localizations = AppLocalizations.of(context);
     final currency = ref.watch(storeCurrencyProvider);
+    final priceIsZero =
+        parseMoneyInput(_priceController.text, currency)?.minorUnits == 0;
     final profit = ProductFormLogic.computeProfitPerSale(
       priceInput: _priceController.text,
       costInput: _costController.text,
@@ -269,12 +313,31 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             hintText: localizations.productNameHint,
             controller: _nameController,
             textInputAction: TextInputAction.next,
-            onChanged: (_) => _clearError(),
+            onChanged: (_) => setState(() => _inlineError = null),
           ),
+          if (InventoryRules.hasDuplicateName(
+            _nameController.text,
+            ref.watch(inventoryProductsProvider).value ??
+                const <StockedProduct>[],
+            excludeProductId: widget.existing?.product.id,
+          ))
+            ProductFormWarning(
+              message: localizations.productDuplicateNameWarning,
+            ),
           const SizedBox(height: AppSpacing.s12),
           _PriceCostRow(
             priceController: _priceController,
             costController: _costController,
+            onChanged: (_) => setState(() => _inlineError = null),
+          ),
+          if (priceIsZero)
+            ProductFormWarning(message: localizations.productPriceZeroWarning),
+          const SizedBox(height: AppSpacing.s12),
+          TindaTextInput(
+            label: localizations.productUtangPriceLabel,
+            controller: _utangPriceController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            textInputAction: TextInputAction.next,
             onChanged: (_) => setState(() => _inlineError = null),
           ),
           AnimatedSwitcher(
@@ -284,7 +347,9 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             child: profit == null
                 ? const SizedBox.shrink()
                 : Padding(
-                    key: ValueKey<String>('${profit.minorUnits}-${profit.isNegative}'),
+                    key: ValueKey<String>(
+                      '${profit.minorUnits}-${profit.isNegative}',
+                    ),
                     padding: const EdgeInsets.only(top: AppSpacing.s8),
                     child: Text(
                       localizations.productProfitPerSale(formatMoney(profit)),
@@ -307,59 +372,106 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             controller: _categoryController,
             textInputAction: TextInputAction.next,
           ),
-          if (_isEditMode) ...[
+          const SizedBox(height: AppSpacing.s16),
+          ProductNoCountSwitchRow(
+            noCount: _noCount,
+            onChanged: (value) => setState(() => _noCount = value),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          ProductExpiryField(
+            expiryDay: _expiryDay,
+            today: LocalDay.fromLocal(ref.read(clockProvider).now()),
+            onChanged: (day) => setState(() => _expiryDay = day),
+          ),
+          if (!_noCount && _isEditMode) ...[
             const SizedBox(height: AppSpacing.s16),
             _AdjustStockSection(
               currentStock: widget.existing!.stock,
-              deltaWhole: _stockDeltaWhole,
+              delta: _stockDelta,
               unit: _selectedUnit,
               onValueTap: _editStockValue,
-              onDecrement: widget.existing!.stock.milli +
-                          (_stockDeltaWhole - 1) * Quantity.milliPerUnit >=
-                      0
+              onDecrement:
+                  !(widget.existing!.stock +
+                          _stockDelta -
+                          const Quantity.whole(1))
+                      .isNegative
                   ? () {
                       unawaited(HapticFeedback.selectionClick());
-                      setState(() => _stockDeltaWhole--);
+                      setState(
+                        () => _stockDelta -= const Quantity.whole(1),
+                      );
                     }
                   : null,
               onIncrement:
-                  (widget.existing!.stock.milli ~/ Quantity.milliPerUnit) +
-                              _stockDeltaWhole <
-                          _maxStock
-                      ? () {
-                          unawaited(HapticFeedback.selectionClick());
-                          setState(() => _stockDeltaWhole++);
-                        }
-                      : null,
-            ),
-          ] else ...[
-            const SizedBox(height: AppSpacing.s16),
-            _InitialStockSection(
-              stockCount: _initialStockWhole,
-              unit: _selectedUnit,
-              onValueTap: _editStockValue,
-              onDecrement: _initialStockWhole > 0
+                  (widget.existing!.stock + _stockDelta).compareTo(
+                        const Quantity.whole(_maxStock),
+                      ) <
+                      0
                   ? () {
                       unawaited(HapticFeedback.selectionClick());
-                      setState(() => _initialStockWhole--);
+                      setState(
+                        () => _stockDelta += const Quantity.whole(1),
+                      );
                     }
                   : null,
-              onIncrement: _initialStockWhole < _maxStock
+            ),
+            if (_stockDelta.isPositive) ...[
+              const SizedBox(height: AppSpacing.s12),
+              TindaTextInput(
+                label: localizations.productRestockCostLabel,
+                controller: _restockCostController,
+                hintText: '0.00',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => _clearError(),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.s12),
+            TindaSecondaryButton(
+              label: localizations.productStockHistoryButton,
+              icon: Icons.history_rounded,
+              onPressed: () => unawaited(
+                StockHistorySheet.show(context, widget.existing!.product),
+              ),
+            ),
+          ] else if (!_noCount) ...[
+            const SizedBox(height: AppSpacing.s16),
+            _InitialStockSection(
+              stockCount: _initialStock,
+              unit: _selectedUnit,
+              onValueTap: _editStockValue,
+              onDecrement: _initialStock.compareTo(const Quantity.whole(1)) >= 0
                   ? () {
                       unawaited(HapticFeedback.selectionClick());
-                      setState(() => _initialStockWhole++);
+                      setState(
+                        () => _initialStock -= const Quantity.whole(1),
+                      );
+                    }
+                  : null,
+              onIncrement:
+                  _initialStock.compareTo(const Quantity.whole(_maxStock)) < 0
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(
+                        () => _initialStock += const Quantity.whole(1),
+                      );
                     }
                   : null,
             ),
           ],
-          const SizedBox(height: AppSpacing.s12),
-          TindaTextInput(
-            label: localizations.productLowStockLabel,
-            controller: _lowStockController,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            onChanged: (_) => _clearError(),
-          ),
+          if (!_noCount) ...[
+            const SizedBox(height: AppSpacing.s12),
+            TindaTextInput(
+              label: localizations.productLowStockLabel,
+              controller: _lowStockController,
+              keyboardType: TextInputType.numberWithOptions(
+                decimal: _selectedUnit.allowsFraction,
+              ),
+              textInputAction: TextInputAction.next,
+              onChanged: (_) => _clearError(),
+            ),
+          ],
           const SizedBox(height: AppSpacing.s12),
           TindaTextInput(
             label: localizations.productBarcodeLabel,
@@ -518,7 +630,7 @@ class _InitialStockSection extends StatelessWidget {
     required this.onValueTap,
   });
 
-  final int stockCount;
+  final Quantity stockCount;
   final ProductUnit unit;
   final VoidCallback? onDecrement;
   final VoidCallback? onIncrement;
@@ -531,7 +643,7 @@ class _InitialStockSection extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
+        Flexible(
           child: Text(
             localizations.productInitialStockLabel,
             style: AppTypography.meta(
@@ -541,14 +653,18 @@ class _InitialStockSection extends StatelessWidget {
             ),
           ),
         ),
-        TindaStepper(
-          valueLabel: '$stockCount ${localizedUnit(localizations, unit)}',
-          onDecrement: onDecrement,
-          onIncrement: onIncrement,
-          onValueTap: onValueTap,
-          decrementTooltip: localizations.productStockDecrement,
-          incrementTooltip: localizations.posAddToCart(
-            localizedUnit(localizations, unit),
+        Flexible(
+          flex: 2,
+          child: TindaStepper(
+            valueLabel:
+                '${formatQuantity(stockCount, unit)} ${localizedUnit(localizations, unit)}',
+            onDecrement: onDecrement,
+            onIncrement: onIncrement,
+            onValueTap: onValueTap,
+            decrementTooltip: localizations.productStockDecrement,
+            incrementTooltip: localizations.posAddToCart(
+              localizedUnit(localizations, unit),
+            ),
           ),
         ),
       ],
@@ -559,7 +675,7 @@ class _InitialStockSection extends StatelessWidget {
 class _AdjustStockSection extends StatelessWidget {
   const _AdjustStockSection({
     required this.currentStock,
-    required this.deltaWhole,
+    required this.delta,
     required this.unit,
     required this.onDecrement,
     required this.onIncrement,
@@ -567,7 +683,7 @@ class _AdjustStockSection extends StatelessWidget {
   });
 
   final Quantity currentStock;
-  final int deltaWhole;
+  final Quantity delta;
   final ProductUnit unit;
   final VoidCallback? onDecrement;
   final VoidCallback? onIncrement;
@@ -578,8 +694,9 @@ class _AdjustStockSection extends StatelessWidget {
     final palette = AppPalette.of(context);
     final localizations = AppLocalizations.of(context);
     final unitLabel = localizedUnit(localizations, unit);
-    final deltaPrefix = deltaWhole > 0 ? '+' : '';
-    final valueLabel = '$deltaPrefix$deltaWhole $unitLabel';
+    final deltaPrefix = delta.isNegative ? '-' : (delta.isPositive ? '+' : '');
+    final deltaAmount = formatQuantity(delta.isNegative ? -delta : delta, unit);
+    final valueLabel = '$deltaPrefix$deltaAmount $unitLabel';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,7 +711,7 @@ class _AdjustStockSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
+            Flexible(
               child: Text(
                 localizations.productAdjustStockLabel,
                 style: AppTypography.meta(
@@ -604,15 +721,100 @@ class _AdjustStockSection extends StatelessWidget {
                 ),
               ),
             ),
-            TindaStepper(
-              valueLabel: valueLabel,
-              onDecrement: onDecrement,
-              onIncrement: onIncrement,
-              onValueTap: onValueTap,
-              decrementTooltip: localizations.productStockDecrement,
-              incrementTooltip: localizations.posAddToCart(unitLabel),
+            Flexible(
+              flex: 2,
+              child: TindaStepper(
+                valueLabel: valueLabel,
+                onDecrement: onDecrement,
+                onIncrement: onIncrement,
+                onValueTap: onValueTap,
+                decrementTooltip: localizations.productStockDecrement,
+                incrementTooltip: localizations.posAddToCart(unitLabel),
+              ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StockTargetDialog extends StatefulWidget {
+  const _StockTargetDialog({
+    required this.startingQuantity,
+    required this.allowsFraction,
+    required this.maxStock,
+    required this.parseStockTarget,
+  });
+
+  final Quantity startingQuantity;
+  final bool allowsFraction;
+  final int maxStock;
+  final Quantity? Function(String rawInput, bool allowsFraction)
+  parseStockTarget;
+
+  @override
+  State<_StockTargetDialog> createState() => _StockTargetDialogState();
+}
+
+class _StockTargetDialogState extends State<_StockTargetDialog> {
+  late final TextEditingController _stockController = TextEditingController(
+    text: ProductFormLogic.decimalText(widget.startingQuantity),
+  );
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _stockController.dispose();
+    super.dispose();
+  }
+
+  void _save(AppLocalizations localizations) {
+    final target = widget.parseStockTarget(
+      _stockController.text,
+      widget.allowsFraction,
+    );
+    if (target == null) {
+      setState(
+        () => _errorMessage = localizations.failureProductQuantityInvalid,
+      );
+      return;
+    }
+    Navigator.of(context).pop(target);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(localizations.productInitialStockLabel),
+      content: TextField(
+        controller: _stockController,
+        autofocus: true,
+        keyboardType: TextInputType.numberWithOptions(
+          decimal: widget.allowsFraction,
+        ),
+        inputFormatters: [
+          if (widget.allowsFraction)
+            FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
+          else
+            FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: InputDecoration(
+          labelText: localizations.productInitialStockLabel,
+          hintText: '0-${widget.maxStock}',
+          errorText: _errorMessage,
+        ),
+        onSubmitted: (_) => _save(localizations),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(localizations.commonCancel),
+        ),
+        TextButton(
+          onPressed: () => _save(localizations),
+          child: Text(localizations.commonSave),
         ),
       ],
     );

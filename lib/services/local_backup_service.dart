@@ -6,13 +6,26 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
 
-/// Validates, exports, and imports local `.sqlite` store database backups.
 final class LocalBackupService {
-  /// Creates a local backup service.
   const LocalBackupService();
 
   static const List<int> _sqliteMagicHeader = <int>[
-    83, 81, 76, 105, 116, 101, 32, 102, 111, 114, 109, 97, 116, 32, 51, 0,
+    83,
+    81,
+    76,
+    105,
+    116,
+    101,
+    32,
+    102,
+    111,
+    114,
+    109,
+    97,
+    116,
+    32,
+    51,
+    0,
   ];
 
   static const Set<String> _requiredTables = <String>{
@@ -21,7 +34,6 @@ final class LocalBackupService {
     'stock_movements',
   };
 
-  /// Returns true when [candidateFile] is a valid Tinda360 SQLite database.
   bool isValidSqliteBackup(File candidateFile) {
     if (!candidateFile.existsSync()) return false;
     if (candidateFile.lengthSync() < 100) return false;
@@ -39,7 +51,15 @@ final class LocalBackupService {
         final tableNames = <String>{
           for (final row in rows) row['name'] as String,
         };
-        return tableNames.containsAll(_requiredTables);
+        if (!tableNames.containsAll(_requiredTables)) return false;
+        final userVersion = database.userVersion;
+        if (userVersion > AppDatabase.currentSchemaVersion) return false;
+        final integrity = database
+            .select('PRAGMA quick_check;')
+            .first
+            .values
+            .first;
+        return integrity == 'ok';
       } finally {
         database.close();
       }
@@ -48,7 +68,6 @@ final class LocalBackupService {
     }
   }
 
-  /// Creates a compacted single-file `.sqlite` snapshot and returns its bytes.
   Future<Uint8List> exportDatabaseBytes({
     required AppDatabase database,
     required File databaseFile,
@@ -59,10 +78,10 @@ final class LocalBackupService {
     );
     try {
       await createCompactedBackupSnapshot(database, snapshotFile);
-      if (snapshotFile.existsSync()) {
-        return await snapshotFile.readAsBytes();
+      if (!snapshotFile.existsSync()) {
+        throw const FileSystemException('backup_snapshot_missing');
       }
-      return await databaseFile.readAsBytes();
+      return await snapshotFile.readAsBytes();
     } finally {
       if (snapshotFile.existsSync()) {
         snapshotFile.deleteSync();
@@ -70,26 +89,54 @@ final class LocalBackupService {
     }
   }
 
-  /// Replaces [targetFile] with [sourceFile] after validating its schema.
-  ///
-  /// Throws [FormatException] if [sourceFile] is not a valid Tinda360 backup.
   Future<void> importDatabaseFile({
     required File sourceFile,
+    required bool keepSourceFile,
     required File targetFile,
     required Future<void> Function() closeActiveDatabase,
     required void Function() invalidateDatabase,
   }) async {
-    if (!isValidSqliteBackup(sourceFile)) {
-      throw const FormatException('invalid_sqlite_backup');
-    }
-
-    await closeActiveDatabase();
     final stagedFile = File('${targetFile.path}.importing');
-    await sourceFile.copy(stagedFile.path);
-    await stagedFile.rename(targetFile.path);
-    _deleteSidecar('${targetFile.path}-wal');
-    _deleteSidecar('${targetFile.path}-shm');
-    invalidateDatabase();
+    try {
+      if (keepSourceFile) {
+        await sourceFile.copy(stagedFile.path);
+      } else {
+        await sourceFile.rename(stagedFile.path);
+      }
+      if (!isValidSqliteBackup(stagedFile)) {
+        throw const FormatException('invalid_sqlite_backup');
+      }
+      final safetyCopy = File(_preImportPath(targetFile));
+      try {
+        await closeActiveDatabase();
+        _deleteSidecar('${targetFile.path}-wal');
+        _deleteSidecar('${targetFile.path}-shm');
+        final hadDatabase = targetFile.existsSync();
+        if (hadDatabase) await targetFile.copy(safetyCopy.path);
+        try {
+          await stagedFile.rename(targetFile.path);
+        } on Object {
+          if (hadDatabase && safetyCopy.existsSync()) {
+            await safetyCopy.copy(targetFile.path);
+          }
+          rethrow;
+        }
+      } finally {
+        invalidateDatabase();
+      }
+    } finally {
+      if (stagedFile.existsSync()) stagedFile.deleteSync();
+      _deleteSidecar('${stagedFile.path}-wal');
+      _deleteSidecar('${stagedFile.path}-shm');
+    }
+  }
+
+  String _preImportPath(File targetFile) {
+    final path = targetFile.path;
+    final withoutExtension = path.endsWith('.sqlite')
+        ? path.substring(0, path.length - '.sqlite'.length)
+        : path;
+    return '$withoutExtension.pre-import.sqlite';
   }
 
   bool _hasSqliteMagicHeader(File candidateFile) {

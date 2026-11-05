@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/routing/app_router.dart';
+import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_theme.dart';
 
-/// The root widget. Knows nothing about how its dependencies were built.
 class App extends ConsumerWidget {
-  /// Creates the app.
   const App({super.key});
 
   @override
@@ -20,6 +19,8 @@ class App extends ConsumerWidget {
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         scrollbars: false,
       ),
+      builder: (context, routedChild) =>
+          AdaptiveTextScale(child: routedChild ?? const SizedBox.shrink()),
       routerConfig: ref.watch(appRouterProvider),
       locale: ref.watch(localeProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,

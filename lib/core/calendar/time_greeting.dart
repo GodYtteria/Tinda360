@@ -1,4 +1,3 @@
-/// Returns a time-of-day greeting based on [now.hour].
 String timeOfDayGreeting(DateTime now, {required bool isFilipino}) {
   final hour = now.hour;
   if (hour >= 5 && hour < 12) {

@@ -1,10 +1,9 @@
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/money.dart';
 
-/// A product the store sells.
 final class Product {
-  /// Creates a product.
   const Product({
     required this.id,
     required this.name,
@@ -14,33 +13,33 @@ final class Product {
     this.categoryId,
     this.barcode,
     this.lowStockAt,
+    this.utangPrice,
+    this.tracksStock = true,
+    this.expiryDay,
   });
 
-  /// Stable identifier.
   final String id;
 
-  /// Display name, as the owner typed it.
   final String name;
 
-  /// How the product is counted.
   final ProductUnit unit;
 
-  /// Selling price per one [unit].
   final Money price;
 
-  /// Cost (puhunan) per one [unit].
   final Money cost;
 
-  /// Optional category link.
   final String? categoryId;
 
-  /// Optional barcode.
   final String? barcode;
 
-  /// Stock level at or below which the product counts as low; null = no alert.
   final Quantity? lowStockAt;
 
-  /// Profit per one [unit] (may be negative if priced below cost).
+  final Money? utangPrice;
+
+  final bool tracksStock;
+
+  final LocalDay? expiryDay;
+
   Money get marginPerUnit => price - cost;
 
   @override
@@ -53,7 +52,10 @@ final class Product {
       other.cost == cost &&
       other.categoryId == categoryId &&
       other.barcode == barcode &&
-      other.lowStockAt == lowStockAt;
+      other.lowStockAt == lowStockAt &&
+      other.utangPrice == utangPrice &&
+      other.tracksStock == tracksStock &&
+      other.expiryDay == expiryDay;
 
   @override
   int get hashCode => Object.hash(
@@ -65,5 +67,8 @@ final class Product {
     categoryId,
     barcode,
     lowStockAt,
+    utangPrice,
+    tracksStock,
+    expiryDay,
   );
 }

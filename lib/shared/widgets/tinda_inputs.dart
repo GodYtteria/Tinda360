@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Labeled form input with 1.5 px borderStrong outline and 14 dp radius.
 class TindaTextInput extends StatelessWidget {
-  /// Creates a labeled text input.
   const TindaTextInput({
     required this.label,
     super.key,
@@ -22,34 +21,24 @@ class TindaTextInput extends StatelessWidget {
     this.autofocus = false,
   });
 
-  /// Label displayed above the field.
   final String label;
 
-  /// Text controller.
   final TextEditingController? controller;
 
-  /// Placeholder text.
   final String? hintText;
 
-  /// Inline error displayed below the field.
   final String? errorText;
 
-  /// Keyboard type.
   final TextInputType? keyboardType;
 
-  /// Keyboard action.
   final TextInputAction? textInputAction;
 
-  /// Change listener.
   final ValueChanged<String>? onChanged;
 
-  /// Submit listener.
   final ValueChanged<String>? onSubmitted;
 
-  /// Optional trailing action inside the field.
   final Widget? suffixIcon;
 
-  /// Whether to focus on mount.
   final bool autofocus;
 
   @override
@@ -107,9 +96,7 @@ class TindaTextInput extends StatelessWidget {
   }
 }
 
-/// 46 dp search bar with leading search icon and optional clear button.
 class TindaSearchField extends StatelessWidget {
-  /// Creates a search field.
   const TindaSearchField({
     required this.hintText,
     required this.onChanged,
@@ -117,13 +104,10 @@ class TindaSearchField extends StatelessWidget {
     this.controller,
   });
 
-  /// Placeholder hint.
   final String hintText;
 
-  /// Change callback.
   final ValueChanged<String> onChanged;
 
-  /// Optional controller.
   final TextEditingController? controller;
 
   @override
@@ -162,9 +146,7 @@ class TindaSearchField extends StatelessWidget {
   }
 }
 
-/// Filter chip (40 dp height, 20 dp radius).
 class TindaFilterChip extends StatelessWidget {
-  /// Creates a filter chip.
   const TindaFilterChip({
     required this.label,
     required this.selected,
@@ -172,13 +154,10 @@ class TindaFilterChip extends StatelessWidget {
     super.key,
   });
 
-  /// Chip text.
   final String label;
 
-  /// Whether the chip is selected.
   final bool selected;
 
-  /// Tap callback.
   final VoidCallback? onTap;
 
   @override
@@ -229,9 +208,7 @@ class TindaFilterChip extends StatelessWidget {
   }
 }
 
-/// 2-3 equal segments (44-48 dp height).
 class TindaSegmentedControl<T> extends StatelessWidget {
-  /// Creates a segmented control.
   const TindaSegmentedControl({
     required this.segments,
     required this.selected,
@@ -239,13 +216,10 @@ class TindaSegmentedControl<T> extends StatelessWidget {
     super.key,
   });
 
-  /// Map of value -> display label.
   final Map<T, String> segments;
 
-  /// Currently selected value.
   final T selected;
 
-  /// Selection callback.
   final ValueChanged<T> onChanged;
 
   @override
@@ -307,13 +281,21 @@ class _SegmentButton extends StatelessWidget {
                 horizontal: AppSpacing.s8,
                 vertical: AppSpacing.s8,
               ),
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: AppTypography.meta(
-                  isSelected ? palette.onPrimary : palette.text,
-                  size: 13,
-                  weight: FontWeight.w700,
+              child: AdaptiveTextScale(
+                maxScale: AdaptiveLayout.maxChromeTextScale,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.meta(
+                      isSelected ? palette.onPrimary : palette.text,
+                      size: 13,
+                      weight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -324,9 +306,7 @@ class _SegmentButton extends StatelessWidget {
   }
 }
 
-/// Outlined pill stepper with 44x44 minus/plus buttons.
 class TindaStepper extends StatelessWidget {
-  /// Creates a stepper.
   const TindaStepper({
     required this.valueLabel,
     required this.onDecrement,
@@ -337,22 +317,16 @@ class TindaStepper extends StatelessWidget {
     this.onValueTap,
   });
 
-  /// Formatted current value.
   final String valueLabel;
 
-  /// Decrement handler; null disables minus.
   final VoidCallback? onDecrement;
 
-  /// Increment handler.
   final VoidCallback? onIncrement;
 
-  /// Accessibility label for decrement.
   final String decrementTooltip;
 
-  /// Accessibility label for increment.
   final String incrementTooltip;
 
-  /// Optional tap handler for the value label (e.g. open numeric entry).
   final VoidCallback? onValueTap;
 
   @override
@@ -376,24 +350,31 @@ class TindaStepper extends StatelessWidget {
               minHeight: AppSizes.touchTargetMin,
             ),
           ),
-          Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.s12,
-            ),
-            child: InkWell(
-              onTap: onValueTap,
-              borderRadius: BorderRadius.circular(AppRadii.smallButton),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.s4,
-                  vertical: AppSpacing.s4,
-                ),
-                child: Text(
-                  valueLabel,
-                  style: AppTypography.bodyStrong(
-                    palette.text,
-                    size: 18,
-                    weight: FontWeight.w700,
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.s12,
+              ),
+              child: InkWell(
+                onTap: onValueTap,
+                borderRadius: BorderRadius.circular(AppRadii.smallButton),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.s4,
+                    vertical: AppSpacing.s4,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      valueLabel,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: AppTypography.bodyStrong(
+                        palette.text,
+                        size: 18,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -414,19 +395,15 @@ class TindaStepper extends StatelessWidget {
   }
 }
 
-/// Accessible toggle switch (44 dp min tap area).
 class TindaToggleSwitch extends StatelessWidget {
-  /// Creates a toggle switch.
   const TindaToggleSwitch({
     required this.value,
     required this.onChanged,
     super.key,
   });
 
-  /// Current state.
   final bool value;
 
-  /// Change handler.
   final ValueChanged<bool> onChanged;
 
   @override

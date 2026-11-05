@@ -8,30 +8,27 @@ import 'package:tinda360/core/calendar/time_greeting.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
+import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/core/expenses/expense_entry.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/features/chat/presentation/chat_store_replies.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 
-/// Author of a chat message.
 enum ChatRole {
-  /// Message sent by the store owner.
   user,
 
-  /// Response generated on-device by Tinda AI.
   assistant,
 }
 
-/// A single message in the Tinda AI conversation.
 final class ChatMessage {
-  /// Creates a chat message.
   const ChatMessage({
     required this.id,
     required this.role,
@@ -40,41 +37,30 @@ final class ChatMessage {
     this.source,
   });
 
-  /// Unique message identifier.
   final String id;
 
-  /// Sender role.
   final ChatRole role;
 
-  /// Message body.
   final String text;
 
-  /// Data source label shown under assistant replies.
   final String? source;
 
-  /// Local timestamp when the message was created.
   final DateTime createdAt;
 }
 
-/// Immutable state for the Tinda AI chat sheet.
 final class ChatState {
-  /// Creates a chat state.
   const ChatState({
     required this.messages,
     required this.mood,
     required this.isThinking,
   });
 
-  /// Ordered conversation history.
   final List<ChatMessage> messages;
 
-  /// Current Tinda AI avatar expression.
   final TindaAvatarMood mood;
 
-  /// True while querying on-device store data.
   final bool isThinking;
 
-  /// Returns a copy with updated fields.
   ChatState copyWith({
     List<ChatMessage>? messages,
     TindaAvatarMood? mood,
@@ -86,12 +72,11 @@ final class ChatState {
   );
 }
 
-/// Riverpod provider for the offline Tinda AI chat assistant.
-final chatNotifierProvider = NotifierProvider.autoDispose<ChatNotifier, ChatState>(
-  ChatNotifier.new,
-);
+final chatNotifierProvider =
+    NotifierProvider.autoDispose<ChatNotifier, ChatState>(
+      ChatNotifier.new,
+    );
 
-/// Manages chat history, offline store queries, and avatar mood transitions.
 class ChatNotifier extends Notifier<ChatState> {
   Timer? _moodResetTimer;
   IntentMatcher? _matcher;
@@ -110,8 +95,10 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
-  /// Sends [rawText] and generates an offline answer from live store data.
-  Future<void> sendMessage(String rawText, AppLocalizations localizations) async {
+  Future<void> sendMessage(
+    String rawText,
+    AppLocalizations localizations,
+  ) async {
     final trimmed = rawText.trim();
     if (trimmed.isEmpty || state.isThinking) return;
 
@@ -134,20 +121,20 @@ class ChatNotifier extends Notifier<ChatState> {
     _AssistantReply reply;
     try {
       reply = await _answerFromStoreData(trimmed, now, localizations);
-    } on Exception {
+    } on Exception catch (error, stack) {
+      ref.read(appLogProvider).error('chat.answer', error, stack);
       reply = _AssistantReply(
         text: localizations.chatErrorReply,
         source: localizations.chatSourceSummary,
         mood: TindaAvatarMood.talking,
       );
     }
-    // Keep the thinking bubble visible long enough to read, even when the
-    // on-device lookup finishes almost instantly.
     final elapsed = DateTime.now().difference(thinkingStarted);
     const minimumThinking = Duration(milliseconds: 900);
     if (elapsed < minimumThinking) {
       await Future<void>.delayed(minimumThinking - elapsed);
     }
+    if (!ref.mounted) return;
 
     final assistantMessage = ChatMessage(
       id: 'assistant_${++_sequence}',
@@ -199,8 +186,8 @@ class ChatNotifier extends Notifier<ChatState> {
     if (matched.intent == ChatIntent.help) {
       return _AssistantReply(
         text: isFilipino
-            ? 'Pwede mong itanong: "Magkano benta ngayon?", "Ano pinakamabenta?", "Ano mababa ang stock?", "Sino may utang?", o pangalan ng produkto/suki.'
-            : 'You can ask: "How are sales today?", "Top products?", "What is low on stock?", "Who has utang?", or a product/suki name.',
+            ? 'Pwede mong itanong: "Magkano benta ngayon?", "Ano pinakamabenta?", "Ano mababa ang stock?", "Sino may utang?", "Magkano gastos ko?", "Ilan produkto ko?", o pangalan ng produkto/suki.'
+            : 'You can ask: "How are sales today?", "Top products?", "What is low on stock?", "Who has utang?", "How much did I spend?", "How many products do I have?", or a product/suki name.',
         source: localizations.chatSourceSummary,
         mood: TindaAvatarMood.talking,
       );
@@ -227,7 +214,11 @@ class ChatNotifier extends Notifier<ChatState> {
       products,
     );
     if (matchedProduct != null) {
-      return _buildProductLookupReply(matchedProduct, isFilipino, localizations);
+      return _buildProductLookupReply(
+        matchedProduct,
+        isFilipino,
+        localizations,
+      );
     }
 
     final matchedCustomer = _findMentionedCustomer(
@@ -245,8 +236,10 @@ class ChatNotifier extends Notifier<ChatState> {
     if (matched.intent == ChatIntent.salesCompare) {
       final todayRange = DayRange.single(today);
       final yesterdayRange = DayRange.single(today.plusDays(-1));
-      final todaySummary =
-          await ref.read(saleRepositoryProvider).watchSummary(todayRange).first;
+      final todaySummary = await ref
+          .read(saleRepositoryProvider)
+          .watchSummary(todayRange)
+          .first;
       final yesterdaySummary = await ref
           .read(saleRepositoryProvider)
           .watchSummary(yesterdayRange)
@@ -283,6 +276,44 @@ class ChatNotifier extends Notifier<ChatState> {
         expenses,
         currency,
         isFilipino,
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.storeInfo) {
+      final storeProfile = await ref
+          .read(storeProfileRepositoryProvider)
+          .watch()
+          .first;
+      return _fromStoreReply(
+        storeInfoReply(
+          storeName: storeProfile.name,
+          products: products,
+          isFilipino: isFilipino,
+        ),
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.productCount) {
+      return _fromStoreReply(
+        productCountReply(products: products, isFilipino: isFilipino),
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.expenses) {
+      final expenses = await ref
+          .read(expenseRepositoryProvider)
+          .watchInRange(range)
+          .first;
+      return _fromStoreReply(
+        expensesReply(
+          expenses: expenses,
+          summary: summary,
+          periodLabel: _timeframeLabel(matched.timeframe, isFilipino),
+          isFilipino: isFilipino,
+        ),
         localizations,
       );
     }
@@ -383,14 +414,13 @@ class ChatNotifier extends Notifier<ChatState> {
   _AssistantReply _buildProductPromptReply(
     bool isFilipino,
     AppLocalizations localizations,
-  ) =>
-      _AssistantReply(
-        text: isFilipino
-            ? 'Pakilagay ang pangalan ng produkto (hal. "Magkano Pancit Canton?").'
-            : 'Include the product name (e.g. "Price of Pancit Canton?").',
-        source: localizations.chatSourceInventory,
-        mood: TindaAvatarMood.talking,
-      );
+  ) => _AssistantReply(
+    text: isFilipino
+        ? 'Pakilagay ang pangalan ng produkto (hal. "Magkano Pancit Canton?").'
+        : 'Include the product name (e.g. "Price of Pancit Canton?").',
+    source: localizations.chatSourceInventory,
+    mood: TindaAvatarMood.talking,
+  );
 
   DayRange _rangeForTimeframe(QueryTimeframe timeframe, LocalDay today) =>
       switch (timeframe) {
@@ -434,12 +464,25 @@ class ChatNotifier extends Notifier<ChatState> {
     final price = formatMoney(product.price);
     final unit = localizedUnit(localizations, product.unit);
     final stock = formatQuantity(item.stock, product.unit);
+    final utangPrice = product.utangPrice;
+    final stockText = product.tracksStock
+        ? (isFilipino
+              ? 'Natitirang stock: $stock $unit.'
+              : 'Remaining stock: $stock $unit.')
+        : (isFilipino ? 'Stock: walang bilang.' : 'Stock: no stock count.');
+    final utangText = utangPrice == null
+        ? ''
+        : (isFilipino
+              ? ' Presyong utang: ${formatMoney(utangPrice)}.'
+              : ' Utang price: ${formatMoney(utangPrice)}.');
     return _AssistantReply(
       text: isFilipino
-          ? '${product.name}: $price bawat $unit. Natitirang stock: $stock $unit.'
-          : '${product.name}: $price per $unit. Remaining stock: $stock $unit.',
+          ? '${product.name}: $price bawat $unit. $stockText$utangText'
+          : '${product.name}: $price per $unit. $stockText$utangText',
       source: localizations.chatSourceInventory,
-      mood: item.isLowOnStock ? TindaAvatarMood.talking : TindaAvatarMood.happy,
+      mood: product.tracksStock && item.isLowOnStock
+          ? TindaAvatarMood.talking
+          : TindaAvatarMood.happy,
     );
   }
 
@@ -535,7 +578,8 @@ class ChatNotifier extends Notifier<ChatState> {
       switch (timeframe) {
         QueryTimeframe.today => isFilipino ? 'ngayon' : 'today',
         QueryTimeframe.week => isFilipino ? 'nakaraang 7 araw' : 'last 7 days',
-        QueryTimeframe.month => isFilipino ? 'nakaraang 30 araw' : 'last 30 days',
+        QueryTimeframe.month =>
+          isFilipino ? 'nakaraang 30 araw' : 'last 30 days',
       };
 
   _AssistantReply _buildLowStockReply(
@@ -577,10 +621,7 @@ class ChatNotifier extends Notifier<ChatState> {
         mood: TindaAvatarMood.happy,
       );
     }
-    final total = debtors.fold(
-      Money.zero(currency),
-      (sum, item) => sum + item.balance,
-    );
+    final total = totalUnpaidUtang(balances, currency: currency);
     final topNames = debtors
         .take(3)
         .map((item) => '${item.customer.name} (${formatMoney(item.balance)})')
@@ -609,16 +650,14 @@ class ChatNotifier extends Notifier<ChatState> {
       (total, entry) => total + entry.amount,
     );
     final netIncome = summary.profit - totalExpenses;
-    final totalUnpaidUtang = balances
-        .where((customerBalance) => customerBalance.owes)
-        .fold(Money.zero(currency), (total, entry) => total + entry.balance);
+    final unpaidUtangTotal = totalUnpaidUtang(balances, currency: currency);
 
     final utangExceedsThirtyPercent = summary.revenue.isPositive
-        ? totalUnpaidUtang.minorUnits * 100 > summary.revenue.minorUnits * 30
-        : totalUnpaidUtang.isPositive;
+        ? unpaidUtangTotal.minorUnits * 100 > summary.revenue.minorUnits * 30
+        : unpaidUtangTotal.isPositive;
     final hasRisk = netIncome.isNegative || utangExceedsThirtyPercent;
 
-    final unpaidText = formatMoney(totalUnpaidUtang);
+    final unpaidText = formatMoney(unpaidUtangTotal);
     final netIncomeText = formatMoney(netIncome);
 
     if (hasRisk) {
@@ -686,6 +725,15 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
+  _AssistantReply _fromStoreReply(
+    StoreReplyText storeReply,
+    AppLocalizations localizations,
+  ) => _AssistantReply(
+    text: storeReply.text,
+    source: localizations.chatSourceSummary,
+    mood: storeReply.mood,
+  );
+
   _AssistantReply _buildOverviewReply(
     List<StockedProduct> products,
     SalesSummary summary,
@@ -694,10 +742,7 @@ class ChatNotifier extends Notifier<ChatState> {
     AppLocalizations localizations,
   ) {
     final lowCount = products.where((item) => item.isLowOnStock).length;
-    final totalUtang = balances.fold(
-      Money.zero(currency),
-      (sum, item) => sum + item.balance,
-    );
+    final totalUtang = totalUnpaidUtang(balances, currency: currency);
     return _AssistantReply(
       text: localizations.chatReplyOverview(
         formatMoney(summary.revenue),

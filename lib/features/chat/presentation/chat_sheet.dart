@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
+import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -12,9 +13,7 @@ import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Modal bottom sheet for offline on-device Tinda AI chat.
 class ChatSheet extends ConsumerStatefulWidget {
-  /// Creates the chat sheet.
   const ChatSheet({
     super.key,
     this.contextHint,
@@ -22,16 +21,12 @@ class ChatSheet extends ConsumerStatefulWidget {
     this.onOpenTab,
   });
 
-  /// Optional context label shown above messages (e.g. "Asking about: Today report").
   final String? contextHint;
 
-  /// Extra quick suggestions shown first.
   final List<String> extraSuggestions;
 
-  /// Optional tab navigation callback (0=POS,1=Inventory,2=Utang,3=Reports).
   final ValueChanged<int>? onOpenTab;
 
-  /// Presents the Tinda AI chat sheet.
   static Future<void> show(
     BuildContext context, {
     String? contextHint,
@@ -130,9 +125,10 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final chatState = ref.watch(chatNotifierProvider);
+    final yumiScreen = ref.watch(yumiScreenProvider);
     if (_revealedIds.isEmpty && chatState.messages.isNotEmpty) {
       _revealedIds.addAll(chatState.messages.map((m) => m.id));
     }
@@ -209,6 +205,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                 children: [
                   _MessageList(
                     messages: chatState.messages,
+                    yumiScreen: yumiScreen,
                     isThinking: chatState.isThinking,
                     scrollController: _scrollController,
                     revealingMessageId: _revealingMessageId,
@@ -216,7 +213,8 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                       if (!mounted) return;
                       setState(() {
                         _revealedIds.add(id);
-                        if (_revealingMessageId == id) _revealingMessageId = null;
+                        if (_revealingMessageId == id)
+                          _revealingMessageId = null;
                       });
                     },
                     onOpenTab: widget.onOpenTab == null
@@ -258,9 +256,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                   _sendSuggestion(suggestion, localizations),
               suggestions: [
                 ...widget.extraSuggestions,
-                localizations.chatSuggestionSales,
-                localizations.chatSuggestionLowStock,
-                localizations.chatSuggestionUtang,
+                ...yumiSuggestionsFor(yumiScreen, localizations),
               ],
             ),
             _ChatInputBar(
@@ -288,7 +284,7 @@ class _ChatHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final statusText = isThinking
         ? localizations.chatStatusThinking
@@ -347,6 +343,7 @@ class _ChatHeader extends StatelessWidget {
 class _MessageList extends StatelessWidget {
   const _MessageList({
     required this.messages,
+    required this.yumiScreen,
     required this.isThinking,
     required this.scrollController,
     this.revealingMessageId,
@@ -355,6 +352,7 @@ class _MessageList extends StatelessWidget {
   });
 
   final List<ChatMessage> messages;
+  final YumiScreen yumiScreen;
   final bool isThinking;
   final ScrollController scrollController;
   final String? revealingMessageId;
@@ -363,16 +361,16 @@ class _MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final itemCount = messages.length + (isThinking ? 1 : 0);
     if (itemCount == 0) {
       final isFilipino = localizations.localeName.startsWith('fil');
       final welcome = ChatMessage(
         id: 'welcome',
         role: ChatRole.assistant,
-        text: localizations.chatWelcomeMessage(
-          timeOfDayGreeting(DateTime.now(), isFilipino: isFilipino),
-        ),
+        text:
+            '${localizations.chatWelcomeMessage(timeOfDayGreeting(DateTime.now(), isFilipino: isFilipino))} '
+            '${yumiHintFor(yumiScreen, localizations)}',
         createdAt: DateTime.now(),
         source: localizations.chatTitle,
       );
@@ -425,8 +423,7 @@ class _UserBubble extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.card),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppRadii.card),
-            onLongPress: () =>
-                Clipboard.setData(ClipboardData(text: text)),
+            onLongPress: () => Clipboard.setData(ClipboardData(text: text)),
             child: Padding(
               padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: AppSpacing.s14,
@@ -459,7 +456,7 @@ class _AssistantBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,7 +519,6 @@ class _AssistantBubble extends StatelessWidget {
   }
 }
 
-
 class _AssistantAction {
   const _AssistantAction(this.label, this.tabIndex);
   final String label;
@@ -535,19 +531,29 @@ List<_AssistantAction> _suggestedActions(
 ) {
   final text = '${message.text} ${message.source ?? ''}'.toLowerCase();
   final actions = <_AssistantAction>[];
-  if (text.contains('stock') || text.contains('imbentaryo') || text.contains('restock') || text.contains('mababa')) {
+  if (text.contains('stock') ||
+      text.contains('imbentaryo') ||
+      text.contains('restock') ||
+      text.contains('mababa')) {
     actions.add(_AssistantAction(localizations.navInventory, 1));
   }
-  if (text.contains('utang') || text.contains('suki') || text.contains('credit') || text.contains('may utang')) {
+  if (text.contains('utang') ||
+      text.contains('suki') ||
+      text.contains('credit') ||
+      text.contains('may utang')) {
     actions.add(_AssistantAction(localizations.navUtang, 2));
   }
-  if (text.contains('sales') || text.contains('benta') || text.contains('profit') || text.contains('report') || text.contains('ulat') || text.contains('top')) {
+  if (text.contains('sales') ||
+      text.contains('benta') ||
+      text.contains('profit') ||
+      text.contains('report') ||
+      text.contains('ulat') ||
+      text.contains('top')) {
     actions.add(_AssistantAction(localizations.navReports, 3));
   }
   if (actions.isEmpty) return const [];
-  // de-dup by tab
   final seen = <int>{};
-  return actions.where((a) => seen.add(a.tabIndex)).take(2).toList();
+  return actions.where((action) => seen.add(action.tabIndex)).take(2).toList();
 }
 
 class _ProgressiveText extends StatefulWidget {
@@ -574,16 +580,17 @@ class _ProgressiveTextState extends State<_ProgressiveText>
     super.initState();
     final length = widget.text.length.clamp(1, 400);
     final millis = (length * 12).clamp(300, 1400);
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: millis),
-    )
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          widget.onDone?.call();
-        }
-      })
-      ..forward();
+    _controller =
+        AnimationController(
+            vsync: this,
+            duration: Duration(milliseconds: millis),
+          )
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              widget.onDone?.call();
+            }
+          })
+          ..forward();
   }
 
   @override
@@ -600,8 +607,10 @@ class _ProgressiveTextState extends State<_ProgressiveText>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final count =
-            (widget.text.length * _controller.value).ceil().clamp(0, widget.text.length);
+        final count = (widget.text.length * _controller.value).ceil().clamp(
+          0,
+          widget.text.length,
+        );
         final visible = widget.text.substring(0, count);
         return Text(visible, style: widget.style);
       },
@@ -775,7 +784,7 @@ class _ChatInputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     return Container(
       padding: const EdgeInsetsDirectional.fromSTEB(

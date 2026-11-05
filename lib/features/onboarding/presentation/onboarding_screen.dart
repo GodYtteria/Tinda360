@@ -12,6 +12,7 @@ import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/data/db/store_registry.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/google_drive_backup_service.dart';
 import 'package:tinda360/services/service_providers.dart';
@@ -23,16 +24,12 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Two-step first-run onboarding flow for naming the store and choosing
-/// fresh start vs. Google Drive restore.
 class OnboardingScreen extends ConsumerStatefulWidget {
-  /// Creates the onboarding screen.
   const OnboardingScreen({
     required this.onCompleted,
     super.key,
   });
 
-  /// Called when onboarding is saved and ready to enter POS.
   final VoidCallback onCompleted;
 
   @override
@@ -161,6 +158,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final backupService = ref.read(driveBackupServiceProvider);
     final authResult = await backupService.signIn();
     if (!mounted) return;
+    final String signedInEmail;
     switch (authResult) {
       case BackupAuthCancelled():
         setState(() => _isSaving = false);
@@ -172,32 +170,56 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         });
         return;
       case BackupAuthSuccess(:final email):
-        await ref.read(backupPreferencesProvider).writeConnectedEmail(email);
-        break;
+        signedInEmail = email;
+        try {
+          await ref.read(backupPreferencesProvider).writeConnectedEmail(email);
+        } on Exception catch (error, stack) {
+          ref.read(appLogProvider).error('onboarding.save_email', error, stack);
+        }
     }
 
     final file = await ref.read(databaseFileProvider)();
-    final db = ref.read(appDatabaseProvider);
-    await db.close();
-    final syncResult = await backupService.downloadDatabaseTo(
-      file,
-      storeId: 'default',
-      allowPrompt: true,
-    );
-    if (syncResult is BackupSyncSuccess) {
-      for (final suffix in const ['-wal', '-shm']) {
-        final sidecar = File('${file.path}$suffix');
-        if (sidecar.existsSync()) sidecar.deleteSync();
+    final downloadedFile = File('${file.path}.downloaded');
+    var restored = false;
+    try {
+      final syncResult = await backupService.downloadDatabaseTo(
+        downloadedFile,
+        storeId:
+            ref.read(storeRegistryProvider).value?.activeStoreId ??
+            StoreRegistry.defaultStoreId,
+        accountEmail: signedInEmail,
+        allowPrompt: true,
+      );
+      if (syncResult is BackupSyncSuccess) {
+        await ref
+            .read(localBackupServiceProvider)
+            .importDatabaseFile(
+              sourceFile: downloadedFile,
+              keepSourceFile: false,
+              targetFile: file,
+              closeActiveDatabase: () => ref.read(appDatabaseProvider).close(),
+              invalidateDatabase: () => ref.invalidate(appDatabaseProvider),
+            );
+        restored = true;
+        try {
+          await ref.read(backupPreferencesProvider).writeBackupConnected(true);
+        } on Exception catch (error, stack) {
+          ref
+              .read(appLogProvider)
+              .error('onboarding.save_backup_connected', error, stack);
+        }
       }
-      await ref.read(backupPreferencesProvider).writeBackupConnected(true);
-      ref.invalidate(appDatabaseProvider);
-      if (!mounted) return;
+    } on Exception catch (error, stack) {
+      ref.read(appLogProvider).error('onboarding.restore', error, stack);
+    } finally {
+      if (downloadedFile.existsSync()) downloadedFile.deleteSync();
+    }
+    if (!mounted) return;
+    if (restored) {
       setState(() => _isSaving = false);
       widget.onCompleted();
       return;
     }
-    ref.invalidate(appDatabaseProvider);
-    if (!mounted) return;
     setState(() {
       _isSaving = false;
       _showRestoreUnavailable = true;
@@ -238,8 +260,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     constraints: const BoxConstraints(maxWidth: 520),
                     child: AnimatedSwitcher(
                       duration: Duration(
-                        milliseconds:
-                            MediaQuery.disableAnimationsOf(context) ? 0 : 260,
+                        milliseconds: MediaQuery.disableAnimationsOf(context)
+                            ? 0
+                            : 260,
                       ),
                       switchInCurve: Curves.easeOutCubic,
                       switchOutCurve: Curves.easeInCubic,
@@ -250,7 +273,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ).animate(animation);
                         return FadeTransition(
                           opacity: animation,
-                          child: SlideTransition(position: offset, child: child),
+                          child: SlideTransition(
+                            position: offset,
+                            child: child,
+                          ),
                         );
                       },
                       child: KeyedSubtree(
@@ -268,8 +294,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               )
                             : _StepTwoBackup(
                                 isSaving: _isSaving,
-                                showRestoreUnavailable:
-                                    _showRestoreUnavailable,
+                                showRestoreUnavailable: _showRestoreUnavailable,
                                 addSampleItems: _addSampleItems,
                                 errorMessage: _errorMessage,
                                 onAddSampleItemsChanged: (value) {
@@ -535,8 +560,9 @@ class _StepTwoBackup extends StatelessWidget {
               ),
               AnimatedSwitcher(
                 duration: Duration(
-                  milliseconds:
-                      MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+                  milliseconds: MediaQuery.disableAnimationsOf(context)
+                      ? 0
+                      : 180,
                 ),
                 child: !showRestoreUnavailable
                     ? const SizedBox.shrink()
@@ -545,8 +571,10 @@ class _StepTwoBackup extends StatelessWidget {
                         padding: const EdgeInsets.only(top: AppSpacing.s12),
                         child: Text(
                           localizations.onboardingRestoreUnavailable,
-                          style:
-                              AppTypography.meta(palette.textMuted, size: 13),
+                          style: AppTypography.meta(
+                            palette.textMuted,
+                            size: 13,
+                          ),
                         ),
                       ),
               ),

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
-/// Shown when the store data cannot be loaded.
 class HomeErrorView extends StatelessWidget {
-  /// Creates the view; [onRetry] reloads.
   const HomeErrorView({required this.onRetry, super.key});
 
-  /// Called when the owner taps retry.
   final VoidCallback onRetry;
 
   @override

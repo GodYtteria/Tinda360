@@ -1,0 +1,2778 @@
+[
+  {
+    "text": "hello",
+    "intent": "greeting"
+  },
+  {
+    "text": "hi po",
+    "intent": "greeting"
+  },
+  {
+    "text": "kumusta",
+    "intent": "greeting"
+  },
+  {
+    "text": "kamusta ka",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang umaga",
+    "intent": "greeting"
+  },
+  {
+    "text": "good morning po",
+    "intent": "greeting"
+  },
+  {
+    "text": "hey",
+    "intent": "greeting"
+  },
+  {
+    "text": "musta na",
+    "intent": "greeting"
+  },
+  {
+    "text": "HELLO!!",
+    "intent": "greeting"
+  },
+  {
+    "text": "kumusta po tinda",
+    "intent": "greeting"
+  },
+  {
+    "text": "good afternoon",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang hapon po",
+    "intent": "greeting"
+  },
+  {
+    "text": "hi tinda",
+    "intent": "greeting"
+  },
+  {
+    "text": "hello po",
+    "intent": "greeting"
+  },
+  {
+    "text": "👋 hello",
+    "intent": "greeting"
+  },
+  {
+    "text": "hey there",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang gabi",
+    "intent": "greeting"
+  },
+  {
+    "text": "good evening",
+    "intent": "greeting"
+  },
+  {
+    "text": "kmusta",
+    "intent": "greeting"
+  },
+  {
+    "text": "kamusta na",
+    "intent": "greeting"
+  },
+  {
+    "text": "uy hello",
+    "intent": "greeting"
+  },
+  {
+    "text": "hi hi",
+    "intent": "greeting"
+  },
+  {
+    "text": "gud am",
+    "intent": "greeting"
+  },
+  {
+    "text": "hello assistant",
+    "intent": "greeting"
+  },
+  {
+    "text": "kumusta ka na",
+    "intent": "greeting"
+  },
+  {
+    "text": "morning po",
+    "intent": "greeting"
+  },
+  {
+    "text": "hello good morning",
+    "intent": "greeting"
+  },
+  {
+    "text": "yo",
+    "intent": "greeting"
+  },
+  {
+    "text": "hola",
+    "intent": "greeting"
+  },
+  {
+    "text": "hello tinda ai",
+    "intent": "greeting"
+  },
+  {
+    "text": "kumusta ang araw mo",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang araw",
+    "intent": "greeting"
+  },
+  {
+    "text": "maayong buntag",
+    "intent": "greeting"
+  },
+  {
+    "text": "good day",
+    "intent": "greeting"
+  },
+  {
+    "text": "hi po kumusta",
+    "intent": "greeting"
+  },
+  {
+    "text": "HI",
+    "intent": "greeting"
+  },
+  {
+    "text": "hey kumusta",
+    "intent": "greeting"
+  },
+  {
+    "text": "kamusta po",
+    "intent": "greeting"
+  },
+  {
+    "text": "hello kumusta ka",
+    "intent": "greeting"
+  },
+  {
+    "text": "good morning tinda",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang umaga po",
+    "intent": "greeting"
+  },
+  {
+    "text": "😊 hi",
+    "intent": "greeting"
+  },
+  {
+    "text": "kumusta na po kayo",
+    "intent": "greeting"
+  },
+  {
+    "text": "hellooo",
+    "intent": "greeting"
+  },
+  {
+    "text": "hi there",
+    "intent": "greeting"
+  },
+  {
+    "text": "Hello! Kumusta?",
+    "intent": "greeting"
+  },
+  {
+    "text": "magandang tanghali",
+    "intent": "greeting"
+  },
+  {
+    "text": "musta po",
+    "intent": "greeting"
+  },
+  {
+    "text": "salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "thank you",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks po",
+    "intent": "thanks"
+  },
+  {
+    "text": "maraming salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat po",
+    "intent": "thanks"
+  },
+  {
+    "text": "THANKS",
+    "intent": "thanks"
+  },
+  {
+    "text": "ty",
+    "intent": "thanks"
+  },
+  {
+    "text": "tnx",
+    "intent": "thanks"
+  },
+  {
+    "text": "thx po",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat ah",
+    "intent": "thanks"
+  },
+  {
+    "text": "thank you so much",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat sa tulong",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat tinda",
+    "intent": "thanks"
+  },
+  {
+    "text": "🙏 salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "maraming salamat po",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks a lot",
+    "intent": "thanks"
+  },
+  {
+    "text": "thankyou",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat nmn",
+    "intent": "thanks"
+  },
+  {
+    "text": "ok salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks ha",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat sayo",
+    "intent": "thanks"
+  },
+  {
+    "text": "daghang salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat talaga",
+    "intent": "thanks"
+  },
+  {
+    "text": "thank u",
+    "intent": "thanks"
+  },
+  {
+    "text": "tenkyu",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat boss",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat sa info",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks for the help",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat ulit",
+    "intent": "thanks"
+  },
+  {
+    "text": "appreciate it",
+    "intent": "thanks"
+  },
+  {
+    "text": "ok thanks",
+    "intent": "thanks"
+  },
+  {
+    "text": "big thanks",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat po sa sagot",
+    "intent": "thanks"
+  },
+  {
+    "text": "mabuhay salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "thank you po",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks tinda",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat kaayo",
+    "intent": "thanks"
+  },
+  {
+    "text": "grabe salamat",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat sa sagot",
+    "intent": "thanks"
+  },
+  {
+    "text": "👍 thanks",
+    "intent": "thanks"
+  },
+  {
+    "text": "great thanks",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat sa lahat",
+    "intent": "thanks"
+  },
+  {
+    "text": "thanks so much",
+    "intent": "thanks"
+  },
+  {
+    "text": "salamat din",
+    "intent": "thanks"
+  },
+  {
+    "text": "ok thank you po",
+    "intent": "thanks"
+  },
+  {
+    "text": "tysm",
+    "intent": "thanks"
+  },
+  {
+    "text": "slmat po",
+    "intent": "thanks"
+  },
+  {
+    "text": "help",
+    "intent": "help"
+  },
+  {
+    "text": "tulong",
+    "intent": "help"
+  },
+  {
+    "text": "ano kaya mo",
+    "intent": "help"
+  },
+  {
+    "text": "what can you do",
+    "intent": "help"
+  },
+  {
+    "text": "ano pwede itanong",
+    "intent": "help"
+  },
+  {
+    "text": "how to use this",
+    "intent": "help"
+  },
+  {
+    "text": "paano gamitin",
+    "intent": "help"
+  },
+  {
+    "text": "help me po",
+    "intent": "help"
+  },
+  {
+    "text": "ano ba kaya mong gawin",
+    "intent": "help"
+  },
+  {
+    "text": "what can I ask you",
+    "intent": "help"
+  },
+  {
+    "text": "tulungan mo ako",
+    "intent": "help"
+  },
+  {
+    "text": "HELP",
+    "intent": "help"
+  },
+  {
+    "text": "paano ka gamitin",
+    "intent": "help"
+  },
+  {
+    "text": "what do you do",
+    "intent": "help"
+  },
+  {
+    "text": "ano pwede mong sagutin",
+    "intent": "help"
+  },
+  {
+    "text": "anong mga tanong pwede",
+    "intent": "help"
+  },
+  {
+    "text": "pano gamitin to",
+    "intent": "help"
+  },
+  {
+    "text": "can you help me",
+    "intent": "help"
+  },
+  {
+    "text": "commands",
+    "intent": "help"
+  },
+  {
+    "text": "what are your features",
+    "intent": "help"
+  },
+  {
+    "text": "ano ang kaya mo",
+    "intent": "help"
+  },
+  {
+    "text": "pano mag tanong sayo",
+    "intent": "help"
+  },
+  {
+    "text": "how do I use this assistant",
+    "intent": "help"
+  },
+  {
+    "text": "can u help",
+    "intent": "help"
+  },
+  {
+    "text": "need help",
+    "intent": "help"
+  },
+  {
+    "text": "tulong po",
+    "intent": "help"
+  },
+  {
+    "text": "anong pwede ko itanong sayo",
+    "intent": "help"
+  },
+  {
+    "text": "show me what you can do",
+    "intent": "help"
+  },
+  {
+    "text": "ano mga kaya mo gawin",
+    "intent": "help"
+  },
+  {
+    "text": "help menu",
+    "intent": "help"
+  },
+  {
+    "text": "guide me",
+    "intent": "help"
+  },
+  {
+    "text": "gabay naman",
+    "intent": "help"
+  },
+  {
+    "text": "how does this work",
+    "intent": "help"
+  },
+  {
+    "text": "paano ba to gamitin",
+    "intent": "help"
+  },
+  {
+    "text": "ano ginagawa mo",
+    "intent": "help"
+  },
+  {
+    "text": "what are you",
+    "intent": "help"
+  },
+  {
+    "text": "sino ka",
+    "intent": "help"
+  },
+  {
+    "text": "ano ka ba",
+    "intent": "help"
+  },
+  {
+    "text": "what questions can I ask",
+    "intent": "help"
+  },
+  {
+    "text": "instructions po",
+    "intent": "help"
+  },
+  {
+    "text": "tulungan mo ko",
+    "intent": "help"
+  },
+  {
+    "text": "pa help",
+    "intent": "help"
+  },
+  {
+    "text": "🆘 help",
+    "intent": "help"
+  },
+  {
+    "text": "ano kaya ng ai na to",
+    "intent": "help"
+  },
+  {
+    "text": "tulong naman po",
+    "intent": "help"
+  },
+  {
+    "text": "ano pwede ko gawin dito",
+    "intent": "help"
+  },
+  {
+    "text": "ano pinakamabenta",
+    "intent": "top_products"
+  },
+  {
+    "text": "best seller ko",
+    "intent": "top_products"
+  },
+  {
+    "text": "top products ngayon",
+    "intent": "top_products"
+  },
+  {
+    "text": "anong mabenta ngayong linggo",
+    "intent": "top_products"
+  },
+  {
+    "text": "best selling items this week",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano laging binibili",
+    "intent": "top_products"
+  },
+  {
+    "text": "top 3 products",
+    "intent": "top_products"
+  },
+  {
+    "text": "pinakamabenta this month",
+    "intent": "top_products"
+  },
+  {
+    "text": "what sells the most",
+    "intent": "top_products"
+  },
+  {
+    "text": "anong paninda ang malakas",
+    "intent": "top_products"
+  },
+  {
+    "text": "malakas na paninda",
+    "intent": "top_products"
+  },
+  {
+    "text": "popular items",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano mabenta today",
+    "intent": "top_products"
+  },
+  {
+    "text": "bestseller this week",
+    "intent": "top_products"
+  },
+  {
+    "text": "what are my best sellers",
+    "intent": "top_products"
+  },
+  {
+    "text": "top selling products",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ang pinakamabenta ngayong buwan",
+    "intent": "top_products"
+  },
+  {
+    "text": "anong item ang pinaka mabenta",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano mabilis maubos",
+    "intent": "top_products"
+  },
+  {
+    "text": "fast moving products",
+    "intent": "top_products"
+  },
+  {
+    "text": "hot items",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano madalas bilhin ng suki",
+    "intent": "top_products"
+  },
+  {
+    "text": "most sold items",
+    "intent": "top_products"
+  },
+  {
+    "text": "top sellers ko",
+    "intent": "top_products"
+  },
+  {
+    "text": "MABENTA NGAYON",
+    "intent": "top_products"
+  },
+  {
+    "text": "pinakamabenta nitong linggo",
+    "intent": "top_products"
+  },
+  {
+    "text": "what is selling fast",
+    "intent": "top_products"
+  },
+  {
+    "text": "anong bumebenta",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ang bumebenta ngayon",
+    "intent": "top_products"
+  },
+  {
+    "text": "top 5 products",
+    "intent": "top_products"
+  },
+  {
+    "text": "best sellers this month",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ang pinaka malakas",
+    "intent": "top_products"
+  },
+  {
+    "text": "which products sell best",
+    "intent": "top_products"
+  },
+  {
+    "text": "what do customers buy most",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano laging hinahanap",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ang hot ngayon",
+    "intent": "top_products"
+  },
+  {
+    "text": "fastest selling items",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano nangunguna sa benta",
+    "intent": "top_products"
+  },
+  {
+    "text": "top product ngayon",
+    "intent": "top_products"
+  },
+  {
+    "text": "anong paninda malakas benta",
+    "intent": "top_products"
+  },
+  {
+    "text": "ranking ng produkto",
+    "intent": "top_products"
+  },
+  {
+    "text": "pinakamabili",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ang pinakamadalas mabili",
+    "intent": "top_products"
+  },
+  {
+    "text": "🔥 bestsellers",
+    "intent": "top_products"
+  },
+  {
+    "text": "most popular product",
+    "intent": "top_products"
+  },
+  {
+    "text": "mabenta ba ngayon",
+    "intent": "top_products"
+  },
+  {
+    "text": "pinakamabnta ngaun",
+    "intent": "top_products"
+  },
+  {
+    "text": "ano ubos na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "low stock items",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano mababa stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "anong paubos na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "what's running low",
+    "intent": "low_stock"
+  },
+  {
+    "text": "out of stock products",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano kailangan i-restock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano na ang konti",
+    "intent": "low_stock"
+  },
+  {
+    "text": "low stock ngayon",
+    "intent": "low_stock"
+  },
+  {
+    "text": "imbentaryo check",
+    "intent": "low_stock"
+  },
+  {
+    "text": "check inventory",
+    "intent": "low_stock"
+  },
+  {
+    "text": "anong wala na stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano malapit maubos",
+    "intent": "low_stock"
+  },
+  {
+    "text": "what should I restock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano paubos na ngayon",
+    "intent": "low_stock"
+  },
+  {
+    "text": "LOW STOCK",
+    "intent": "low_stock"
+  },
+  {
+    "text": "mababa na ba stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "may ubos na ba",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano wala na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "stock alert",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano kulang sa paninda",
+    "intent": "low_stock"
+  },
+  {
+    "text": "items na konti na lang",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ilang items ang paubos",
+    "intent": "low_stock"
+  },
+  {
+    "text": "almost out of stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "what's nearly sold out",
+    "intent": "low_stock"
+  },
+  {
+    "text": "inventory status",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano nauubos na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano ubos",
+    "intent": "low_stock"
+  },
+  {
+    "text": "saan ako mauubusan",
+    "intent": "low_stock"
+  },
+  {
+    "text": "what needs refill",
+    "intent": "low_stock"
+  },
+  {
+    "text": "anong dapat i restock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "check stocks",
+    "intent": "low_stock"
+  },
+  {
+    "text": "stock level",
+    "intent": "low_stock"
+  },
+  {
+    "text": "pa check ng stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano na ang kulang",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano ang malapit na ubos",
+    "intent": "low_stock"
+  },
+  {
+    "text": "low inventory",
+    "intent": "low_stock"
+  },
+  {
+    "text": "show low stocks",
+    "intent": "low_stock"
+  },
+  {
+    "text": "may mauubos ba",
+    "intent": "low_stock"
+  },
+  {
+    "text": "wala nang stock",
+    "intent": "low_stock"
+  },
+  {
+    "text": "anong item ubos na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano imbntryo ko ngaun",
+    "intent": "low_stock"
+  },
+  {
+    "text": "mababa stock ano",
+    "intent": "low_stock"
+  },
+  {
+    "text": "ano pa ang kailangan ireplenish",
+    "intent": "low_stock"
+  },
+  {
+    "text": "anu ubos na",
+    "intent": "low_stock"
+  },
+  {
+    "text": "😱 ubos na ba",
+    "intent": "low_stock"
+  },
+  {
+    "text": "magkano utang ng mga suki",
+    "intent": "utang"
+  },
+  {
+    "text": "sino may utang",
+    "intent": "utang"
+  },
+  {
+    "text": "who owes me",
+    "intent": "utang"
+  },
+  {
+    "text": "utang ngayon",
+    "intent": "utang"
+  },
+  {
+    "text": "total utang",
+    "intent": "utang"
+  },
+  {
+    "text": "listahan ng utang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino nangutang",
+    "intent": "utang"
+  },
+  {
+    "text": "cno may utng",
+    "intent": "utang"
+  },
+  {
+    "text": "pautang list",
+    "intent": "utang"
+  },
+  {
+    "text": "who has unpaid balance",
+    "intent": "utang"
+  },
+  {
+    "text": "receivables",
+    "intent": "utang"
+  },
+  {
+    "text": "sinong hindi pa nagbabayad",
+    "intent": "utang"
+  },
+  {
+    "text": "total receivable",
+    "intent": "utang"
+  },
+  {
+    "text": "mga may utang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino ang may balance",
+    "intent": "utang"
+  },
+  {
+    "text": "utang ng suki ko",
+    "intent": "utang"
+  },
+  {
+    "text": "sino pa hindi nagbabayad",
+    "intent": "utang"
+  },
+  {
+    "text": "how much credit is outstanding",
+    "intent": "utang"
+  },
+  {
+    "text": "outstanding debts",
+    "intent": "utang"
+  },
+  {
+    "text": "unpaid utang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino sisingilin ko",
+    "intent": "utang"
+  },
+  {
+    "text": "sino dapat singilin",
+    "intent": "utang"
+  },
+  {
+    "text": "collect utang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino may pending bayad",
+    "intent": "utang"
+  },
+  {
+    "text": "utang book",
+    "intent": "utang"
+  },
+  {
+    "text": "show me utang",
+    "intent": "utang"
+  },
+  {
+    "text": "magkano ang utang lahat",
+    "intent": "utang"
+  },
+  {
+    "text": "SINO MAY UTANG",
+    "intent": "utang"
+  },
+  {
+    "text": "who owes money",
+    "intent": "utang"
+  },
+  {
+    "text": "total debt of customers",
+    "intent": "utang"
+  },
+  {
+    "text": "sinong nagkautang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino hindi pa bayad",
+    "intent": "utang"
+  },
+  {
+    "text": "pending utang",
+    "intent": "utang"
+  },
+  {
+    "text": "customers with debt",
+    "intent": "utang"
+  },
+  {
+    "text": "anong mga utang",
+    "intent": "utang"
+  },
+  {
+    "text": "dapat singilin",
+    "intent": "utang"
+  },
+  {
+    "text": "mga suki na may utang",
+    "intent": "utang"
+  },
+  {
+    "text": "utang this month",
+    "intent": "utang"
+  },
+  {
+    "text": "mgkano utang",
+    "intent": "utang"
+  },
+  {
+    "text": "sino pinakamalaki utang",
+    "intent": "utang"
+  },
+  {
+    "text": "biggest utang",
+    "intent": "utang"
+  },
+  {
+    "text": "unpaid credit",
+    "intent": "utang"
+  },
+  {
+    "text": "listahan ng sisingilin",
+    "intent": "utang"
+  },
+  {
+    "text": "balance ng mga suki",
+    "intent": "utang"
+  },
+  {
+    "text": "utang tracker",
+    "intent": "utang"
+  },
+  {
+    "text": "💸 sino may utang",
+    "intent": "utang"
+  },
+  {
+    "text": "magkano benta ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "how much did I sell today",
+    "intent": "sales"
+  },
+  {
+    "text": "mgkano bnta ngaun",
+    "intent": "sales"
+  },
+  {
+    "text": "sales today",
+    "intent": "sales"
+  },
+  {
+    "text": "total sales this week",
+    "intent": "sales"
+  },
+  {
+    "text": "kita ko ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "how much profit today",
+    "intent": "sales"
+  },
+  {
+    "text": "benta this month",
+    "intent": "sales"
+  },
+  {
+    "text": "ilan benta ko",
+    "intent": "sales"
+  },
+  {
+    "text": "revenue this week",
+    "intent": "sales"
+  },
+  {
+    "text": "gaano kalaki kita",
+    "intent": "sales"
+  },
+  {
+    "text": "kumita ba ako",
+    "intent": "sales"
+  },
+  {
+    "text": "how much did I earn",
+    "intent": "sales"
+  },
+  {
+    "text": "kinita ko today",
+    "intent": "sales"
+  },
+  {
+    "text": "tubo ngayong linggo",
+    "intent": "sales"
+  },
+  {
+    "text": "my income this month",
+    "intent": "sales"
+  },
+  {
+    "text": "ano benta ko",
+    "intent": "sales"
+  },
+  {
+    "text": "SALES TODAY",
+    "intent": "sales"
+  },
+  {
+    "text": "magkano kinita namin",
+    "intent": "sales"
+  },
+  {
+    "text": "kita ngayong buwan",
+    "intent": "sales"
+  },
+  {
+    "text": "how are sales",
+    "intent": "sales"
+  },
+  {
+    "text": "benta nitong linggo",
+    "intent": "sales"
+  },
+  {
+    "text": "total transactions today",
+    "intent": "sales"
+  },
+  {
+    "text": "ilang transaksyon",
+    "intent": "sales"
+  },
+  {
+    "text": "magkano naipon ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "earnings today",
+    "intent": "sales"
+  },
+  {
+    "text": "profit this week",
+    "intent": "sales"
+  },
+  {
+    "text": "how much money did I make",
+    "intent": "sales"
+  },
+  {
+    "text": "magkano pumasok na pera",
+    "intent": "sales"
+  },
+  {
+    "text": "kita ng tindahan ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "daily sales",
+    "intent": "sales"
+  },
+  {
+    "text": "weekly sales",
+    "intent": "sales"
+  },
+  {
+    "text": "monthly revenue",
+    "intent": "sales"
+  },
+  {
+    "text": "gross sales ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "ano kita ko this month",
+    "intent": "sales"
+  },
+  {
+    "text": "pera na pumasok",
+    "intent": "sales"
+  },
+  {
+    "text": "💰 kita today",
+    "intent": "sales"
+  },
+  {
+    "text": "benta ko nitong buwan",
+    "intent": "sales"
+  },
+  {
+    "text": "sales report",
+    "intent": "sales"
+  },
+  {
+    "text": "sales summary",
+    "intent": "sales"
+  },
+  {
+    "text": "total na benta",
+    "intent": "sales"
+  },
+  {
+    "text": "cash in today",
+    "intent": "sales"
+  },
+  {
+    "text": "how much was my profit",
+    "intent": "sales"
+  },
+  {
+    "text": "ang kita ko ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "sales ngaun",
+    "intent": "sales"
+  },
+  {
+    "text": "nakabenta ba ako ngayon",
+    "intent": "sales"
+  },
+  {
+    "text": "how many sales today",
+    "intent": "sales"
+  },
+  {
+    "text": "benta ng linggong ito",
+    "intent": "sales"
+  },
+  {
+    "text": "benta ngayon vs kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "compare today and yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas malaki ba benta ngayon kaysa kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "today vs yesterday sales",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "kumpara sa kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas mataas ba ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "how do sales compare to yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "benta kahapon at ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "compared to yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas mababa ba benta ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "bumaba ba benta",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "tumaas ba benta ko",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "VS KAHAPON",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas ok ba today kesa kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "benta ngaun vs kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "did sales go up",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "are sales up or down",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas marami ba nabenta kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "sales yesterday vs today",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "kahapon vs ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "ihambing ang benta",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "ihambing sa kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas malakas ba ngayon kaysa kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "difference ng benta today and yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "change in sales from yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "how is today compared to yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas maganda ba benta ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "bumaba ba kumpara kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "tumaas ba kumpara kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "up or down vs yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "benta ko kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "how much did I sell yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "kahapon magkano benta",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "yesterday sales",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "sales growth",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas malaki kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "kahapon ba mas mabenta",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "vs yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "ngayon kontra kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "pareho ba ng kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "better than yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "📈 compare sales",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas lamang ba ngayon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "benta today versus yesterday",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "versus kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "kumpara kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "mas mataas kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "bnta ngaun vs kahapon",
+    "intent": "sales_compare"
+  },
+  {
+    "text": "ano matumal",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "slow moving items",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "hindi nabibili",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "dead stock",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "walang benta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano di mabenta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "matumal na paninda",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "what's not selling",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "slow sellers",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "anong hindi mabenta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "unsold products",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano ang matumal ngayong buwan",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "products with no sales",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano walang bumibili",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano ang hindi nabebenta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "nakatambak na paninda",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano nakatengga",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "items na hindi gumagalaw",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "MATUMAL",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "dead stock ko",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano di nabebenta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "what is not moving",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "bad sellers",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "least sold items",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "pinakamatumal",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "pinakamatumal na produkto",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "stagnant items",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "slow items ngayong linggo",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano pinaka hindi mabenta",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "anong item matagal na walang bumibili",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "what isn't selling",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "nothing selling",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "products that don't sell",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano ang nakatambak",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano natengga",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "hindi gumagalaw na stock",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "aling produkto ang tumal",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "tumal na paninda",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "mga tumal na item",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano di mabili",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "anong item di nabili",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "hindi nabili this month",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "lowest selling products",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "worst sellers",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano ang hindi umaalis sa tindahan",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "unmoving stock",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "😴 matumal ano",
+    "intent": "slow_moving"
+  },
+  {
+    "text": "ano presyo",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano po",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "what is the price",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "presyo ng produkto",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano po ito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano ba ang isang item",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "price check",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "pa check ng presyo",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "how much is it",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano po yan",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "presyo?",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "what's the price of this",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "halaga ng paninda",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano isa",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano each",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "price list",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "ano ang presyo ng paninda",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "how much does it cost",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano ito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "ilan stock ng item",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "stock ng item",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "may stock ba nito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "meron pa ba nito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "ilan pa natitira nito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "how many left of this",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "available pa ba",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "is it available",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "pde malaman presyo",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "PRICE",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "PRESYO",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "mgkano po",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "pa-price",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "how much po",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "gaano kamahal",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "mahal ba",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano ang bentahan",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "selling price",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "retail price",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "cost price",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "tagpila ni",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "pila ang presyo",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "ilan natira",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "💵 presyo",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "magkano isang piraso",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "ano presyo nito",
+    "intent": "product_lookup"
+  },
+  {
+    "text": "naluluge ba ako",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "delikado ba mag pautang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "is it risky to give credit",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "credit risk",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "wag muna pautangin sino",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino delikado sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "who is a credit risk",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "cashflow check",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "how is my cashflow",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "ok ba cashflow ko",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "may risk ba sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "lugi ba ako",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "baka malugi ako",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino bad payer",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino mahirap singilin",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "risky customers",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino ang di nagbabayad lagi",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "dapat ba ako mag pautang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "safe ba magpautang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "masyadong malaki na ba utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "too much utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sobra na ba utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "utang vs cash",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "may panganib ba sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino dapat hindi pautangin",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "who should I stop giving credit to",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "stop credit",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "utang warning",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "credit warning",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "babala sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "cash flow ko",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "tight ba cashflow",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "mauubusan ba ako ng cash",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "late payers",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "sino laging late magbayad",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "delinquent customers",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "bad debts",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "overdue utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "lampas na sa due",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "DELIKADO BA",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "⚠️ risk sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "pautang ba ito",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "wag pautang muna",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "malulugi ba ako sa utang",
+    "intent": "utang_risk"
+  },
+  {
+    "text": "magkano puhunan sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "restock budget",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano bibilhin ko sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano kailangan sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "budget sa paninda",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "palengke budget",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much to bring to the market",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much do I need to restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "estimated restock cost",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano ang kapital pang restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "kapital sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano dadalhin ko sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "budget for restocking",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much should I budget for restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano gastusin sa pagbili ng paninda",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "cost to restock low items",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano pang restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano pambili ng ubos na paninda",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "puhunan ngayon",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "kailangan na puhunan",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano pamalengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "pamalengke budget",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "pamalengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "estimate ng restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "restock cost estimate",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much money for the market",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano pang puhunan",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "gaano kalaki puhunan",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano kailangan i restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "budget sa pamimili",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "budget for supplies",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "supplier budget",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much cash for supplies",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano ang bibilhin",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "palengke bukas magkano",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "budget bukas sa palengke",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "PALENGKE BUDGET",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "🛒 palengke budget",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "how much capital do I need",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano ilalabas ko sa restock",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "restock estimate",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "mgkano puhunan ngaun",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "magkano kapital pang palengke ngayong linggo",
+    "intent": "restock_budget"
+  },
+  {
+    "text": "ano pangalan ng tindahan ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "what's my store name",
+    "intent": "store_info"
+  },
+  {
+    "text": "anong store to",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano name ng store ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "store name",
+    "intent": "store_info"
+  },
+  {
+    "text": "pangalan ng tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "sino may-ari",
+    "intent": "store_info"
+  },
+  {
+    "text": "who owns this store",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano tawag sa tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "anong tindahan to",
+    "intent": "store_info"
+  },
+  {
+    "text": "my store info",
+    "intent": "store_info"
+  },
+  {
+    "text": "store details",
+    "intent": "store_info"
+  },
+  {
+    "text": "tungkol sa tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "about my store",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano address ng tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "anong tindahan ito",
+    "intent": "store_info"
+  },
+  {
+    "text": "tindahan ko ano pangalan",
+    "intent": "store_info"
+  },
+  {
+    "text": "store profile",
+    "intent": "store_info"
+  },
+  {
+    "text": "what is this store called",
+    "intent": "store_info"
+  },
+  {
+    "text": "name ng tindahan ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano store ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "which store is this",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano ang pangalan ng store",
+    "intent": "store_info"
+  },
+  {
+    "text": "saan ang tindahan ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "store address",
+    "intent": "store_info"
+  },
+  {
+    "text": "owner ng tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano pangalan ng sari-sari store ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "what's my shop's name",
+    "intent": "store_info"
+  },
+  {
+    "text": "shop name",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano ang name ng tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "anong shop to",
+    "intent": "store_info"
+  },
+  {
+    "text": "tindahan info",
+    "intent": "store_info"
+  },
+  {
+    "text": "info ng store",
+    "intent": "store_info"
+  },
+  {
+    "text": "STORE NAME",
+    "intent": "store_info"
+  },
+  {
+    "text": "sino owner ng store",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano ang tawag sa store ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "name of my store",
+    "intent": "store_info"
+  },
+  {
+    "text": "nasaan ang tindahan",
+    "intent": "store_info"
+  },
+  {
+    "text": "store location",
+    "intent": "store_info"
+  },
+  {
+    "text": "anong sari sari store to",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano pangalan ng business ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "business name",
+    "intent": "store_info"
+  },
+  {
+    "text": "ano name ng sari sari ko",
+    "intent": "store_info"
+  },
+  {
+    "text": "pangalan ng tindahan ko po",
+    "intent": "store_info"
+  },
+  {
+    "text": "🏪 store name",
+    "intent": "store_info"
+  },
+  {
+    "text": "ilan produkto ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many items do I sell",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan ang paninda ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many products",
+    "intent": "product_count"
+  },
+  {
+    "text": "total products",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang produkto meron ako",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan na paninda sa tindahan",
+    "intent": "product_count"
+  },
+  {
+    "text": "number of products",
+    "intent": "product_count"
+  },
+  {
+    "text": "bilang ng produkto",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan item ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many items in my catalog",
+    "intent": "product_count"
+  },
+  {
+    "text": "product count",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan lahat ng tinda",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang klase ng paninda",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many products do I have",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan ba paninda ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "total items",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang item meron",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan na produkto sa listahan",
+    "intent": "product_count"
+  },
+  {
+    "text": "count ng products",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan na ang nailagay kong produkto",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many things do I sell",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan ang tinda ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang paninda ang nasa app",
+    "intent": "product_count"
+  },
+  {
+    "text": "total number of items",
+    "intent": "product_count"
+  },
+  {
+    "text": "ILAN PRODUKTO",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan produkto meron",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang products meron ako",
+    "intent": "product_count"
+  },
+  {
+    "text": "how many different items",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang klase ng tinda ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "bilang ng paninda",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan lahat ng produkto",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilang items nasa listahan",
+    "intent": "product_count"
+  },
+  {
+    "text": "gaano karaming produkto",
+    "intent": "product_count"
+  },
+  {
+    "text": "dami ng produkto ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan lahat ng item",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan pala produkto ko nmn",
+    "intent": "product_count"
+  },
+  {
+    "text": "number of items",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan produkto nmn ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "ilan ang products ko",
+    "intent": "product_count"
+  },
+  {
+    "text": "magkano gastos ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "expenses this week",
+    "intent": "expenses"
+  },
+  {
+    "text": "net income",
+    "intent": "expenses"
+  },
+  {
+    "text": "kita pagkatapos ng gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos ngayon",
+    "intent": "expenses"
+  },
+  {
+    "text": "total expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano gastos ngayong buwan",
+    "intent": "expenses"
+  },
+  {
+    "text": "my expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "ano gastos ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "how much did I spend",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos this week",
+    "intent": "expenses"
+  },
+  {
+    "text": "net profit",
+    "intent": "expenses"
+  },
+  {
+    "text": "kita after expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "ano net income ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano nagastos ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "nagastos ngayon",
+    "intent": "expenses"
+  },
+  {
+    "text": "operating expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos sa tindahan",
+    "intent": "expenses"
+  },
+  {
+    "text": "expenses today",
+    "intent": "expenses"
+  },
+  {
+    "text": "expense report",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano lumabas na pera",
+    "intent": "expenses"
+  },
+  {
+    "text": "kita minus gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "tubo pagkatapos ng gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "net kita",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos at kita",
+    "intent": "expenses"
+  },
+  {
+    "text": "income after expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "profit after expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "how much did I spend this month",
+    "intent": "expenses"
+  },
+  {
+    "text": "total gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos ko this week",
+    "intent": "expenses"
+  },
+  {
+    "text": "bills and expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "ilan ang gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano ang nagastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "spending this week",
+    "intent": "expenses"
+  },
+  {
+    "text": "my spending",
+    "intent": "expenses"
+  },
+  {
+    "text": "gastos sa kuryente",
+    "intent": "expenses"
+  },
+  {
+    "text": "cash out today",
+    "intent": "expenses"
+  },
+  {
+    "text": "lumabas na pera",
+    "intent": "expenses"
+  },
+  {
+    "text": "ano net ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "GASTOS",
+    "intent": "expenses"
+  },
+  {
+    "text": "ano kita ko pagkatapos gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "how much is left after expenses",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano natira after gastos",
+    "intent": "expenses"
+  },
+  {
+    "text": "take home income",
+    "intent": "expenses"
+  },
+  {
+    "text": "mgkano gastos ngaun",
+    "intent": "expenses"
+  },
+  {
+    "text": "💸 gastos this month",
+    "intent": "expenses"
+  },
+  {
+    "text": "magkano ginastos ko",
+    "intent": "expenses"
+  },
+  {
+    "text": "How are sales in my store today?",
+    "intent": "sales"
+  },
+  {
+    "text": "number of sales today",
+    "intent": "sales"
+  },
+  {
+    "text": "pangalan ng suki na may utang",
+    "intent": "utang"
+  },
+  {
+    "text": "how much did my shop earn this week",
+    "intent": "sales"
+  },
+  {
+    "text": "sino may utang sa tindahan ko",
+    "intent": "utang"
+  },
+  {
+    "text": "what is my store name",
+    "intent": "store_info"
+  },
+  {
+    "text": "ilan produkto ko lahat",
+    "intent": "product_count"
+  }
+]
