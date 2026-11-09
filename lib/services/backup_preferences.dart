@@ -24,7 +24,7 @@ abstract interface class BackupPreferencesStore {
 }
 
 final class FileBackupPreferencesStore implements BackupPreferencesStore {
-  FileBackupPreferencesStore({Future<Directory> Function()? directoryProvider})
+  new({Future<Directory> Function()? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   static const String _fileName = 'tinda360_backup_prefs.json';

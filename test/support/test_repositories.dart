@@ -12,7 +12,7 @@ import 'sequential_ids.dart';
 import 'test_database.dart';
 
 final class TestRepositories {
-  TestRepositories({DateTime? now})
+  new({DateTime? now})
     : db = openTestDatabase(),
       clock = Clock.fixed(now ?? DateTime(2026, 11, 17, 10));
 

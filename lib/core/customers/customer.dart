@@ -1,7 +1,9 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/money.dart';
 
+@immutable
 final class Customer {
-  const Customer({
+  const new({
     required this.id,
     required this.name,
     this.phone,

@@ -5,7 +5,7 @@ enum PaymentMethod {
 
   utang('utang');
 
-  const PaymentMethod(this.storageName);
+  new(this.storageName);
 
   final String storageName;
 

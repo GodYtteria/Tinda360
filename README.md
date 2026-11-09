@@ -17,7 +17,7 @@ Version 1.0.0 is an MVP. We are glad to hear what real stores need next.
 - Stock that cannot be oversold, expiry dates and a shopping list
 - Utang per suki with history, reminders and a way to fix a wrong line
 - Reports, returns and an end of day cash count
-- A PIN for sensitive actions and a bantay name on every sale
+- A PIN for sensitive actions and the name of who is on duty on every sale
 - Backup to your own Google Drive or to a file
 - Filipino and English, and no internet needed
 

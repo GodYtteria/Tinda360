@@ -37,7 +37,7 @@ void main() {
       final dataRow = exportProductsCsv(products).split('\r\n')[1];
 
       expect(dataRow, startsWith('"\'=HYPERLINK('));
-      expect(dataRow, contains(",-3,"));
+      expect(dataRow, contains(',-3,'));
       expect(dataRow, contains("'@SUM(A1)"));
     });
 
@@ -192,7 +192,7 @@ void main() {
     });
 
     test('exports interest, refunded, local time and safe cashier', () {
-      final earlyMorning = DateTime(2026, 5, 10, 7, 0, 0);
+      final earlyMorning = DateTime(2026, 5, 10, 7);
       final csvOutput = exportSalesCsv(<SaleRecord>[
         SaleRecord(
           id: 'sale-9',

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/customer.dart';
 import 'package:tinda360/core/customers/customer_draft.dart';
 import 'package:tinda360/core/customers/interest_rate.dart';
@@ -15,7 +15,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class SukiEditSheet extends ConsumerStatefulWidget {
-  const SukiEditSheet({required this.customer, super.key});
+  const new({required this.customer, super.key});
 
   final Customer customer;
 

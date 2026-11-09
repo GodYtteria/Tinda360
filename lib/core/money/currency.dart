@@ -1,7 +1,7 @@
 enum Currency {
   php('PHP', 2);
 
-  const Currency(this.code, this.exponent);
+  new(this.code, this.exponent);
 
   final String code;
 

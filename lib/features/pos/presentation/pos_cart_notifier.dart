@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tinda360/features/pos/data/cart_storage.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/sale_line_draft.dart';
 import 'package:tinda360/core/sales/sale_math.dart';
+import 'package:tinda360/features/pos/data/cart_storage.dart';
 import 'package:tinda360/services/service_providers.dart';
 
 final posCartProvider =

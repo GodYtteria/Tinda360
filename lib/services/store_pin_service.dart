@@ -542,7 +542,7 @@ final class _PinRecord {
 }
 
 final class _PinAttempts {
-  const _PinAttempts({required this.failures, this.lockedUntil});
+  const new({required this.failures, this.lockedUntil});
 
   final int failures;
   final DateTime? lockedUntil;

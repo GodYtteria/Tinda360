@@ -15,17 +15,13 @@ import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/id_generator.dart';
 
 final class ExpenseRepository {
-  ExpenseRepository({
+  new({
     required AppDatabase db,
-    required Clock clock,
-    required IdGenerator ids,
-    required AppLog log,
-    required Currency currency,
-  }) : _database = db,
-       _clock = clock,
-       _ids = ids,
-       _log = log,
-       _currency = currency;
+    required this._clock,
+    required this._ids,
+    required this._log,
+    required this._currency,
+  }) : _database = db;
 
   final AppDatabase _database;
   final Clock _clock;

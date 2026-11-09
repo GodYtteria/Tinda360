@@ -1,7 +1,10 @@
-final class Quantity implements Comparable<Quantity> {
-  const Quantity.milli(this.milli);
+import 'package:meta/meta.dart';
 
-  const Quantity.whole(int count) : milli = count * milliPerUnit;
+@immutable
+final class Quantity implements Comparable<Quantity> {
+  const new milli(this.milli);
+
+  const new whole(int count) : milli = count * milliPerUnit;
 
   static const int milliPerUnit = 1000;
 

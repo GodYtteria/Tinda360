@@ -9,13 +9,11 @@ import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/db/app_database.dart';
 
 final class StoreProfileRepository {
-  StoreProfileRepository({
-    required AppDatabase db,
-    required Clock clock,
-    required AppLog log,
-  }) : _db = db,
-       _clock = clock,
-       _log = log;
+  new({
+    required this._db,
+    required this._clock,
+    required this._log,
+  });
 
   final AppDatabase _db;
   final Clock _clock;

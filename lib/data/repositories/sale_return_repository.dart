@@ -17,7 +17,7 @@ import 'package:tinda360/data/db/id_generator.dart';
 import 'package:tinda360/data/repositories/customer_repository.dart';
 
 final class SaleReturnOutcome {
-  const SaleReturnOutcome({
+  const new({
     required this.refund,
     required this.creditedToUtang,
   });
@@ -29,17 +29,13 @@ final class SaleReturnOutcome {
 }
 
 final class SaleReturnRepository {
-  SaleReturnRepository({
-    required AppDatabase db,
-    required Clock clock,
-    required IdGenerator ids,
-    required AppLog log,
-    required Currency currency,
-  }) : _db = db,
-       _clock = clock,
-       _ids = ids,
-       _log = log,
-       _currency = currency;
+  new({
+    required this._db,
+    required this._clock,
+    required this._ids,
+    required this._log,
+    required this._currency,
+  });
 
   final AppDatabase _db;
   final Clock _clock;
@@ -333,7 +329,7 @@ WHERE c.id = ?
 }
 
 final class _ReturnRejected implements Exception {
-  const _ReturnRejected(this.failure);
+  const new(this.failure);
 
   final SaleReturnFailure failure;
 }

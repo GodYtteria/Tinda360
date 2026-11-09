@@ -1,8 +1,10 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/customers/customer.dart';
 import 'package:tinda360/core/money/money.dart';
 
+@immutable
 final class CustomerBalance {
-  const CustomerBalance({
+  const new({
     required this.customer,
     required this.balance,
     this.outstandingInterestOrNull,

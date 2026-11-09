@@ -58,7 +58,7 @@ Future<void> _editStoreContact(
 }
 
 class _StoreSwitcherSection extends ConsumerWidget {
-  const _StoreSwitcherSection({required this.activeStoreName});
+  const new({required this.activeStoreName});
 
   final String activeStoreName;
 
@@ -271,7 +271,7 @@ class _StoreSwitcherSection extends ConsumerWidget {
 }
 
 class _StoreRow extends StatelessWidget {
-  const _StoreRow({
+  const new({
     required this.displayName,
     required this.isActive,
     required this.onSwitch,
@@ -343,7 +343,7 @@ class _StoreRow extends StatelessWidget {
 }
 
 class _StoreNameDialog extends StatefulWidget {
-  const _StoreNameDialog({required this.title, this.initialName = ''});
+  const new({required this.title, this.initialName = ''});
 
   final String title;
   final String initialName;

@@ -6,7 +6,7 @@ void main() {
   late ScanDebouncer debouncer;
 
   setUp(() {
-    currentTime = DateTime(2026, 1, 1);
+    currentTime = DateTime(2026);
     debouncer = ScanDebouncer(now: () => currentTime);
   });
 

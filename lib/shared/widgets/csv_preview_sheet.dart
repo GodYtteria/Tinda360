@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/inventory/data/product_csv_importer.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -11,7 +11,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class CsvPreviewSheet extends StatelessWidget {
-  const CsvPreviewSheet({
+  const new({
     required this.title,
     required this.headers,
     required this.rows,

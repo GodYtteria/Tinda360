@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tinda360/features/pos/presentation/cart_price_override_provider.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -10,6 +9,7 @@ import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/features/pos/data/cart_storage.dart';
+import 'package:tinda360/features/pos/presentation/cart_price_override_provider.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 
 StockedProduct _stocked(String id, Quantity stock) => StockedProduct(

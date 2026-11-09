@@ -5,7 +5,7 @@ abstract interface class IdGenerator {
 }
 
 final class UuidIdGenerator implements IdGenerator {
-  UuidIdGenerator();
+  new();
 
   final Uuid _uuid = const Uuid();
 

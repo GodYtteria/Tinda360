@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/expiry_status.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -7,7 +7,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class ProductNoCountSwitchRow extends StatelessWidget {
-  const ProductNoCountSwitchRow({
+  const new({
     required this.noCount,
     required this.onChanged,
     super.key,
@@ -48,7 +48,7 @@ class ProductNoCountSwitchRow extends StatelessWidget {
 }
 
 class ProductExpiryField extends StatelessWidget {
-  const ProductExpiryField({
+  const new({
     required this.expiryDay,
     required this.today,
     required this.onChanged,
@@ -104,7 +104,7 @@ class ProductExpiryField extends StatelessWidget {
 }
 
 class ProductFormWarning extends StatelessWidget {
-  const ProductFormWarning({required this.message, super.key});
+  const new({required this.message, super.key});
 
   final String message;
 

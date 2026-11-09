@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/pos/presentation/checkout_interest.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -18,7 +18,7 @@ String interestErrorMessage(
 };
 
 class CheckoutInterestField extends StatelessWidget {
-  const CheckoutInterestField({
+  const new({
     required this.controller,
     required this.mode,
     required this.onModeChanged,

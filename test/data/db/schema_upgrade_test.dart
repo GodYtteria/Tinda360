@@ -52,17 +52,17 @@ void main() {
         ..execute('ALTER TABLE store_profiles DROP COLUMN address')
         ..execute('ALTER TABLE store_profiles DROP COLUMN phone')
         ..execute(
-          "INSERT INTO sales (id, created_at, updated_at, method, "
+          'INSERT INTO sales (id, created_at, updated_at, method, '
           "paid_minor, day_serial) VALUES ('old-sale', 1, 1, 'cash', 500, 1)",
         )
         ..execute(
-          "INSERT INTO products (id, created_at, updated_at, name, "
-          "unit, price_minor, cost_minor) "
+          'INSERT INTO products (id, created_at, updated_at, name, '
+          'unit, price_minor, cost_minor) '
           "VALUES ('old-product', 1, 1, 'Kopiko', 'sachet', 500, 400)",
         )
         ..execute(
-          "INSERT INTO sale_items (id, created_at, updated_at, "
-          "sale_id, product_id, qty_milli, unit_price_minor, "
+          'INSERT INTO sale_items (id, created_at, updated_at, '
+          'sale_id, product_id, qty_milli, unit_price_minor, '
           "unit_cost_minor) VALUES ('old-line', 1, 1, 'old-sale', "
           "'old-product', 1000, 500, 400)",
         )
@@ -129,8 +129,8 @@ void main() {
 
       await expectLater(
         upgraded.customStatement(
-          "INSERT INTO sales (id, created_at, updated_at, method, paid_minor, "
-          "tendered_minor, day_serial) "
+          'INSERT INTO sales (id, created_at, updated_at, method, paid_minor, '
+          'tendered_minor, day_serial) '
           "VALUES ('short-cash', 2, 2, 'cash', 500, 100, 1)",
         ),
         throwsA(anything),
@@ -145,18 +145,18 @@ void main() {
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);
     await upgraded.customStatement(
-      "INSERT INTO sale_returns (id, created_at, updated_at, sale_id, "
-      "product_id, qty_milli, refund_minor) "
+      'INSERT INTO sale_returns (id, created_at, updated_at, sale_id, '
+      'product_id, qty_milli, refund_minor) '
       "VALUES ('return-1', 3, 3, 'old-sale', 'old-product', 1000, 500)",
     );
     await upgraded.customStatement(
-      "INSERT INTO stock_movements (id, created_at, updated_at, product_id, "
-      "qty_delta_milli, reason, sale_id) "
+      'INSERT INTO stock_movements (id, created_at, updated_at, product_id, '
+      'qty_delta_milli, reason, sale_id) '
       "VALUES ('movement-return', 3, 3, 'old-product', 1000, 'return', "
       "'old-sale')",
     );
     await upgraded.customStatement(
-      "INSERT INTO cash_counts (id, created_at, updated_at, day_serial, "
+      'INSERT INTO cash_counts (id, created_at, updated_at, day_serial, '
       "expected_minor, counted_minor) VALUES ('count-1', 3, 3, 1, 500, 480)",
     );
 
@@ -193,11 +193,11 @@ void main() {
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);
     await upgraded.customStatement(
-      "INSERT INTO customers (id, created_at, updated_at, name, "
+      'INSERT INTO customers (id, created_at, updated_at, name, '
       "interest_percent_tenths) VALUES ('suki-1', 1, 1, 'Ate Lina', 50)",
     );
     await upgraded.customStatement(
-      "INSERT INTO ledger_entries (id, created_at, updated_at, customer_id, "
+      'INSERT INTO ledger_entries (id, created_at, updated_at, customer_id, '
       "kind, amount_minor) VALUES ('tubo-1', 2, 2, 'suki-1', 'interest', 500)",
     );
     final rows = await upgraded
@@ -207,15 +207,15 @@ void main() {
 
     await expectLater(
       upgraded.customStatement(
-        "INSERT INTO ledger_entries (id, created_at, updated_at, "
-        "customer_id, kind, amount_minor) "
+        'INSERT INTO ledger_entries (id, created_at, updated_at, '
+        'customer_id, kind, amount_minor) '
         "VALUES ('bad', 3, 3, 'suki-1', 'bonus', 100)",
       ),
       throwsA(anything),
     );
     await expectLater(
       upgraded.customStatement(
-        "INSERT INTO customers (id, created_at, updated_at, name, "
+        'INSERT INTO customers (id, created_at, updated_at, name, '
         "interest_percent_tenths) VALUES ('suki-2', 1, 1, 'Mang Ben', 900)",
       ),
       throwsA(anything),
@@ -265,12 +265,12 @@ void main() {
       final upgraded = AppDatabase(NativeDatabase(file));
       addTearDown(upgraded.close);
       await upgraded.customStatement(
-        "INSERT INTO customers (id, created_at, updated_at, name) "
+        'INSERT INTO customers (id, created_at, updated_at, name) '
         "VALUES ('suki-9', 1, 1, 'Ate Rosa')",
       );
       await upgraded.customStatement(
-        "INSERT INTO ledger_entries (id, created_at, updated_at, customer_id, "
-        "kind, amount_minor, is_deleted, deleted_at, delete_reason) "
+        'INSERT INTO ledger_entries (id, created_at, updated_at, customer_id, '
+        'kind, amount_minor, is_deleted, deleted_at, delete_reason) '
         "VALUES ('entry-1', 2, 2, 'suki-9', 'payment', 500, 1, 3, 'maling halaga')",
       );
       final rows = await upgraded
@@ -292,7 +292,7 @@ void main() {
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);
     await upgraded.customStatement(
-      "UPDATE products SET tracks_stock = 0, expiry_day_serial = 20800 "
+      'UPDATE products SET tracks_stock = 0, expiry_day_serial = 20800 '
       "WHERE id = 'old-product'",
     );
     await upgraded.customStatement(

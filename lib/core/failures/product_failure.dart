@@ -1,32 +1,32 @@
 import 'package:tinda360/core/failure.dart';
 
 sealed class ProductFailure extends Failure {
-  const ProductFailure();
+  const new();
 }
 
 final class ProductNameRequired extends ProductFailure {
-  const ProductNameRequired();
+  const new();
 
   @override
   String get code => 'product.name_required';
 }
 
 final class ProductAmountInvalid extends ProductFailure {
-  const ProductAmountInvalid();
+  const new();
 
   @override
   String get code => 'product.amount_invalid';
 }
 
 final class ProductQuantityInvalid extends ProductFailure {
-  const ProductQuantityInvalid();
+  const new();
 
   @override
   String get code => 'product.quantity_invalid';
 }
 
 final class ProductBarcodeTaken extends ProductFailure {
-  const ProductBarcodeTaken(this.barcode);
+  const new(this.barcode);
 
   final String barcode;
 
@@ -35,7 +35,7 @@ final class ProductBarcodeTaken extends ProductFailure {
 }
 
 final class ProductNotFound extends ProductFailure {
-  const ProductNotFound(this.productId);
+  const new(this.productId);
 
   final String productId;
 
@@ -44,7 +44,7 @@ final class ProductNotFound extends ProductFailure {
 }
 
 final class ProductStoreUnavailable extends ProductFailure {
-  const ProductStoreUnavailable();
+  const new();
 
   @override
   String get code => 'product.store_unavailable';

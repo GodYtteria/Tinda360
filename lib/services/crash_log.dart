@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tinda360/core/app_log.dart';
 
 final class CrashLog implements AppLog {
-  CrashLog._(this._file);
+  new _(this._file);
 
   static Future<CrashLog> open() async {
     Directory directory;
@@ -41,7 +41,7 @@ final class CrashLog implements AppLog {
 }
 
 final RegExp _boundValues = RegExp(
-  r'(parameters|args|arguments):.*',
+  '(parameters|args|arguments):.*',
   caseSensitive: false,
   dotAll: true,
 );

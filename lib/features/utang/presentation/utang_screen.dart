@@ -1,27 +1,27 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
+import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/repositories/utang_age_providers.dart';
 import 'package:tinda360/data/repositories/utang_age_repository.dart';
 import 'package:tinda360/features/utang/data/utang_csv_exporter.dart';
-import 'package:tinda360/services/service_providers.dart';
-import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 import 'package:tinda360/features/utang/presentation/suki_ledger_sheet.dart';
+import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
-import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
+import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
+import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
-import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
-import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
@@ -45,7 +45,7 @@ List<CustomerBalance> filterUtangBalances(
 }
 
 class UtangScreen extends ConsumerStatefulWidget {
-  const UtangScreen({
+  const new({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
@@ -72,6 +72,8 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
   Future<void> _exportUtangCsv(List<CustomerBalance> balances) async {
     unawaited(HapticFeedback.lightImpact());
     final localizations = AppLocalizations.of(context);
+    final appLog = ref.read(appLogProvider);
+    final clock = ref.read(clockProvider);
     try {
       final ledgerByCustomer = await ref
           .read(utangAgeRepositoryProvider)
@@ -79,7 +81,7 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
       final csvContent = exportUtangCsv(
         balances: balances,
         ledgerByCustomer: ledgerByCustomer,
-        now: ref.read(clockProvider).now(),
+        now: clock.now(),
       );
       final parsed = parseCsvForPreview(csvContent);
       if (!mounted) return;
@@ -92,10 +94,11 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
         csvContent: csvContent,
         successMessage: localizations.reportsExportCsvSuccess,
       );
-    } on Exception {
+    } on Exception catch (error, stackTrace) {
+      appLog.error('utang_export_csv_failed', error, stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizations.reportsExportPdfError)),
+        SnackBar(content: Text(localizations.reportsExportCsvError)),
       );
     }
   }
@@ -121,6 +124,7 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
                 totalUtang: totalUtang,
                 sukiCount: balances.length,
                 onOpenSettings: widget.onOpenSettings,
+                onExportCsv: () => unawaited(_exportUtangCsv(balances)),
               ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(
@@ -133,18 +137,6 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
                   controller: _searchController,
                   hintText: localizations.utangSearchHint,
                   onChanged: (value) => setState(() => _searchQuery = value),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    end: AppSpacing.screenHorizontal,
-                  ),
-                  child: TindaTextLinkButton(
-                    label: localizations.utangExportCsv,
-                    onPressed: () => unawaited(_exportUtangCsv(balances)),
-                  ),
                 ),
               ),
               Expanded(
@@ -288,15 +280,17 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
 }
 
 class _UtangHeader extends StatelessWidget {
-  const _UtangHeader({
+  const new({
     required this.totalUtang,
     required this.sukiCount,
     required this.onOpenSettings,
+    required this.onExportCsv,
   });
 
   final Money totalUtang;
   final int sukiCount;
   final VoidCallback onOpenSettings;
+  final VoidCallback onExportCsv;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +299,12 @@ class _UtangHeader extends StatelessWidget {
     return TindaHeaderBar(
       title: Text(localizations.utangTitle),
       actions: [
+        TindaIconButton(
+          icon: Icons.file_download_outlined,
+          tooltip: localizations.utangExportCsv,
+          onPressed: onExportCsv,
+          onHeader: true,
+        ),
         TindaIconButton(
           svgAsset: 'assets/icons/settings.svg',
           tooltip: localizations.posOpenSettings,
@@ -350,7 +350,7 @@ class _UtangHeader extends StatelessWidget {
 }
 
 class _SukiBalanceCard extends StatelessWidget {
-  const _SukiBalanceCard({
+  const new({
     required this.balance,
     required this.ageDays,
     required this.onTap,
@@ -415,7 +415,7 @@ class _SukiBalanceCard extends StatelessWidget {
                           label: localizations.utangOverLimit,
                           isDanger: true,
                         ),
-                      if (ageDays != null)
+                      if (ageDays != null && ageDays! >= 1)
                         Text(
                           localizations.utangAgeDays(ageDays!),
                           key: ValueKey('utang-age-${customer.id}'),
@@ -446,7 +446,7 @@ class _SukiBalanceCard extends StatelessWidget {
 }
 
 class _AddSukiPillButton extends StatelessWidget {
-  const _AddSukiPillButton({required this.label, required this.onPressed});
+  const new({required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;

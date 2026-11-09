@@ -57,6 +57,6 @@ void main() {
       _record('debt', amountMinor: 1000),
       _record('payment', isDeleted: true, amountMinor: 900),
     ], Currency.php);
-    expect(breakdown.utang, Money(1000, Currency.php));
+    expect(breakdown.utang, const Money(1000, Currency.php));
   });
 }

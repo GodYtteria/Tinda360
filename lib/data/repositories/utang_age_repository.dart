@@ -58,9 +58,7 @@ int? oldestOutstandingDebtAgeDays(
 }
 
 final class UtangAgeRepository {
-  UtangAgeRepository({required AppDatabase db, required Currency currency})
-    : _db = db,
-      _currency = currency;
+  new({required this._db, required this._currency});
 
   final AppDatabase _db;
   final Currency _currency;

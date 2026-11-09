@@ -1,17 +1,17 @@
 import 'package:tinda360/core/failure.dart';
 
 sealed class Result<T, F extends Failure> {
-  const Result();
+  const new();
 }
 
 final class Ok<T, F extends Failure> extends Result<T, F> {
-  const Ok(this.value);
+  const new(this.value);
 
   final T value;
 }
 
 final class Err<T, F extends Failure> extends Result<T, F> {
-  const Err(this.failure);
+  const new(this.failure);
 
   final F failure;
 }

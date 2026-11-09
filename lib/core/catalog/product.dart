@@ -1,10 +1,12 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/money.dart';
 
+@immutable
 final class Product {
-  const Product({
+  const new({
     required this.id,
     required this.name,
     required this.unit,

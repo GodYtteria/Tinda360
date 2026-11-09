@@ -1,7 +1,7 @@
 part of 'ulat_screen.dart';
 
 class _RecentSalesSection extends ConsumerWidget {
-  const _RecentSalesSection();
+  const new();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -123,179 +123,177 @@ class _RecentSalesSection extends ConsumerWidget {
   ) {
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: palette.scrim,
-        builder: (sheetContext) => TindaBottomSheet(
-          title: localizations.ulatSaleDetailTitle,
-          closeTooltip: localizations.commonClose,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final line in sale.lines)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${line.productName} × '
-                          '${formatQuantity(line.quantity, line.unit)} '
-                          '${localizedUnit(localizations, line.unit)}',
-                          style: AppTypography.body(palette.text),
-                        ),
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: palette.scrim,
+      builder: (sheetContext) => TindaBottomSheet(
+        title: localizations.ulatSaleDetailTitle,
+        closeTooltip: localizations.commonClose,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final line in sale.lines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.s8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${line.productName} × '
+                        '${formatQuantity(line.quantity, line.unit)} '
+                        '${localizedUnit(localizations, line.unit)}',
+                        style: AppTypography.body(palette.text),
                       ),
-                      Text(
-                        formatMoney(line.lineTotal),
-                        style: AppTypography.bodyStrong(palette.text),
-                      ),
-                    ],
-                  ),
-                ),
-              Divider(color: palette.border),
-              const SizedBox(height: AppSpacing.s8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      localizations.ulatSaleTotalLabel,
+                    ),
+                    Text(
+                      formatMoney(line.lineTotal),
                       style: AppTypography.bodyStrong(palette.text),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Flexible(
-                    child: MoneyText(
-                      sale.total,
-                      alignment: AlignmentDirectional.centerEnd,
-                      style: AppTypography.title(palette.primary),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              if (sale.refunded.isPositive) ...[
-                _SaleDetailAmountRow(
-                  label: localizations.receiptRefunded,
-                  amount: Money(
-                    -sale.refunded.minorUnits,
-                    sale.refunded.currency,
+            Divider(color: palette.border),
+            const SizedBox(height: AppSpacing.s8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    localizations.ulatSaleTotalLabel,
+                    style: AppTypography.bodyStrong(palette.text),
                   ),
                 ),
-                _SaleDetailAmountRow(
-                  label: localizations.receiptNetTotal,
-                  amount: sale.netTotal,
+                const SizedBox(width: AppSpacing.s8),
+                Flexible(
+                  child: MoneyText(
+                    sale.total,
+                    alignment: AlignmentDirectional.centerEnd,
+                    style: AppTypography.title(palette.primary),
+                  ),
                 ),
               ],
+            ),
+            if (sale.refunded.isPositive) ...[
               _SaleDetailAmountRow(
-                label: localizations.ulatSalePaidLabel,
-                amount: sale.received,
+                label: localizations.receiptRefunded,
+                amount: Money(
+                  -sale.refunded.minorUnits,
+                  sale.refunded.currency,
+                ),
               ),
-              if (sale.change.isPositive)
-                _SaleDetailAmountRow(
-                  label: localizations.receiptChange,
-                  amount: sale.change,
-                ),
-              if (sale.paid < sale.total)
-                _SaleDetailAmountRow(
-                  label: localizations.receiptUtang,
-                  amount: sale.total - sale.paid + sale.interest,
-                ),
-              if (sale.paid < sale.total && sale.interest.isPositive)
-                _SaleDetailAmountRow(
-                  label: localizations.receiptInterest,
-                  amount: sale.interest,
-                ),
-              if (sale.cashierName != null) ...[
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  '${localizations.receiptBantayLabel}: ${sale.cashierName}',
-                  style: AppTypography.meta(palette.textMuted),
-                ),
-              ],
-              if (sale.ewalletReference != null &&
-                  sale.ewalletReference!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  '${localizations.ulatSaleReferenceLabel}: '
-                  '${sale.ewalletReference}',
-                  style: AppTypography.meta(palette.textMuted),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.s16),
-              TindaSecondaryButton(
-                label: localizations.receiptPrint58mm,
-                icon: Icons.print_outlined,
-                onPressed: () {
-                  unawaited(HapticFeedback.lightImpact());
-                  final storeProfile = ref
-                      .read(_ulatStoreProfileProvider)
-                      .asData
-                      ?.value;
-                  final storeName = storeProfile?.name ?? '';
-                  unawaited(
-                    ReceiptPreviewSheet.show(
-                      sheetContext,
-                      storeName: storeName.trim().isEmpty
-                          ? localizations.appTitle
-                          : storeName,
-                      lines: [
-                        for (final line in sale.lines)
-                          '${line.productName} x${formatQuantity(line.quantity, line.unit)} '
-                              '${localizedUnit(localizations, line.unit)} = ${formatMoney(line.lineTotal)}',
-                      ],
-                      total: sale.total,
-                      paid: sale.received,
-                      change: sale.change,
-                      paymentLabel: localizedPaymentMethod(
-                        localizations,
-                        sale.method,
-                      ),
-                      timestamp: DateTime.fromMillisecondsSinceEpoch(
-                        sale.createdAtMs,
-                      ).toLocal(),
-                      details: ReceiptDetails(
-                        receiptNumber: sale.receiptNumber,
-                        customerName: sale.customerName,
-                        ewalletReference: sale.ewalletReference,
-                        interest: sale.interest,
-                        refunded: sale.refunded,
-                        cashierName: sale.cashierName,
-                        storeAddress: storeProfile?.address,
-                        storePhone: storeProfile?.phone,
-                      ),
+              _SaleDetailAmountRow(
+                label: localizations.receiptNetTotal,
+                amount: sale.netTotal,
+              ),
+            ],
+            _SaleDetailAmountRow(
+              label: localizations.ulatSalePaidLabel,
+              amount: sale.received,
+            ),
+            if (sale.change.isPositive)
+              _SaleDetailAmountRow(
+                label: localizations.receiptChange,
+                amount: sale.change,
+              ),
+            if (sale.paid < sale.total)
+              _SaleDetailAmountRow(
+                label: localizations.receiptUtang,
+                amount: sale.total - sale.paid + sale.interest,
+              ),
+            if (sale.paid < sale.total && sale.interest.isPositive)
+              _SaleDetailAmountRow(
+                label: localizations.receiptInterest,
+                amount: sale.interest,
+              ),
+            if (sale.cashierName != null) ...[
+              const SizedBox(height: AppSpacing.s4),
+              Text(
+                '${localizations.receiptBantayLabel}: ${sale.cashierName}',
+                style: AppTypography.meta(palette.textMuted),
+              ),
+            ],
+            if (sale.ewalletReference != null &&
+                sale.ewalletReference!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.s4),
+              Text(
+                '${localizations.ulatSaleReferenceLabel}: '
+                '${sale.ewalletReference}',
+                style: AppTypography.meta(palette.textMuted),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.s16),
+            TindaSecondaryButton(
+              label: localizations.receiptPrint58mm,
+              icon: Icons.print_outlined,
+              onPressed: () {
+                unawaited(HapticFeedback.lightImpact());
+                final storeProfile = ref
+                    .read(_ulatStoreProfileProvider)
+                    .asData
+                    ?.value;
+                final storeName = storeProfile?.name ?? '';
+                unawaited(
+                  ReceiptPreviewSheet.show(
+                    sheetContext,
+                    storeName: storeName.trim().isEmpty
+                        ? localizations.appTitle
+                        : storeName,
+                    lines: [
+                      for (final line in sale.lines)
+                        '${line.productName} x${formatQuantity(line.quantity, line.unit)} '
+                            '${localizedUnit(localizations, line.unit)} = ${formatMoney(line.lineTotal)}',
+                    ],
+                    total: sale.total,
+                    paid: sale.received,
+                    change: sale.change,
+                    paymentLabel: localizedPaymentMethod(
+                      localizations,
+                      sale.method,
                     ),
-                  );
-                },
-              ),
-              if (sale.lines.any(
-                (line) => line.returnableQuantity.isPositive,
-              )) ...[
-                const SizedBox(height: AppSpacing.s8),
-                TindaSecondaryButton(
-                  label: localizations.ulatReturnTitle,
-                  icon: Icons.assignment_return_outlined,
-                  onPressed: () {
-                    unawaited(HapticFeedback.selectionClick());
-                    Navigator.of(sheetContext).pop();
-                    unawaited(showSaleReturnSheet(context, sale: sale));
-                  },
-                ),
-              ],
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(
+                      sale.createdAtMs,
+                    ).toLocal(),
+                    details: ReceiptDetails(
+                      receiptNumber: sale.receiptNumber,
+                      customerName: sale.customerName,
+                      ewalletReference: sale.ewalletReference,
+                      interest: sale.interest,
+                      refunded: sale.refunded,
+                      cashierName: sale.cashierName,
+                      storeAddress: storeProfile?.address,
+                      storePhone: storeProfile?.phone,
+                    ),
+                  ),
+                );
+              },
+            ),
+            if (sale.lines.any(
+              (line) => line.returnableQuantity.isPositive,
+            )) ...[
               const SizedBox(height: AppSpacing.s8),
-              TindaTextLinkButton(
-                label: localizations.ulatVoidSaleButton,
-                isDanger: true,
+              TindaSecondaryButton(
+                label: localizations.ulatReturnTitle,
+                icon: Icons.assignment_return_outlined,
                 onPressed: () {
                   unawaited(HapticFeedback.selectionClick());
-                  unawaited(_confirmVoidSale(sheetContext, context, ref, sale));
+                  Navigator.of(sheetContext).pop();
+                  unawaited(showSaleReturnSheet(context, sale: sale));
                 },
               ),
             ],
-          ),
+            const SizedBox(height: AppSpacing.s8),
+            TindaTextLinkButton(
+              label: localizations.ulatVoidSaleButton,
+              isDanger: true,
+              onPressed: () {
+                unawaited(HapticFeedback.selectionClick());
+                unawaited(_confirmVoidSale(sheetContext, context, ref, sale));
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -346,7 +344,7 @@ class _RecentSalesSection extends ConsumerWidget {
 }
 
 class _SaleDetailAmountRow extends StatelessWidget {
-  const _SaleDetailAmountRow({required this.label, required this.amount});
+  const new({required this.label, required this.amount});
 
   final String label;
   final Money amount;

@@ -29,7 +29,7 @@ enum ChatRole {
 }
 
 final class ChatMessage {
-  const ChatMessage({
+  const new({
     required this.id,
     required this.role,
     required this.text,
@@ -49,7 +49,7 @@ final class ChatMessage {
 }
 
 final class ChatState {
-  const ChatState({
+  const new({
     required this.messages,
     required this.mood,
     required this.isThinking,
@@ -72,7 +72,7 @@ final class ChatState {
   );
 }
 
-final chatNotifierProvider =
+final NotifierProvider<ChatNotifier, ChatState> chatNotifierProvider =
     NotifierProvider.autoDispose<ChatNotifier, ChatState>(
       ChatNotifier.new,
     );
@@ -759,7 +759,7 @@ class ChatNotifier extends Notifier<ChatState> {
 }
 
 final class _AssistantReply {
-  const _AssistantReply({
+  const new({
     required this.text,
     required this.source,
     required this.mood,

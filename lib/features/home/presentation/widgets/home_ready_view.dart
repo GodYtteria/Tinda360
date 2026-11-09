@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/home/presentation/home_state.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
 class HomeReadyView extends StatelessWidget {
-  const HomeReadyView({required this.state, super.key});
+  const new({required this.state, super.key});
 
   final HomeState state;
 

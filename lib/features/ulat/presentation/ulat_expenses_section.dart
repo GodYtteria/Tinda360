@@ -1,7 +1,7 @@
 part of 'ulat_screen.dart';
 
 class _ExpensesSection extends ConsumerWidget {
-  const _ExpensesSection({required this.grossProfit});
+  const new({required this.grossProfit});
 
   final Money grossProfit;
 
@@ -216,7 +216,7 @@ class _ExpensesSection extends ConsumerWidget {
 }
 
 class _AddExpenseDialog extends StatefulWidget {
-  const _AddExpenseDialog({required this.currency});
+  const new({required this.currency});
 
   final Currency currency;
 

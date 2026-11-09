@@ -1,7 +1,9 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/money.dart';
 
+@immutable
 final class SalesSummary {
-  const SalesSummary({
+  const new({
     required this.revenue,
     required this.cost,
     required this.saleCount,

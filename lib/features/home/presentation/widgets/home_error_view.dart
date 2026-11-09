@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
 class HomeErrorView extends StatelessWidget {
-  const HomeErrorView({required this.onRetry, super.key});
+  const new({required this.onRetry, super.key});
 
   final VoidCallback onRetry;
 

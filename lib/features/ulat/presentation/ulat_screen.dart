@@ -1,44 +1,44 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:printing/printing.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:tinda360/features/ulat/presentation/ulat_report_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tinda360/core/achievements/store_milestone.dart';
 import 'package:tinda360/core/calendar/day_range.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/expenses/expense_entry.dart';
 import 'package:tinda360/core/failures/cash_count_failure.dart';
 import 'package:tinda360/core/failures/expense_failure.dart';
-import 'package:tinda360/data/repositories/cash_count_providers.dart';
-import 'package:tinda360/data/repositories/cash_count_repository.dart';
-import 'package:tinda360/features/ulat/presentation/ulat_range_math.dart';
-import 'package:tinda360/core/result.dart';
-import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
+import 'package:tinda360/core/result.dart';
 import 'package:tinda360/core/sales/payment_method.dart';
 import 'package:tinda360/core/sales/sale_record.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/data/repositories/cash_count_providers.dart';
+import 'package:tinda360/data/repositories/cash_count_repository.dart';
+import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
 import 'package:tinda360/features/inventory/data/product_csv_exporter.dart';
+import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
+import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
+import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
+import 'package:tinda360/features/ulat/presentation/sale_return_sheet.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_range_math.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_report_text.dart';
+import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/report_pdf_service.dart';
 import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
-import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
-import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
-import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
-import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
-import 'package:tinda360/features/ulat/presentation/sale_return_sheet.dart';
-import 'package:tinda360/l10n/app_localizations.dart';
-import 'package:tinda360/services/report_pdf_service.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
@@ -46,18 +46,19 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-part 'ulat_recent_sales_section.dart';
+part 'ulat_cash_count_section.dart';
 part 'ulat_expenses_section.dart';
 part 'ulat_range_bar.dart';
-part 'ulat_cash_count_section.dart';
+part 'ulat_recent_sales_section.dart';
 part 'ulat_share_report_button.dart';
 
-final _ulatStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
-  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
-);
+final StreamProvider<StoreProfile> _ulatStoreProfileProvider =
+    StreamProvider.autoDispose<StoreProfile>(
+      (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+    );
 
 class UlatScreen extends ConsumerWidget {
-  const UlatScreen({
+  const new({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
@@ -156,7 +157,7 @@ class UlatScreen extends ConsumerWidget {
 }
 
 class _ReportContent extends ConsumerStatefulWidget {
-  const _ReportContent({
+  const new({
     required this.state,
     required this.onOpenAiChat,
     this.onOpenTab,
@@ -359,7 +360,7 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
 }
 
 class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.state});
+  const new({required this.state});
 
   final UlatState state;
 
@@ -421,7 +422,7 @@ class _StatsGrid extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({
+  const new({
     required this.label,
     required this.value,
     required this.valueColor,
@@ -490,7 +491,7 @@ String _rangeFileSuffix(UlatState state) => state.period == ReportPeriod.custom
     : state.period.name;
 
 class _SalesTrendCard extends StatelessWidget {
-  const _SalesTrendCard({
+  const new({
     required this.period,
     required this.range,
     required this.summary,
@@ -595,7 +596,7 @@ class _SalesTrendCard extends StatelessWidget {
 }
 
 class _ChartLegendItem extends StatelessWidget {
-  const _ChartLegendItem({required this.color, required this.label});
+  const new({required this.color, required this.label});
 
   final Color color;
   final String label;
@@ -626,7 +627,7 @@ class _ChartLegendItem extends StatelessWidget {
 }
 
 class _SalesTrendPainter extends CustomPainter {
-  const _SalesTrendPainter({
+  const new({
     required this.revenueMinor,
     required this.profitMinor,
     required this.utangMinor,
@@ -654,9 +655,9 @@ class _SalesTrendPainter extends CustomPainter {
     );
     final values = [revenueMinor, profitMinor, utangMinor];
     final colors = [primaryColor, successColor, dangerColor];
-    final barWidth = math.min(44.0, size.width / 6);
+    final barWidth = math.min<double>(44, size.width / 6);
     final slotWidth = size.width / values.length;
-    final radius = const Radius.circular(AppRadii.smallButton);
+    const radius = Radius.circular(AppRadii.smallButton);
 
     for (var index = 0; index < values.length; index++) {
       final left = slotWidth * index + (slotWidth - barWidth) / 2;
@@ -694,7 +695,7 @@ class _SalesTrendPainter extends CustomPainter {
 }
 
 class _TopProductsCard extends StatelessWidget {
-  const _TopProductsCard({
+  const new({
     required this.period,
     required this.range,
     required this.topProducts,
@@ -762,7 +763,7 @@ class _TopProductsCard extends StatelessWidget {
 }
 
 class _TopProductRow extends StatelessWidget {
-  const _TopProductRow({required this.rank, required this.item});
+  const new({required this.rank, required this.item});
 
   final int rank;
   final TopProduct item;
@@ -823,7 +824,7 @@ class _TopProductRow extends StatelessWidget {
 }
 
 class _AnimatedListEntry extends StatelessWidget {
-  const _AnimatedListEntry({required this.index, required this.child});
+  const new({required this.index, required this.child});
 
   final int index;
   final Widget child;
@@ -849,7 +850,7 @@ class _AnimatedListEntry extends StatelessWidget {
 }
 
 class _MilestonesSection extends ConsumerWidget {
-  const _MilestonesSection({
+  const new({
     required this.saleCount,
     required this.totalRevenueMinor,
   });
@@ -914,7 +915,7 @@ class _MilestonesSection extends ConsumerWidget {
 }
 
 class _MilestoneRow extends StatelessWidget {
-  const _MilestoneRow({required this.milestone, required this.isFilipino});
+  const new({required this.milestone, required this.isFilipino});
 
   final StoreMilestone milestone;
   final bool isFilipino;

@@ -2,18 +2,18 @@ import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/failure.dart';
 
 sealed class SaleReturnFailure extends Failure {
-  const SaleReturnFailure();
+  const new();
 }
 
 final class SaleReturnNothingSelected extends SaleReturnFailure {
-  const SaleReturnNothingSelected();
+  const new();
 
   @override
   String get code => 'sale_return.nothing_selected';
 }
 
 final class SaleReturnQuantityInvalid extends SaleReturnFailure {
-  const SaleReturnQuantityInvalid(this.productId);
+  const new(this.productId);
 
   final String productId;
 
@@ -22,7 +22,7 @@ final class SaleReturnQuantityInvalid extends SaleReturnFailure {
 }
 
 final class SaleReturnTooMany extends SaleReturnFailure {
-  const SaleReturnTooMany({required this.productId, required this.returnable});
+  const new({required this.productId, required this.returnable});
 
   final String productId;
 
@@ -33,21 +33,21 @@ final class SaleReturnTooMany extends SaleReturnFailure {
 }
 
 final class SaleReturnSaleVoided extends SaleReturnFailure {
-  const SaleReturnSaleVoided();
+  const new();
 
   @override
   String get code => 'sale_return.sale_voided';
 }
 
 final class SaleReturnNotFound extends SaleReturnFailure {
-  const SaleReturnNotFound();
+  const new();
 
   @override
   String get code => 'sale_return.not_found';
 }
 
 final class SaleReturnStoreUnavailable extends SaleReturnFailure {
-  const SaleReturnStoreUnavailable();
+  const new();
 
   @override
   String get code => 'sale_return.store_unavailable';

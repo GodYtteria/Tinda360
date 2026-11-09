@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TindaLogoMark extends StatelessWidget {
-  const TindaLogoMark({
+  const new({
     super.key,
     this.size = 40,
     this.onDarkHeader = false,
@@ -26,7 +26,7 @@ class TindaLogoMark extends StatelessWidget {
 }
 
 class TindaWordmark extends StatelessWidget {
-  const TindaWordmark({
+  const new({
     super.key,
     this.fontSize = 20,
     this.onDarkHeader = true,
@@ -44,7 +44,6 @@ class TindaWordmark extends StatelessWidget {
     return SvgPicture.asset(
       asset,
       height: fontSize * 1.15,
-      fit: BoxFit.contain,
     );
   }
 }

@@ -1,9 +1,11 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 
+@immutable
 final class DayRange {
-  const DayRange(this.first, this.last);
+  const new(this.first, this.last);
 
-  const DayRange.single(LocalDay day) : first = day, last = day;
+  const new single(LocalDay day) : first = day, last = day;
 
   final LocalDay first;
 

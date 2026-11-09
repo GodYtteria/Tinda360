@@ -1,7 +1,7 @@
 part of 'ulat_screen.dart';
 
 class _ShareReportTextButton extends ConsumerWidget {
-  const _ShareReportTextButton({required this.state});
+  const new({required this.state});
 
   final UlatState state;
 

@@ -11,8 +11,9 @@ final productPopularityRepositoryProvider =
       ),
     );
 
-final productPopularityProvider = StreamProvider.autoDispose<Map<String, int>>(
-  (ref) => ref
-      .watch(productPopularityRepositoryProvider)
-      .watchUnitsSoldMilliByProductId(),
-);
+final StreamProvider<Map<String, int>> productPopularityProvider =
+    StreamProvider.autoDispose<Map<String, int>>(
+      (ref) => ref
+          .watch(productPopularityRepositoryProvider)
+          .watchUnitsSoldMilliByProductId(),
+    );

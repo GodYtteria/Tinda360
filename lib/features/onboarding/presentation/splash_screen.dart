@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -11,12 +11,13 @@ import 'package:tinda360/shared/widgets/tinda_logo.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-final splashStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
-  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
-);
+final StreamProvider<StoreProfile> splashStoreProfileProvider =
+    StreamProvider.autoDispose<StoreProfile>(
+      (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+    );
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({
+  const new({
     required this.onDone,
     super.key,
   });
@@ -41,7 +42,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (MediaQuery.disableAnimationsOf(context)) {
       _spinController.stop();
     } else if (!_spinController.isAnimating) {
-      unawaited(_spinController.repeat());
+      _spinController.repeat();
     }
   }
 
@@ -133,7 +134,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 }
 
 class _SplashProgress extends StatelessWidget {
-  const _SplashProgress({required this.label});
+  const new({required this.label});
 
   final String label;
 
@@ -170,7 +171,7 @@ class _SplashProgress extends StatelessWidget {
 }
 
 class _SplashErrorView extends StatelessWidget {
-  const _SplashErrorView({
+  const new({
     required this.message,
     required this.retryLabel,
     required this.onRetry,
@@ -205,7 +206,7 @@ class _SplashErrorView extends StatelessWidget {
 }
 
 class _SpinningSplashLogo extends StatelessWidget {
-  const _SpinningSplashLogo({
+  const new({
     required this.size,
     required this.controller,
     required this.ringColor,
@@ -270,7 +271,7 @@ class _SpinningSplashLogo extends StatelessWidget {
 }
 
 class _SplashRingPainter extends CustomPainter {
-  const _SplashRingPainter({
+  const new({
     required this.progress,
     required this.ringColor,
     required this.arcColor,
@@ -282,7 +283,7 @@ class _SplashRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final stroke = 5.0;
+    const stroke = 5.0;
     final center = size.center(Offset.zero);
     final radius = (size.width - stroke) / 2;
     final ringPaint = Paint()

@@ -3,18 +3,18 @@ import 'package:tinda360/core/failure.dart';
 import 'package:tinda360/core/money/money.dart';
 
 sealed class SaleFailure extends Failure {
-  const SaleFailure();
+  const new();
 }
 
 final class SaleHasNoLines extends SaleFailure {
-  const SaleHasNoLines();
+  const new();
 
   @override
   String get code => 'sale.no_lines';
 }
 
 final class SaleQuantityInvalid extends SaleFailure {
-  const SaleQuantityInvalid(this.productId);
+  const new(this.productId);
 
   final String productId;
 
@@ -23,7 +23,7 @@ final class SaleQuantityInvalid extends SaleFailure {
 }
 
 final class SaleProductNotFound extends SaleFailure {
-  const SaleProductNotFound(this.productId);
+  const new(this.productId);
 
   final String productId;
 
@@ -32,7 +32,7 @@ final class SaleProductNotFound extends SaleFailure {
 }
 
 final class SaleInsufficientStock extends SaleFailure {
-  const SaleInsufficientStock({
+  const new({
     required this.productId,
     required this.available,
   });
@@ -46,14 +46,14 @@ final class SaleInsufficientStock extends SaleFailure {
 }
 
 final class SaleCustomerRequired extends SaleFailure {
-  const SaleCustomerRequired();
+  const new();
 
   @override
   String get code => 'sale.customer_required';
 }
 
 final class SaleCustomerNotFound extends SaleFailure {
-  const SaleCustomerNotFound(this.customerId);
+  const new(this.customerId);
 
   final String customerId;
 
@@ -62,7 +62,7 @@ final class SaleCustomerNotFound extends SaleFailure {
 }
 
 final class SalePaymentTooLow extends SaleFailure {
-  const SalePaymentTooLow({required this.total, required this.tendered});
+  const new({required this.total, required this.tendered});
 
   final Money total;
 
@@ -73,7 +73,7 @@ final class SalePaymentTooLow extends SaleFailure {
 }
 
 final class SalePaidNowInvalid extends SaleFailure {
-  const SalePaidNowInvalid({required this.total, required this.paidNow});
+  const new({required this.total, required this.paidNow});
 
   final Money total;
 
@@ -84,14 +84,14 @@ final class SalePaidNowInvalid extends SaleFailure {
 }
 
 final class SaleInterestInvalid extends SaleFailure {
-  const SaleInterestInvalid();
+  const new();
 
   @override
   String get code => 'sale.interest_invalid';
 }
 
 final class SalePriceInvalid extends SaleFailure {
-  const SalePriceInvalid(this.productId);
+  const new(this.productId);
 
   final String productId;
 
@@ -100,28 +100,28 @@ final class SalePriceInvalid extends SaleFailure {
 }
 
 final class SaleNotFound extends SaleFailure {
-  const SaleNotFound();
+  const new();
 
   @override
   String get code => 'sale.not_found';
 }
 
 final class SaleVoidAfterPayment extends SaleFailure {
-  const SaleVoidAfterPayment();
+  const new();
 
   @override
   String get code => 'sale.void_after_payment';
 }
 
 final class SaleVoidAfterReturn extends SaleFailure {
-  const SaleVoidAfterReturn();
+  const new();
 
   @override
   String get code => 'sale.void_after_return';
 }
 
 final class SaleStoreUnavailable extends SaleFailure {
-  const SaleStoreUnavailable();
+  const new();
 
   @override
   String get code => 'sale.store_unavailable';

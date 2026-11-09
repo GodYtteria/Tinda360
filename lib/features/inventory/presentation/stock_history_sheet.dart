@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show StreamProviderFamily;
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/stock_history_entry.dart';
 import 'package:tinda360/data/data_providers.dart';
@@ -10,7 +11,8 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-final stockHistoryProvider = StreamProvider.autoDispose
+final StreamProviderFamily<List<StockHistoryEntry>, String>
+stockHistoryProvider = StreamProvider.autoDispose
     .family<List<StockHistoryEntry>, String>(
       (ref, productId) =>
           ref.watch(productRepositoryProvider).watchStockHistory(productId),
@@ -31,7 +33,7 @@ String formatSignedQuantity(StockHistoryEntry entry, Product product) {
 }
 
 class StockHistorySheet extends ConsumerWidget {
-  const StockHistorySheet({required this.product, super.key});
+  const new({required this.product, super.key});
 
   final Product product;
 
@@ -94,7 +96,7 @@ class StockHistorySheet extends ConsumerWidget {
 }
 
 class _StockHistoryRow extends StatelessWidget {
-  const _StockHistoryRow({required this.entry, required this.product});
+  const new({required this.entry, required this.product});
 
   final StockHistoryEntry entry;
 

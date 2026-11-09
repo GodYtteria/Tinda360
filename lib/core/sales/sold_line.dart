@@ -2,7 +2,7 @@ import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/money.dart';
 
 final class SoldLine {
-  const SoldLine({
+  const new({
     required this.saleId,
     required this.quantity,
     required this.unitPrice,

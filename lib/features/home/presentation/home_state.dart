@@ -1,5 +1,8 @@
+import 'package:meta/meta.dart';
+
+@immutable
 final class HomeState {
-  const HomeState({required this.productCount, required this.lowStockCount});
+  const new({required this.productCount, required this.lowStockCount});
 
   final int productCount;
 

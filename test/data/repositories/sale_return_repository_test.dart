@@ -470,7 +470,7 @@ void main() {
       final summary = await repos.sales.watchSummary(today).first;
       expect(summary.saleCount, 1);
       expect(summary.revenue, _php(4 * 1500 + 2 * 4500 - 1500 - 2 * 4500));
-      expect(summary.profit, _php((3 * 1500 - 3 * 1200)));
+      expect(summary.profit, _php(3 * 1500 - 3 * 1200));
 
       final top = await repos.sales.watchTopProducts(today).first;
       expect(top, hasLength(1));
@@ -682,7 +682,7 @@ void main() {
 }
 
 final class _PrefixedIds implements IdGenerator {
-  _PrefixedIds(this._prefix);
+  new(this._prefix);
 
   final String _prefix;
 

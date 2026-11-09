@@ -1,7 +1,7 @@
 import 'package:tinda360/core/money/money.dart';
 
 final class CreditLimitDecision {
-  const CreditLimitDecision({
+  const new({
     required this.isBlocked,
     required this.projectedBalance,
     this.creditLimit,

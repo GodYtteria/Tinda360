@@ -48,7 +48,7 @@ Future<void> _pickCustomRange(BuildContext context, WidgetRef ref) async {
 }
 
 class _RangeBar extends ConsumerWidget {
-  const _RangeBar({required this.range});
+  const new({required this.range});
 
   final DayRange range;
 

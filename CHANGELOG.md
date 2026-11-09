@@ -12,7 +12,7 @@ First public release of Tinda 360, an offline point of sale for sari-sari stores
   wrong line while keeping the record.
 - Reports for today, week, month or any dates, with expenses, returns and a
   cash count at the end of the day.
-- A PIN for sensitive actions, a bantay name on every sale, and receipts you
+- A PIN for sensitive actions, the name of who is on duty on every sale, and receipts you
   can share as text or print.
 - Backup to your own Google Drive or to a file named after your store.
 - Works without internet. Filipino and English.

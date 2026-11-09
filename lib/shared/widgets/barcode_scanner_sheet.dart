@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/scan_debouncer.dart';
@@ -12,7 +12,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class BarcodeScannerSheet extends StatefulWidget {
-  const BarcodeScannerSheet({super.key, this.continuous = false, this.onCode});
+  const new({super.key, this.continuous = false, this.onCode});
 
   final bool continuous;
   final bool Function(String code)? onCode;
@@ -197,7 +197,7 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
 }
 
 class _ScanLine extends StatefulWidget {
-  const _ScanLine();
+  const new();
 
   @override
   State<_ScanLine> createState() => _ScanLineState();

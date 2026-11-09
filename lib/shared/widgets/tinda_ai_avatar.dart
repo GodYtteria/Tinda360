@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
@@ -16,7 +16,7 @@ enum TindaAvatarMood {
 }
 
 class TindaAiAvatar extends StatefulWidget {
-  const TindaAiAvatar({
+  const new({
     super.key,
     this.mood = TindaAvatarMood.idle,
     this.size = 44,
@@ -134,7 +134,7 @@ class _TindaAiAvatarState extends State<TindaAiAvatar> {
 }
 
 class TindaAiFab extends StatelessWidget {
-  const TindaAiFab({
+  const new({
     required this.onPressed,
     required this.tooltip,
     super.key,
@@ -181,7 +181,7 @@ class TindaAiFab extends StatelessWidget {
 }
 
 class TindaStatusDot extends StatefulWidget {
-  const TindaStatusDot({
+  const new({
     required this.active,
     required this.color,
     super.key,

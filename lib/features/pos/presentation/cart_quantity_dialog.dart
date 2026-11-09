@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/money/money.dart';
@@ -80,7 +80,7 @@ Future<Quantity?> showCartQuantityDialog(
 }
 
 class _CartQuantityDialog extends StatefulWidget {
-  const _CartQuantityDialog({
+  const new({
     required this.stocked,
     required this.currentQuantity,
     this.unitPrice,

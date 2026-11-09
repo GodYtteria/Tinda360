@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/features/pos/data/suggested_cash_amounts.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -13,7 +13,7 @@ String formatExactTenderedText(int totalMinorUnits) {
 }
 
 class CashQuickAmountsRow extends StatelessWidget {
-  const CashQuickAmountsRow({
+  const new({
     required this.total,
     required this.onAmountSelected,
     required this.onExactSelected,

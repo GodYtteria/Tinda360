@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -8,21 +8,22 @@ import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/features/pos/presentation/cart_quantity_dialog.dart';
 import 'package:tinda360/features/pos/presentation/checkout_utang_pricing.dart';
+import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
 const Money _cashPrice = Money(5000, Currency.php);
 const Money _utangPrice = Money(5500, Currency.php);
 
-final StockedProduct _kiloRice = StockedProduct(
+const StockedProduct _kiloRice = StockedProduct(
   product: Product(
     id: 'rice',
     name: 'Bigas Dinorado',
     unit: ProductUnit.kilo,
     price: _cashPrice,
-    cost: const Money(4200, Currency.php),
+    cost: Money(4200, Currency.php),
     utangPrice: _utangPrice,
   ),
-  stock: const Quantity.whole(10),
+  stock: Quantity.whole(10),
 );
 
 Future<Quantity?> _typeAmount(
@@ -33,7 +34,7 @@ Future<Quantity?> _typeAmount(
   Quantity? chosen;
   await tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
       home: Builder(

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/payment_method.dart';
@@ -20,7 +20,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class SaleDoneSheet extends ConsumerStatefulWidget {
-  const SaleDoneSheet({
+  const new({
     required this.total,
     required this.paid,
     required this.change,
@@ -198,7 +198,7 @@ class _SaleDoneSheetState extends ConsumerState<SaleDoneSheet> {
 }
 
 class _AmountsSummaryCard extends StatelessWidget {
-  const _AmountsSummaryCard({
+  const new({
     required this.total,
     required this.paid,
     required this.change,
@@ -276,7 +276,7 @@ class _AmountsSummaryCard extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.label, required this.value});
+  const new({required this.label, required this.value});
 
   final String label;
   final String value;

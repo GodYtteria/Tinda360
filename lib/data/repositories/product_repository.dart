@@ -29,17 +29,13 @@ Future<Quantity> readProductStock(AppDatabase db, String productId) async {
 }
 
 final class ProductRepository {
-  ProductRepository({
-    required AppDatabase db,
-    required Clock clock,
-    required IdGenerator ids,
-    required AppLog log,
-    required Currency currency,
-  }) : _db = db,
-       _clock = clock,
-       _ids = ids,
-       _log = log,
-       _currency = currency;
+  new({
+    required this._db,
+    required this._clock,
+    required this._ids,
+    required this._log,
+    required this._currency,
+  });
 
   final AppDatabase _db;
   final Clock _clock;
@@ -446,7 +442,7 @@ ORDER BY created_at DESC, row_order DESC
 }
 
 final class _ProductRejected implements Exception {
-  const _ProductRejected(this.failure);
+  const new(this.failure);
 
   final ProductFailure failure;
 }

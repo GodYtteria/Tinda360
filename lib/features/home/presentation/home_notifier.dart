@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/home/presentation/home_state.dart';
 
-final homeNotifierProvider =
+final StreamNotifierProvider<HomeNotifier, HomeState> homeNotifierProvider =
     StreamNotifierProvider.autoDispose<HomeNotifier, HomeState>(
       HomeNotifier.new,
     );

@@ -1,7 +1,9 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/currency.dart';
 
+@immutable
 final class StoreProfile {
-  const StoreProfile({
+  const new({
     required this.name,
     required this.currency,
     required this.onboardingDone,

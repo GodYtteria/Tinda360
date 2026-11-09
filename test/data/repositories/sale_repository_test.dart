@@ -410,7 +410,7 @@ void main() {
     () async {
       final productId = _ok(
         await repos.products.create(
-          ProductDraft(
+          const ProductDraft(
             name: 'Sardinas',
             unit: ProductUnit.can,
             price: Money(2500, Currency.php),
@@ -428,7 +428,7 @@ void main() {
             lines: [
               SaleLineDraft(
                 productId: productId,
-                quantity: Quantity.whole(3),
+                quantity: const Quantity.whole(3),
               ),
             ],
             method: PaymentMethod.utang,

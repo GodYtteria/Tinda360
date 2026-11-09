@@ -13,7 +13,7 @@ void main() {
 
   test('turns accents and unsafe characters into plain letters', () {
     expect(
-      backupFileNameFor('Ñora\'s / Tindahan: #1?', day),
+      backupFileNameFor("Ñora's / Tindahan: #1?", day),
       'Tinda360-Nora-s-Tindahan-1-2026-11-18.sqlite',
     );
   });

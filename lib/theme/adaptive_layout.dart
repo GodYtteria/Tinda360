@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum AdaptiveWidth {
   compact,
@@ -24,7 +24,7 @@ abstract final class AdaptiveLayout {
 
   static const double maxAppTextScale = 1.3;
 
-  static const double minAppTextScale = 1.0;
+  static const double minAppTextScale = 1;
 
   static const double maxChromeTextScale = 1.15;
 
@@ -49,7 +49,7 @@ abstract final class AdaptiveLayout {
 }
 
 class AdaptiveTextScale extends StatelessWidget {
-  const AdaptiveTextScale({
+  const new({
     required this.child,
     super.key,
     this.maxScale = AdaptiveLayout.maxAppTextScale,

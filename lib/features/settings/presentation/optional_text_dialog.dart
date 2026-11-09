@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 
@@ -21,7 +21,7 @@ Future<String?> showOptionalTextDialog(
 );
 
 class _OptionalTextDialog extends StatefulWidget {
-  const _OptionalTextDialog({
+  const new({
     required this.title,
     required this.label,
     required this.initialText,

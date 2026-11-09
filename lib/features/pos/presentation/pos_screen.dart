@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
@@ -17,8 +17,8 @@ import 'package:tinda360/features/pos/presentation/cart_quantity_dialog.dart';
 import 'package:tinda360/features/pos/presentation/checkout_sheet.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
-import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
+import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -29,22 +29,24 @@ import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-final posStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
-  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
-);
+final StreamProvider<StoreProfile> posStoreProfileProvider =
+    StreamProvider.autoDispose<StoreProfile>(
+      (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+    );
 
-final posProductsProvider = StreamProvider.autoDispose<List<StockedProduct>>((
-  ref,
-) {
-  final unitsSold = ref.watch(productPopularityProvider).value ?? const {};
-  return ref
-      .watch(productRepositoryProvider)
-      .watchActive()
-      .map((products) => sortProductsByPopularity(products, unitsSold));
-});
+final StreamProvider<List<StockedProduct>> posProductsProvider =
+    StreamProvider.autoDispose<List<StockedProduct>>((
+      ref,
+    ) {
+      final unitsSold = ref.watch(productPopularityProvider).value ?? const {};
+      return ref
+          .watch(productRepositoryProvider)
+          .watchActive()
+          .map((products) => sortProductsByPopularity(products, unitsSold));
+    });
 
 class PosScreen extends ConsumerStatefulWidget {
-  const PosScreen({
+  const new({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
@@ -151,14 +153,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     List<StockedProduct> products,
     Map<String, Quantity> cart,
   ) {
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: AppPalette.of(context).scrim,
-        builder: (_) => CheckoutSheet(products: products, cart: cart),
-      ),
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: AppPalette.of(context).scrim,
+      builder: (_) => CheckoutSheet(products: products, cart: cart),
     );
   }
 
@@ -194,9 +194,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 title: const TindaWordmark(),
                 subtitle: storeName,
                 belowSubtitle: useCompactChrome
-                    ? const Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: BantayChip(),
+                    ? const Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.s8),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: BantayChip(),
+                        ),
                       )
                     : null,
                 actions: [
@@ -264,7 +267,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         messenger.showSnackBar(
                           SnackBar(
                             behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 4),
                             persist: false,
                             content: Text(
                               localizations.posRemovedFromCart(name ?? '—'),
@@ -340,7 +342,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               bottom: AppSpacing.s16,
               child: TweenAnimationBuilder<double>(
                 key: ValueKey('cart_${cartNotifier.itemCount}_${cart.length}'),
-                tween: Tween(begin: 0.97, end: 1.0),
+                tween: Tween(begin: 0.97, end: 1),
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutBack,
                 builder: (context, scale, child) =>
@@ -373,7 +375,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 const double _cartBarExtraClearance = 72;
 
 class _PosBody extends StatelessWidget {
-  const _PosBody({
+  const new({
     required this.productsAsync,
     required this.filteredProducts,
     required this.categories,
@@ -508,7 +510,7 @@ class _PosBody extends StatelessWidget {
 }
 
 class _GreetingBubble extends StatelessWidget {
-  const _GreetingBubble({required this.onTap, required this.onDismiss});
+  const new({required this.onTap, required this.onDismiss});
 
   final VoidCallback onTap;
   final VoidCallback onDismiss;
@@ -574,7 +576,7 @@ class _GreetingBubble extends StatelessWidget {
 }
 
 class _CategoryChipsRow extends StatelessWidget {
-  const _CategoryChipsRow({
+  const new({
     required this.categories,
     required this.selectedCategory,
     required this.onSelected,
@@ -611,7 +613,7 @@ class _CategoryChipsRow extends StatelessWidget {
 }
 
 class _AnimatedPosRow extends StatelessWidget {
-  const _AnimatedPosRow({
+  const new({
     required this.index,
     required this.child,
     super.key,
@@ -641,7 +643,7 @@ class _AnimatedPosRow extends StatelessWidget {
 }
 
 class _PosProductRow extends StatelessWidget {
-  const _PosProductRow({
+  const new({
     required this.item,
     required this.cartQuantity,
     required this.onAdd,
@@ -735,7 +737,7 @@ class _PosProductRow extends StatelessWidget {
 }
 
 class _RemoveFromCartButton extends StatelessWidget {
-  const _RemoveFromCartButton({
+  const new({
     required this.tooltip,
     required this.onPressed,
     required this.palette,
@@ -779,7 +781,7 @@ class _RemoveFromCartButton extends StatelessWidget {
 }
 
 class _AddToCartButton extends StatelessWidget {
-  const _AddToCartButton({
+  const new({
     required this.tooltip,
     required this.countLabel,
     required this.onPressed,

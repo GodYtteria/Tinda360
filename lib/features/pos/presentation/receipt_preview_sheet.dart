@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:printing/printing.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -14,7 +14,7 @@ export 'package:tinda360/services/receipt_print_service.dart'
     show ReceiptDetails;
 
 class ReceiptPreviewSheet extends StatelessWidget {
-  const ReceiptPreviewSheet({
+  const new({
     required this.storeName,
     required this.lines,
     required this.total,

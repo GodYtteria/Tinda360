@@ -1,9 +1,11 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/money.dart';
 
+@immutable
 final class StockedProduct {
-  const StockedProduct({required this.product, required this.stock});
+  const new({required this.product, required this.stock});
 
   final Product product;
 

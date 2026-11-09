@@ -23,9 +23,9 @@ void main() {
       final shortfall = cashShortfallOf(
         method: PaymentMethod.cash,
         total: pesos(40),
-        cashReceived: Money(3999, Currency.php),
+        cashReceived: const Money(3999, Currency.php),
       );
-      expect(shortfall, Money(1, Currency.php));
+      expect(shortfall, const Money(1, Currency.php));
     });
 
     test('cash equal to total has no shortfall', () {
@@ -77,7 +77,7 @@ void main() {
         cashShortfallOf(
           method: PaymentMethod.cash,
           total: pesos(40),
-          cashReceived: Money(-100, Currency.php),
+          cashReceived: const Money(-100, Currency.php),
         ),
         isNull,
       );

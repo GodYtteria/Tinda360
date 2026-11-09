@@ -20,12 +20,13 @@ String exportProductsCsv(List<StockedProduct> products) {
       _formatDecimalQuantity(stockedProduct.stock),
       product.unit.storageName,
       product.barcode ?? '',
-      lowStockThreshold == null
-          ? ''
-          : _formatDecimalQuantity(lowStockThreshold),
-      utangPrice == null ? '' : _formatDecimalMoney(utangPrice),
-      expiryDay == null ? '' : ExpiryRules.formatIso(expiryDay),
-      product.tracksStock ? '1' : '0',
+      if (lowStockThreshold == null)
+        ''
+      else
+        _formatDecimalQuantity(lowStockThreshold),
+      if (utangPrice == null) '' else _formatDecimalMoney(utangPrice),
+      if (expiryDay == null) '' else ExpiryRules.formatIso(expiryDay),
+      if (product.tracksStock) '1' else '0',
     ];
     lines.add(_encodeCsvRow(fields));
   }

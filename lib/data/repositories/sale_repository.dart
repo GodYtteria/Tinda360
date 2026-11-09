@@ -27,17 +27,13 @@ import 'package:tinda360/data/repositories/customer_repository.dart';
 import 'package:tinda360/data/repositories/product_repository.dart';
 
 final class SaleRepository {
-  SaleRepository({
-    required AppDatabase db,
-    required Clock clock,
-    required IdGenerator ids,
-    required AppLog log,
-    required Currency currency,
-  }) : _db = db,
-       _clock = clock,
-       _ids = ids,
-       _log = log,
-       _currency = currency;
+  new({
+    required this._db,
+    required this._clock,
+    required this._ids,
+    required this._log,
+    required this._currency,
+  });
 
   final AppDatabase _db;
   final Clock _clock;
@@ -720,7 +716,7 @@ WHERE s.is_deleted = 0
 }
 
 final class _PricedLine {
-  const _PricedLine({
+  const new({
     required this.productId,
     required this.tracksStock,
     required this.quantity,
@@ -736,13 +732,13 @@ final class _PricedLine {
 }
 
 final class _SaleRejected implements Exception {
-  const _SaleRejected(this.failure);
+  const new(this.failure);
 
   final SaleFailure failure;
 }
 
 final class _MutableSale {
-  _MutableSale({
+  new({
     required this.id,
     required this.createdAtMs,
     required this.method,
