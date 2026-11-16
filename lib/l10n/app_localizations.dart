@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @productNameHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Lucky Me Pancit Canton'**
+  /// **'e.g. Canned sardines'**
   String get productNameHint;
 
   /// No description provided for @productPriceLabel.

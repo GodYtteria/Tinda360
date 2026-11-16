@@ -381,7 +381,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get productNameLabel => 'Pangalan ng produkto';
 
   @override
-  String get productNameHint => 'hal. Lucky Me Pancit Canton';
+  String get productNameHint => 'hal. Sardinas de lata';
 
   @override
   String get productPriceLabel => 'Presyo ng benta (₱)';

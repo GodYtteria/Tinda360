@@ -40,9 +40,9 @@ final class ProductCsvImporter {
 
   static const String sampleCsv =
       'name,price,cost,stock,unit,barcode,low_stock\n'
-      'Lucky Me Pancit Canton,15.00,12.00,24,piece,4800016644801,5\n'
-      'Kopiko Black 3-in-1,9.00,7.00,40,sachet,,10\n'
-      'Rice Sinandomeng,58.00,50.00,25,kilo,,5\n';
+      'Sample product 1,15.00,12.00,24,piece,,5\n'
+      'Sample product 2,9.00,7.00,40,sachet,,10\n'
+      'Sample product 3,58.00,50.00,25,kilo,,5\n';
 
   static const Map<String, String> _headerAliases = <String, String>{
     'name': 'name',
