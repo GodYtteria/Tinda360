@@ -163,6 +163,38 @@ class _StoreSwitcherSection extends ConsumerWidget {
     );
   }
 
+  Future<void> _confirmSwitchStore(
+    BuildContext context,
+    WidgetRef ref,
+    StoreEntry store,
+    String displayName,
+  ) async {
+    final localizations = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.settingsSwitchStore),
+        content: Text(localizations.settingsSwitchStoreConfirm(displayName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.commonCancel),
+          ),
+          TextButton(
+            onPressed: () {
+              unawaited(HapticFeedback.mediumImpact());
+              Navigator.of(dialogContext).pop(true);
+            },
+            child: Text(localizations.settingsSwitchStore),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    unawaited(ref.read(storeRegistryProvider.notifier).switchStore(store.id));
+  }
+
   Future<void> _confirmDeleteStore(
     BuildContext context,
     WidgetRef ref,
@@ -226,9 +258,17 @@ class _StoreSwitcherSection extends ConsumerWidget {
                   : () {
                       unawaited(HapticFeedback.selectionClick());
                       unawaited(
-                        ref
-                            .read(storeRegistryProvider.notifier)
-                            .switchStore(store.id),
+                        _confirmSwitchStore(
+                          context,
+                          ref,
+                          store,
+                          store.name.isNotEmpty
+                              ? store.name
+                              : (store.id == registry.activeStoreId &&
+                                      activeStoreName.isNotEmpty
+                                  ? activeStoreName
+                                  : '—'),
+                        ),
                       );
                     },
               onDelete: () => unawaited(

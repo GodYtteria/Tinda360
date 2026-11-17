@@ -1297,6 +1297,12 @@ abstract class AppLocalizations {
   /// **'Delete {name}? All its products, sales, and utang will be removed.'**
   String settingsDeleteStoreConfirm(String name);
 
+  /// No description provided for @settingsSwitchStoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {name}? Your current store stays saved.'**
+  String settingsSwitchStoreConfirm(String name);
+
   /// No description provided for @settingsActiveBadge.
   ///
   /// In en, this message translates to:
