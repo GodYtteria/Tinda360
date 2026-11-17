@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/money/currency.dart';
@@ -139,13 +140,16 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
     required AsyncValue<List<CustomerBalance>> balancesAsync,
     required List<CustomerBalance> filtered,
   }) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final Widget content;
     if (balancesAsync.isLoading && !balancesAsync.hasValue) {
-      return Center(
+      content = Center(
+        key: const ValueKey('utang-loading'),
         child: CircularProgressIndicator(color: palette.primary),
       );
-    }
-    if (balancesAsync.hasError && !balancesAsync.hasValue) {
-      return TindaEmptyState(
+    } else if (balancesAsync.hasError && !balancesAsync.hasValue) {
+      content = TindaEmptyState(
+        key: const ValueKey('utang-error'),
         icon: Icons.error_outline_rounded,
         title: localizations.homeLoadFailed,
         body: localizations.utangEmptyBody,
@@ -154,38 +158,60 @@ class _UtangScreenState extends ConsumerState<UtangScreen> {
           onPressed: () => ref.invalidate(utangBalancesProvider),
         ),
       );
-    }
-    if (filtered.isEmpty) {
-      return TindaEmptyState(
+    } else if (filtered.isEmpty) {
+      content = TindaEmptyState(
+        key: const ValueKey('utang-empty'),
         icon: Icons.account_balance_wallet_outlined,
         title: localizations.utangEmptyTitle,
         body: localizations.utangEmptyBody,
       );
-    }
-    return ListView.separated(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.screenHorizontal,
-        AppSpacing.s4,
-        AppSpacing.screenHorizontal,
-        96,
-      ),
-      itemCount: filtered.length,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s10),
-      itemBuilder: (context, index) {
-        final item = filtered[index];
-        return _SukiBalanceCard(
-          balance: item,
-          onTap: () => SukiLedgerSheet.show(
-            context,
+    } else {
+      content = ListView.separated(
+        key: ValueKey('utang-list-${filtered.length}'),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.screenHorizontal,
+          AppSpacing.s4,
+          AppSpacing.screenHorizontal,
+          96,
+        ),
+        itemCount: filtered.length,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s10),
+        itemBuilder: (context, index) {
+          final item = filtered[index];
+          final card = _SukiBalanceCard(
             balance: item,
-            onPay: () {
-              Navigator.of(context).pop();
-              unawaited(UtangPaySheet.showPay(context, item));
-            },
-          ),
-          onPay: () => UtangPaySheet.showPay(context, item),
-        );
-      },
+            onTap: () => SukiLedgerSheet.show(
+              context,
+              balance: item,
+              onPay: () {
+                Navigator.of(context).pop();
+                unawaited(UtangPaySheet.showPay(context, item));
+              },
+            ),
+            onPay: () => UtangPaySheet.showPay(context, item),
+          );
+          if (reduceMotion) return card;
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: Duration(milliseconds: 180 + (index.clamp(0, 8) * 20)),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) => Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, (1 - value) * 8),
+                child: child,
+              ),
+            ),
+            child: card,
+          );
+        },
+      );
+    }
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: reduceMotion ? 0 : 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: content,
     );
   }
 
@@ -301,7 +327,10 @@ class _SukiBalanceCard extends StatelessWidget {
     final palette = AppPalette.of(context);
     final customer = balance.customer;
     return TindaCard(
-      onTap: onTap,
+      onTap: () {
+        unawaited(HapticFeedback.selectionClick());
+        onTap();
+      },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 44),
         child: Row(
