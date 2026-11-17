@@ -211,7 +211,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 orElse: () => null,
                               );
                           ScaffoldMessenger.of(context)
-                            ..removeCurrentSnackBar()
+                            ..clearSnackBars()
                             ..showSnackBar(
                               SnackBar(
                                 behavior: SnackBarBehavior.floating,
