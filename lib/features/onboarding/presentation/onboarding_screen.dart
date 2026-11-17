@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
@@ -55,9 +56,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _goToStepTwo() {
     final localizations = AppLocalizations.of(context);
     if (_nameController.text.trim().isEmpty) {
+      unawaited(HapticFeedback.heavyImpact());
       setState(() => _errorMessage = localizations.failureStoreNameRequired);
       return;
     }
+    unawaited(HapticFeedback.selectionClick());
     setState(() {
       _errorMessage = null;
       _stepIndex = 1;
@@ -66,6 +69,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _completeAsNewStore() async {
     if (_isSaving) return;
+    unawaited(HapticFeedback.mediumImpact());
     setState(() {
       _isSaving = true;
       _errorMessage = null;
@@ -148,6 +152,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _restoreFromGoogle() async {
     if (_isSaving) return;
+    unawaited(HapticFeedback.mediumImpact());
     setState(() {
       _isSaving = true;
       _showRestoreUnavailable = false;
@@ -209,10 +214,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               stepIndex: _stepIndex,
               backTooltip: localizations.commonBack,
               onBack: _stepIndex == 1 && !_isSaving
-                  ? () => setState(() {
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() {
                         _stepIndex = 0;
                         _errorMessage = null;
-                      })
+                      });
+                    }
                   : null,
             ),
             Expanded(
@@ -224,28 +232,52 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 520),
-                    child: _stepIndex == 0
-                        ? _StepOneName(
-                            controller: _nameController,
-                            errorMessage: _errorMessage,
-                            onChanged: (_) {
-                              if (_errorMessage != null) {
-                                setState(() => _errorMessage = null);
-                              }
-                            },
-                            onNext: _goToStepTwo,
-                          )
-                        : _StepTwoBackup(
-                            isSaving: _isSaving,
-                            showRestoreUnavailable: _showRestoreUnavailable,
-                            addSampleItems: _addSampleItems,
-                            errorMessage: _errorMessage,
-                            onAddSampleItemsChanged: (value) =>
-                                setState(() => _addSampleItems = value),
-                            onNewStore: _completeAsNewStore,
-                            onGoogleRestore: () =>
-                                unawaited(_restoreFromGoogle()),
-                          ),
+                    child: AnimatedSwitcher(
+                      duration: Duration(
+                        milliseconds:
+                            MediaQuery.disableAnimationsOf(context) ? 0 : 260,
+                      ),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, animation) {
+                        final offset = Tween<Offset>(
+                          begin: const Offset(0.04, 0),
+                          end: Offset.zero,
+                        ).animate(animation);
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(position: offset, child: child),
+                        );
+                      },
+                      child: KeyedSubtree(
+                        key: ValueKey<int>(_stepIndex),
+                        child: _stepIndex == 0
+                            ? _StepOneName(
+                                controller: _nameController,
+                                errorMessage: _errorMessage,
+                                onChanged: (_) {
+                                  if (_errorMessage != null) {
+                                    setState(() => _errorMessage = null);
+                                  }
+                                },
+                                onNext: _goToStepTwo,
+                              )
+                            : _StepTwoBackup(
+                                isSaving: _isSaving,
+                                showRestoreUnavailable:
+                                    _showRestoreUnavailable,
+                                addSampleItems: _addSampleItems,
+                                errorMessage: _errorMessage,
+                                onAddSampleItemsChanged: (value) {
+                                  unawaited(HapticFeedback.selectionClick());
+                                  setState(() => _addSampleItems = value);
+                                },
+                                onNewStore: _completeAsNewStore,
+                                onGoogleRestore: () =>
+                                    unawaited(_restoreFromGoogle()),
+                              ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -463,13 +495,21 @@ class _StepTwoBackup extends StatelessWidget {
             ],
           ),
         ),
-        if (errorMessage != null) ...[
-          const SizedBox(height: AppSpacing.s12),
-          Text(
-            errorMessage!,
-            style: AppTypography.meta(palette.danger, size: 13),
+        AnimatedSwitcher(
+          duration: Duration(
+            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
           ),
-        ],
+          child: errorMessage == null
+              ? const SizedBox.shrink()
+              : Padding(
+                  key: ValueKey<String>(errorMessage!),
+                  padding: const EdgeInsets.only(top: AppSpacing.s12),
+                  child: Text(
+                    errorMessage!,
+                    style: AppTypography.meta(palette.danger, size: 13),
+                  ),
+                ),
+        ),
         const SizedBox(height: AppSpacing.s16),
         TindaCard(
           child: Column(
@@ -489,13 +529,23 @@ class _StepTwoBackup extends StatelessWidget {
                 label: localizations.onboardingGoogleButton,
                 onPressed: isSaving ? null : onGoogleRestore,
               ),
-              if (showRestoreUnavailable) ...[
-                const SizedBox(height: AppSpacing.s12),
-                Text(
-                  localizations.onboardingRestoreUnavailable,
-                  style: AppTypography.meta(palette.textMuted, size: 13),
+              AnimatedSwitcher(
+                duration: Duration(
+                  milliseconds:
+                      MediaQuery.disableAnimationsOf(context) ? 0 : 180,
                 ),
-              ],
+                child: !showRestoreUnavailable
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        key: const ValueKey('restore-unavailable'),
+                        padding: const EdgeInsets.only(top: AppSpacing.s12),
+                        child: Text(
+                          localizations.onboardingRestoreUnavailable,
+                          style:
+                              AppTypography.meta(palette.textMuted, size: 13),
+                        ),
+                      ),
+              ),
             ],
           ),
         ),
