@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
@@ -81,10 +82,11 @@ class _SaleDoneSheetState extends State<SaleDoneSheet> {
       ..writeln('${localizations.saleDonePaid}: ${formatMoney(widget.paid)}')
       ..writeln('${localizations.saleDoneChange}: ${formatMoney(widget.change)}');
 
-    await Clipboard.setData(ClipboardData(text: buffer.toString()));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(localizations.saleDoneReceiptCopied)),
+    await SharePlus.instance.share(
+      ShareParams(
+        text: buffer.toString(),
+        subject: localizations.saleDoneShareReceipt,
+      ),
     );
   }
 
