@@ -238,7 +238,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 constraints: const BoxConstraints(maxWidth: 220),
                 child: _GreetingBubble(
                   onTap: widget.onOpenAiChat,
-                  onDismiss: () => setState(() => _showGreeting = false),
+                  onDismiss: () {
+                    unawaited(HapticFeedback.selectionClick());
+                    setState(() => _showGreeting = false);
+                  },
                 ),
               ),
             ),
@@ -268,7 +271,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     cartNotifier.totalFor(products, currency),
                   ),
                   payLabel: localizations.posPayButton,
-                  onPay: () => _openCheckout(products, cart),
+                  onPay: () {
+                    unawaited(HapticFeedback.mediumImpact());
+                    _openCheckout(products, cart);
+                  },
                 ),
               ),
             ),
@@ -308,69 +314,99 @@ class _PosBody extends StatelessWidget {
     final palette = AppPalette.of(context);
     final localizations = AppLocalizations.of(context);
 
-    return productsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s24),
-          child: Text(
-            localizations.homeLoadFailed,
-            style: AppTypography.body(palette.danger),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: reduceMotion ? 0 : 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: productsAsync.when(
+        loading: () => const Center(
+          key: ValueKey('pos-loading'),
+          child: CircularProgressIndicator(),
+        ),
+        error: (_, _) => Center(
+          key: const ValueKey('pos-error'),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.s24),
+            child: Text(
+              localizations.homeLoadFailed,
+              style: AppTypography.body(palette.danger),
+            ),
           ),
         ),
-      ),
-      data: (allProducts) {
-        return ListView(
-          padding: EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.screenHorizontal,
-            AppSpacing.s14,
-            AppSpacing.screenHorizontal,
-            hasCartItems ? 168 : 96,
-          ),
-          children: [
-            if (showStorageWarning) ...[
-              TindaBanner(
-                icon: Icons.warning_amber_rounded,
-                title: localizations.posStorageFullTitle,
-                body: localizations.posStorageFullBody,
+        data: (allProducts) {
+          Widget listContent;
+          if (allProducts.isEmpty) {
+            listContent = TindaEmptyState(
+              key: const ValueKey('pos-empty-all'),
+              icon: Icons.storefront_outlined,
+              title: localizations.posEmptyTitle,
+              body: localizations.posEmptyBody,
+            );
+          } else if (filteredProducts.isEmpty) {
+            listContent = TindaEmptyState(
+              key: const ValueKey('pos-empty-filter'),
+              icon: Icons.search_off_rounded,
+              title: localizations.posEmptyTitle,
+              body: localizations.posSearchHint,
+            );
+          } else {
+            listContent = TindaGroupedCard(
+              key: ValueKey(
+                'pos-list-${selectedCategory ?? 'all'}-${filteredProducts.length}',
               ),
-              const SizedBox(height: AppSpacing.s12),
-            ],
-            if (categories.isNotEmpty) ...[
-              _CategoryChipsRow(
-                categories: categories,
-                selectedCategory: selectedCategory,
-                onSelected: onCategorySelected,
-              ),
-              const SizedBox(height: AppSpacing.s12),
-            ],
-            if (allProducts.isEmpty)
-              TindaEmptyState(
-                icon: Icons.storefront_outlined,
-                title: localizations.posEmptyTitle,
-                body: localizations.posEmptyBody,
-              )
-            else if (filteredProducts.isEmpty)
-              TindaEmptyState(
-                icon: Icons.search_off_rounded,
-                title: localizations.posEmptyTitle,
-                body: localizations.posSearchHint,
-              )
-            else
-              TindaGroupedCard(
-                children: [
-                  for (final item in filteredProducts)
-                    _PosProductRow(
-                      item: item,
-                      cartQuantity: cart[item.product.id],
-                      onAdd: () => onIncrement(item.product.id),
-                      onRemove: () => onDecrement(item.product.id),
+              children: [
+                for (var index = 0; index < filteredProducts.length; index++)
+                  _AnimatedPosRow(
+                    key: ValueKey(filteredProducts[index].product.id),
+                    index: index,
+                    child: _PosProductRow(
+                      item: filteredProducts[index],
+                      cartQuantity: cart[filteredProducts[index].product.id],
+                      onAdd: () =>
+                          onIncrement(filteredProducts[index].product.id),
+                      onRemove: () =>
+                          onDecrement(filteredProducts[index].product.id),
                     ),
-                ],
+                  ),
+              ],
+            );
+          }
+          return ListView(
+            key: const ValueKey('pos-data'),
+            padding: EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.s14,
+              AppSpacing.screenHorizontal,
+              hasCartItems ? 168 : 96,
+            ),
+            children: [
+              if (showStorageWarning) ...[
+                TindaBanner(
+                  icon: Icons.warning_amber_rounded,
+                  title: localizations.posStorageFullTitle,
+                  body: localizations.posStorageFullBody,
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+              if (categories.isNotEmpty) ...[
+                _CategoryChipsRow(
+                  categories: categories,
+                  selectedCategory: selectedCategory,
+                  onSelected: onCategorySelected,
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: reduceMotion ? 0 : 220),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: listContent,
               ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -474,6 +510,37 @@ class _CategoryChipsRow extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+
+class _AnimatedPosRow extends StatelessWidget {
+  const _AnimatedPosRow({
+    required this.index,
+    required this.child,
+    super.key,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 160 + (index.clamp(0, 10) * 18)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, (1 - value) * 8),
+          child: child,
+        ),
+      ),
+      child: child,
     );
   }
 }
