@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -83,6 +84,7 @@ class ReceiptPreviewSheet extends StatelessWidget {
       footer: TindaPrimaryButton(
         label: localizations.receiptPreviewPrint,
         onPressed: () {
+          unawaited(HapticFeedback.mediumImpact());
           final messenger = ScaffoldMessenger.of(context);
           final navigator = Navigator.of(context);
           unawaited(
@@ -99,6 +101,7 @@ class ReceiptPreviewSheet extends StatelessWidget {
                 );
                 navigator.pop();
               } on Exception {
+                unawaited(HapticFeedback.heavyImpact());
                 messenger.showSnackBar(
                   SnackBar(
                     content: Text(
@@ -113,9 +116,19 @@ class ReceiptPreviewSheet extends StatelessWidget {
           );
         },
       ),
-      child: SizedBox(
-        height: 400,
-        child: PdfPreview(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: Duration(
+          milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220,
+        ),
+        curve: Curves.easeOut,
+        builder: (context, value, child) => Opacity(
+          opacity: value,
+          child: child,
+        ),
+        child: SizedBox(
+          height: 400,
+          child: PdfPreview(
           build: (_) => ReceiptPrintService.build58mmReceiptPdf(
             storeName: storeName,
             lines: lines,
@@ -142,6 +155,7 @@ class ReceiptPreviewSheet extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

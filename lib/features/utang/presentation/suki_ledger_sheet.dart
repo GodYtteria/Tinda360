@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,17 +85,27 @@ class SukiLedgerSheet extends ConsumerWidget {
             child: TindaSecondaryButton(
               label: 'Copy Reminder',
               icon: Icons.copy_rounded,
-              onPressed: () => _copyReminder(
-                context: context,
-                storeName: storeName,
-              ),
+              onPressed: () {
+                unawaited(HapticFeedback.lightImpact());
+                unawaited(
+                  _copyReminder(
+                    context: context,
+                    storeName: storeName,
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: AppSpacing.s12),
           Expanded(
             child: TindaAccentButton(
               label: localizations.utangPayButton,
-              onPressed: balance.owes ? onPay : null,
+              onPressed: balance.owes
+                  ? () {
+                      unawaited(HapticFeedback.selectionClick());
+                      onPay();
+                    }
+                  : null,
             ),
           ),
         ],
@@ -142,41 +154,70 @@ class SukiLedgerSheet extends ConsumerWidget {
     required AppPalette palette,
     required AsyncValue<List<LedgerRecord>> ledgerAsync,
   }) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final Widget content;
     if (ledgerAsync.isLoading && !ledgerAsync.hasValue) {
-      return Padding(
+      content = Padding(
+        key: const ValueKey('ledger-loading'),
         padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.s24),
         child: Center(
           child: CircularProgressIndicator(color: palette.primary),
         ),
       );
-    }
-    if (ledgerAsync.hasError && !ledgerAsync.hasValue) {
-      return Padding(
+    } else if (ledgerAsync.hasError && !ledgerAsync.hasValue) {
+      content = Padding(
+        key: const ValueKey('ledger-error'),
         padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.s16),
         child: Text(
           localizations.homeLoadFailed,
           style: AppTypography.body(palette.danger),
         ),
       );
-    }
-    final records = ledgerAsync.value ?? const <LedgerRecord>[];
-    if (records.isEmpty) {
-      return Padding(
-        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.s20),
-        child: Center(
-          child: Text(
-            'No ledger entries yet.',
-            style: AppTypography.meta(palette.textMuted),
+    } else {
+      final records = ledgerAsync.value ?? const <LedgerRecord>[];
+      if (records.isEmpty) {
+        content = Padding(
+          key: const ValueKey('ledger-empty'),
+          padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.s20),
+          child: Center(
+            child: Text(
+              'No ledger entries yet.',
+              style: AppTypography.meta(palette.textMuted),
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        content = ListView.separated(
+          key: ValueKey('ledger-${records.length}'),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: records.length,
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s8),
+          itemBuilder: (context, index) {
+            final row = _LedgerRecordRow(record: records[index]);
+            if (reduceMotion) return row;
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: Duration(milliseconds: 150 + (index.clamp(0, 8) * 20)),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) => Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, (1 - value) * 6),
+                  child: child,
+                ),
+              ),
+              child: row,
+            );
+          },
+        );
+      }
     }
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: records.length,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s8),
-      itemBuilder: (context, index) => _LedgerRecordRow(record: records[index]),
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: reduceMotion ? 0 : 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: content,
     );
   }
 }
