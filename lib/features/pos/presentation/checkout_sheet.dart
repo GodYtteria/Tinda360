@@ -15,6 +15,7 @@ import 'package:tinda360/core/sales/sale_draft.dart';
 import 'package:tinda360/core/sales/sale_math.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
+import 'package:tinda360/features/pos/presentation/pos_screen.dart';
 import 'package:tinda360/features/pos/presentation/sale_done_sheet.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
@@ -152,6 +153,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
             '${localizedUnit(localizations, line.stocked.product.unit)} '
             '= ${formatMoney(line.subtotal)}',
     ];
+    final storeName =
+        ref.read(posStoreProfileProvider).asData?.value.name ?? '';
+    final timestamp = DateTime.now();
     ref.read(posCartProvider.notifier).clear();
     unawaited(
       ref.read(settingsNotifierProvider.notifier).triggerAutoBackupIfEnabled(),
@@ -170,6 +174,8 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
           paid: paid,
           change: change,
           receiptLines: receiptLines,
+          storeName: storeName,
+          timestamp: timestamp,
         ),
       ),
     );

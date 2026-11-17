@@ -17,6 +17,7 @@ import 'package:tinda360/core/sales/payment_method.dart';
 import 'package:tinda360/core/sales/sale_record.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
+import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/inventory/data/product_csv_exporter.dart';
 import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
@@ -34,6 +35,10 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
+
+final _ulatStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
+  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+);
 /// Reports (Ulat) tab showing sales, profit, transactions, utang, and trend.
 class UlatScreen extends ConsumerWidget {
   /// Creates the reports screen.
@@ -853,26 +858,32 @@ class _RecentSalesSection extends ConsumerWidget {
               TindaSecondaryButton(
                 label: localizations.receiptPrint58mm,
                 icon: Icons.print_outlined,
-                onPressed: () => unawaited(
-                  ReceiptPreviewSheet.show(
-                    sheetContext,
-                    storeName: localizations.appTitle,
-                    lines: [
-                      for (final line in sale.lines)
-                        '${line.productName} x${formatQuantity(line.quantity, line.unit)} '
-                            '${localizedUnit(localizations, line.unit)} = ${formatMoney(line.lineTotal)}',
-                    ],
-                    total: sale.total,
-                    paid: sale.paid,
-                    change: sale.paid.minorUnits >= sale.total.minorUnits
-                        ? sale.paid - sale.total
-                        : Money.zero(sale.total.currency),
-                    paymentLabel: _methodLabel(localizations, sale.method),
-                    timestamp: DateTime.fromMillisecondsSinceEpoch(
-                      sale.createdAtMs,
-                    ).toLocal(),
-                  ),
-                ),
+                onPressed: () {
+                  final storeName =
+                      ref.read(_ulatStoreProfileProvider).asData?.value.name ?? '';
+                  unawaited(
+                    ReceiptPreviewSheet.show(
+                      sheetContext,
+                      storeName: storeName.trim().isEmpty
+                          ? localizations.appTitle
+                          : storeName,
+                      lines: [
+                        for (final line in sale.lines)
+                          '${line.productName} x${formatQuantity(line.quantity, line.unit)} '
+                              '${localizedUnit(localizations, line.unit)} = ${formatMoney(line.lineTotal)}',
+                      ],
+                      total: sale.total,
+                      paid: sale.paid,
+                      change: sale.paid.minorUnits >= sale.total.minorUnits
+                          ? sale.paid - sale.total
+                          : Money.zero(sale.total.currency),
+                      paymentLabel: _methodLabel(localizations, sale.method),
+                      timestamp: DateTime.fromMillisecondsSinceEpoch(
+                        sale.createdAtMs,
+                      ).toLocal(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.s8),
               TindaTextLinkButton(
