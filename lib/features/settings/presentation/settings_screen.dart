@@ -88,9 +88,11 @@ class SettingsScreen extends ConsumerWidget {
                           'fil': localizations.settingsLanguagePh,
                         },
                         selected: ref.watch(localeProvider).languageCode,
-                        onChanged: (code) => ref
-                            .read(localeProvider.notifier)
-                            .setLanguageCode(code),
+                        onChanged: (code) {
+                          if (code == ref.read(localeProvider).languageCode) return;
+                          unawaited(HapticFeedback.selectionClick());
+                          ref.read(localeProvider.notifier).setLanguageCode(code);
+                        },
                       ),
                     ],
                   ),
@@ -171,7 +173,10 @@ class _StoreSwitcherSection extends ConsumerWidget {
             child: Text(localizations.commonCancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
+            onPressed: () {
+              unawaited(HapticFeedback.mediumImpact());
+              Navigator.of(dialogContext).pop(true);
+            },
             style: TextButton.styleFrom(foregroundColor: palette.danger),
             child: Text(localizations.commonDelete),
           ),
@@ -209,9 +214,14 @@ class _StoreSwitcherSection extends ConsumerWidget {
               isActive: store.id == registry.activeStoreId,
               onSwitch: store.id == registry.activeStoreId
                   ? null
-                  : () => unawaited(
-                      ref.read(storeRegistryProvider.notifier).switchStore(store.id),
-                    ),
+                  : () {
+                      unawaited(HapticFeedback.selectionClick());
+                      unawaited(
+                        ref
+                            .read(storeRegistryProvider.notifier)
+                            .switchStore(store.id),
+                      );
+                    },
               onDelete: () => unawaited(
                 _confirmDeleteStore(
                   context,
@@ -231,7 +241,10 @@ class _StoreSwitcherSection extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s4),
           TindaSecondaryButton(
             label: localizations.settingsAddStore,
-            onPressed: () => unawaited(_showAddStoreDialog(context, ref)),
+            onPressed: () {
+              unawaited(HapticFeedback.lightImpact());
+              unawaited(_showAddStoreDialog(context, ref));
+            },
           ),
         ],
       ),
@@ -256,13 +269,21 @@ class _StoreRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
-    return Material(
-      color: isActive ? palette.surfaceMuted : palette.surface,
-      borderRadius: BorderRadius.circular(AppRadii.smallButton),
-      child: InkWell(
-        onTap: onSwitch,
+    return AnimatedContainer(
+      duration: Duration(
+        milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+      ),
+      curve: Curves.easeOut,
+      decoration: BoxDecoration(
+        color: isActive ? palette.surfaceMuted : palette.surface,
         borderRadius: BorderRadius.circular(AppRadii.smallButton),
-        child: Padding(
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onSwitch,
+          borderRadius: BorderRadius.circular(AppRadii.smallButton),
+          child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.s12,
             vertical: AppSpacing.s8,
@@ -283,11 +304,15 @@ class _StoreRow extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.delete_outline, color: palette.danger, size: 20),
                 tooltip: localizations.settingsDeleteStore,
-                onPressed: onDelete,
+                onPressed: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  onDelete();
+                },
               ),
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -404,13 +429,15 @@ class _BackupSection extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.s12),
                         TindaPrimaryButton(
                           label: localizations.settingsBackupUsePhone,
-                          onPressed: () => unawaited(notifier.choosePhoneData()),
+                          onPressed: () { unawaited(HapticFeedback.selectionClick()); unawaited(notifier.choosePhoneData()); },
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         TindaSecondaryButton(
                           label: localizations.settingsBackupRestore,
-                          onPressed: () =>
-                              unawaited(notifier.chooseRestoreBackup()),
+                          onPressed: () {
+                            unawaited(HapticFeedback.mediumImpact());
+                            unawaited(notifier.chooseRestoreBackup());
+                          },
                         ),
                       ] else if (state.backupStatus == BackupStatus.connected) ...[
                         if (state.syncedJustNow) ...[
@@ -427,15 +454,17 @@ class _BackupSection extends ConsumerWidget {
                         ],
                         TindaSecondaryButton(
                           label: localizations.settingsBackupSyncNow,
-                          onPressed: () => unawaited(notifier.syncNow()),
+                          onPressed: () { unawaited(HapticFeedback.lightImpact()); unawaited(notifier.syncNow()); },
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         Center(
                           child: TindaTextLinkButton(
                             label: localizations.settingsBackupDisconnect,
                             isDanger: true,
-                            onPressed: () =>
-                                unawaited(notifier.disconnectBackup()),
+                            onPressed: () {
+                              unawaited(HapticFeedback.selectionClick());
+                              unawaited(notifier.disconnectBackup());
+                            },
                           ),
                         ),
                       ] else
@@ -443,7 +472,10 @@ class _BackupSection extends ConsumerWidget {
                           label: localizations.onboardingGoogleButton,
                           onPressed: state.backupStatus == BackupStatus.connecting
                               ? null
-                              : () => unawaited(notifier.connectBackup()),
+                              : () {
+                                    unawaited(HapticFeedback.mediumImpact());
+                                    unawaited(notifier.connectBackup());
+                                  },
                         ),
                     ],
                   ),
@@ -459,7 +491,10 @@ class _BackupSection extends ConsumerWidget {
             subtitle: localizations.settingsBackupWifiOnly,
             trailing: TindaToggleSwitch(
               value: state.autoBackupEnabled,
-              onChanged: notifier.toggleAutoBackup,
+              onChanged: (value) {
+                unawaited(HapticFeedback.selectionClick());
+                notifier.toggleAutoBackup(value);
+              },
             ),
           ),
         ],
@@ -493,7 +528,7 @@ class _BackupSection extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.s12),
                 TindaSecondaryButton(
                   label: localizations.commonRetry,
-                  onPressed: () => unawaited(notifier.retryBackup()),
+                  onPressed: () { unawaited(HapticFeedback.lightImpact()); unawaited(notifier.retryBackup()); },
                 ),
               ],
             ),
@@ -597,9 +632,11 @@ class _AddStoreDialogState extends State<_AddStoreDialog> {
   void _submit(AppLocalizations localizations) {
     final trimmed = _controller.text.trim();
     if (trimmed.isEmpty) {
+      unawaited(HapticFeedback.heavyImpact());
       setState(() => _inlineError = localizations.failureStoreNameRequired);
       return;
     }
+    unawaited(HapticFeedback.selectionClick());
     Navigator.of(context).pop(trimmed);
   }
 
@@ -708,12 +745,19 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
                     localizations.settingsStorageSizeLabel,
                     style: AppTypography.bodyStrong(palette.text),
                   ),
-                  Text(
-                    sizeLabel,
-                    style: AppTypography.meta(
-                      palette.primary,
-                      size: 13,
-                      weight: FontWeight.w700,
+                  AnimatedSwitcher(
+                    duration: Duration(
+                      milliseconds:
+                          MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+                    ),
+                    child: Text(
+                      sizeLabel,
+                      key: ValueKey<String>(sizeLabel),
+                      style: AppTypography.meta(
+                        palette.primary,
+                        size: 13,
+                        weight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -721,7 +765,12 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
               const SizedBox(height: AppSpacing.s12),
               TindaSecondaryButton(
                 label: localizations.settingsCompactButton,
-                onPressed: _isCompacting ? null : () => unawaited(_compactNow()),
+                onPressed: _isCompacting
+                    ? null
+                    : () {
+                        unawaited(HapticFeedback.lightImpact());
+                        unawaited(_compactNow());
+                      },
               ),
             ],
           ),
@@ -746,16 +795,20 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
                   Expanded(
                     child: TindaSecondaryButton(
                       label: localizations.settingsLocalExportButton,
-                      onPressed: () =>
-                          unawaited(_exportLocalBackup(context, ref)),
+                      onPressed: () {
+                        unawaited(HapticFeedback.lightImpact());
+                        unawaited(_exportLocalBackup(context, ref));
+                      },
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s10),
                   Expanded(
                     child: TindaSecondaryButton(
                       label: localizations.settingsLocalImportButton,
-                      onPressed: () =>
-                          unawaited(_importLocalBackup(context, ref)),
+                      onPressed: () {
+                        unawaited(HapticFeedback.mediumImpact());
+                        unawaited(_importLocalBackup(context, ref));
+                      },
                     ),
                   ),
                 ],
@@ -938,7 +991,10 @@ class _PinLockSectionState extends ConsumerState<_PinLockSection> {
               Expanded(
                 child: TindaSecondaryButton(
                   label: localizations.settingsPinSetButton,
-                  onPressed: () => unawaited(_setPin()),
+                  onPressed: () {
+                    unawaited(HapticFeedback.selectionClick());
+                    unawaited(_setPin());
+                  },
                 ),
               ),
               if (_hasPin) ...[
@@ -947,7 +1003,10 @@ class _PinLockSectionState extends ConsumerState<_PinLockSection> {
                   child: TindaTextLinkButton(
                     label: localizations.settingsPinRemoveButton,
                     isDanger: true,
-                    onPressed: () => unawaited(_removePin()),
+                    onPressed: () {
+                      unawaited(HapticFeedback.selectionClick());
+                      unawaited(_removePin());
+                    },
                   ),
                 ),
               ],
