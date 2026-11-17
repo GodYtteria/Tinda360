@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:printing/printing.dart';
 import 'package:tinda360/core/money/money.dart';
-import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
+import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/receipt_print_service.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -69,35 +70,19 @@ class _SaleDoneSheetState extends State<SaleDoneSheet> {
     final storeLabel = widget.storeName.trim().isEmpty
         ? localizations.appTitle
         : widget.storeName.trim();
-    final buffer = StringBuffer()
-      ..writeln(storeLabel.toUpperCase())
-      ..writeln(_formatReceiptTimestamp(widget.timestamp))
-      ..writeln('------------------------------');
-    for (final line in widget.receiptLines) {
-      buffer.writeln(line);
-    }
-    buffer
-      ..writeln('------------------------------')
-      ..writeln('${localizations.saleDoneTotal}: ${formatMoney(widget.total)}')
-      ..writeln('${localizations.saleDonePaid}: ${formatMoney(widget.paid)}')
-      ..writeln('${localizations.saleDoneChange}: ${formatMoney(widget.change)}');
-
-    await SharePlus.instance.share(
-      ShareParams(
-        text: buffer.toString(),
-        subject: localizations.saleDoneShareReceipt,
-      ),
+    final bytes = await ReceiptPrintService.build58mmReceiptPdf(
+      storeName: storeLabel,
+      lines: widget.receiptLines,
+      total: widget.total,
+      paid: widget.paid,
+      change: widget.change,
+      paymentLabel: localizations.saleDonePaid,
+      timestamp: widget.timestamp,
     );
-  }
-
-  String _formatReceiptTimestamp(DateTime timestamp) {
-    final localTimestamp = timestamp.toLocal();
-    final year = localTimestamp.year.toString().padLeft(4, '0');
-    final month = localTimestamp.month.toString().padLeft(2, '0');
-    final day = localTimestamp.day.toString().padLeft(2, '0');
-    final hour = localTimestamp.hour.toString().padLeft(2, '0');
-    final minute = localTimestamp.minute.toString().padLeft(2, '0');
-    return '$year-$month-$day $hour:$minute';
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'tinda360-receipt-${widget.timestamp.millisecondsSinceEpoch}.pdf',
+    );
   }
 
   @override
