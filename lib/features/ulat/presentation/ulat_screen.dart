@@ -91,26 +91,36 @@ class UlatScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: reportAsync.when(
-              loading: () => Center(
-                child: CircularProgressIndicator(color: palette.primary),
+            child: AnimatedSwitcher(
+              duration: Duration(
+                milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220,
               ),
-              error: (_, _) => TindaEmptyState(
-                icon: Icons.error_outline_rounded,
-                title: localizations.homeLoadFailed,
-                body: localizations.reportsEmptyBody,
-                action: TindaSecondaryButton(
-                  label: localizations.commonRetry,
-                  onPressed: () => ref.invalidate(ulatNotifierProvider),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: reportAsync.when(
+                loading: () => Center(
+                  key: const ValueKey('ulat-loading'),
+                  child: CircularProgressIndicator(color: palette.primary),
                 ),
-              ),
-              data: (state) => Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: _ReportContent(
-                    state: state,
-                    onOpenAiChat: onOpenAiChat,
-                    onOpenTab: onOpenTab,
+                error: (_, _) => TindaEmptyState(
+                  key: const ValueKey('ulat-error'),
+                  icon: Icons.error_outline_rounded,
+                  title: localizations.homeLoadFailed,
+                  body: localizations.reportsEmptyBody,
+                  action: TindaSecondaryButton(
+                    label: localizations.commonRetry,
+                    onPressed: () => ref.invalidate(ulatNotifierProvider),
+                  ),
+                ),
+                data: (state) => Center(
+                  key: ValueKey('ulat-${state.period.name}-${state.summary.revenue.minorUnits}-${state.summary.saleCount}'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: _ReportContent(
+                      state: state,
+                      onOpenAiChat: onOpenAiChat,
+                      onOpenTab: onOpenTab,
+                    ),
                   ),
                 ),
               ),
@@ -383,9 +393,25 @@ class _StatCard extends StatelessWidget {
             style: AppTypography.meta(palette.textMuted, size: 13),
           ),
           const SizedBox(height: AppSpacing.s8),
-          Text(
-            value,
-            style: AppTypography.title(valueColor),
+          AnimatedSwitcher(
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220,
+            ),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.15),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            ),
+            child: Text(
+              value,
+              key: ValueKey<String>(value),
+              style: AppTypography.title(valueColor),
+            ),
           ),
         ],
       ),
@@ -451,15 +477,27 @@ class _SalesTrendCard extends StatelessWidget {
               child: SizedBox(
                 height: 140,
                 width: double.infinity,
-                child: CustomPaint(
-                  painter: _SalesTrendPainter(
-                    revenueMinor: summary.revenue.minorUnits,
-                    profitMinor: math.max(0, summary.profit.minorUnits),
-                    utangMinor: totalUtang.minorUnits,
-                    primaryColor: palette.primary,
-                    successColor: palette.success,
-                    dangerColor: palette.danger,
-                    trackColor: palette.surfaceMuted,
+                child: TweenAnimationBuilder<double>(
+                  key: ValueKey(
+                    '${summary.revenue.minorUnits}-${summary.profit.minorUnits}-${totalUtang.minorUnits}',
+                  ),
+                  tween: Tween(begin: 0, end: 1),
+                  duration: Duration(
+                    milliseconds:
+                        MediaQuery.disableAnimationsOf(context) ? 0 : 450,
+                  ),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, progress, _) => CustomPaint(
+                    painter: _SalesTrendPainter(
+                      revenueMinor: summary.revenue.minorUnits,
+                      profitMinor: math.max(0, summary.profit.minorUnits),
+                      utangMinor: totalUtang.minorUnits,
+                      primaryColor: palette.primary,
+                      successColor: palette.success,
+                      dangerColor: palette.danger,
+                      trackColor: palette.surfaceMuted,
+                      progress: progress,
+                    ),
                   ),
                 ),
               ),
@@ -523,6 +561,7 @@ class _SalesTrendPainter extends CustomPainter {
     required this.successColor,
     required this.dangerColor,
     required this.trackColor,
+    this.progress = 1,
   });
 
   final int revenueMinor;
@@ -532,6 +571,7 @@ class _SalesTrendPainter extends CustomPainter {
   final Color successColor;
   final Color dangerColor;
   final Color trackColor;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -553,9 +593,9 @@ class _SalesTrendPainter extends CustomPainter {
       );
       canvas.drawRRect(trackRect, Paint()..color = trackColor);
 
-      final ratio = values[index] / maxMinor;
+      final ratio = (values[index] / maxMinor) * progress;
       final barHeight = math.max(
-        values[index] > 0 ? 8.0 : 0.0,
+        values[index] > 0 ? 8.0 * progress : 0.0,
         size.height * ratio,
       );
       if (barHeight > 0) {
@@ -576,7 +616,8 @@ class _SalesTrendPainter extends CustomPainter {
       oldDelegate.primaryColor != primaryColor ||
       oldDelegate.successColor != successColor ||
       oldDelegate.dangerColor != dangerColor ||
-      oldDelegate.trackColor != trackColor;
+      oldDelegate.trackColor != trackColor ||
+      oldDelegate.progress != progress;
 }
 
 class _TopProductsCard extends StatelessWidget {
