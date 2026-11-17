@@ -130,6 +130,7 @@ class ChatNotifier extends Notifier<ChatState> {
       isThinking: true,
     );
 
+    final thinkingStarted = DateTime.now();
     _AssistantReply reply;
     try {
       reply = await _answerFromStoreData(trimmed, now, localizations);
@@ -139,6 +140,13 @@ class ChatNotifier extends Notifier<ChatState> {
         source: localizations.chatSourceSummary,
         mood: TindaAvatarMood.talking,
       );
+    }
+    // Keep the thinking bubble visible long enough to read, even when the
+    // on-device lookup finishes almost instantly.
+    final elapsed = DateTime.now().difference(thinkingStarted);
+    const minimumThinking = Duration(milliseconds: 900);
+    if (elapsed < minimumThinking) {
+      await Future<void>.delayed(minimumThinking - elapsed);
     }
 
     final assistantMessage = ChatMessage(
