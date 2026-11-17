@@ -99,7 +99,10 @@ Future<int> compactStoreDatabase(Ref ref) async {
 }
 
 /// Creates a compacted `VACUUM INTO` snapshot and uploads it to Google Drive.
-Future<BackupSyncResult> uploadStoreDatabase(Ref ref) async {
+Future<BackupSyncResult> uploadStoreDatabase(
+  Ref ref, {
+  bool allowPrompt = false,
+}) async {
   final database = ref.read(appDatabaseProvider);
   final file = await ref.read(databaseFileProvider)();
   final snapshotFile = File('${file.path}.snapshot');
@@ -111,6 +114,7 @@ Future<BackupSyncResult> uploadStoreDatabase(Ref ref) async {
     return await ref.read(driveBackupServiceProvider).uploadDatabase(
       uploadTarget,
       storeId: storeId,
+      allowPrompt: allowPrompt,
     );
   } finally {
     if (snapshotFile.existsSync()) {
@@ -121,7 +125,10 @@ Future<BackupSyncResult> uploadStoreDatabase(Ref ref) async {
 
 /// Downloads the Google Drive backup, replaces the local SQLite file, and
 /// invalidates [appDatabaseProvider] so repositories reopen the restored DB.
-Future<BackupSyncResult> restoreStoreDatabase(Ref ref) async {
+Future<BackupSyncResult> restoreStoreDatabase(
+  Ref ref, {
+  bool allowPrompt = false,
+}) async {
   final file = await ref.read(databaseFileProvider)();
   final db = ref.read(appDatabaseProvider);
   await db.close();
@@ -130,6 +137,7 @@ Future<BackupSyncResult> restoreStoreDatabase(Ref ref) async {
   final result = await ref.read(driveBackupServiceProvider).downloadDatabaseTo(
     file,
     storeId: storeId,
+    allowPrompt: allowPrompt,
   );
   if (result is BackupSyncSuccess) {
     _deleteIfExists('${file.path}-wal');
@@ -225,7 +233,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
       backupStatus: BackupStatus.connecting,
       clearError: true,
     );
-    final result = await uploadStoreDatabase(ref);
+    final result = await uploadStoreDatabase(ref, allowPrompt: true);
     switch (result) {
       case BackupSyncSuccess():
         unawaited(
@@ -255,7 +263,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
       backupStatus: BackupStatus.connecting,
       clearError: true,
     );
-    final result = await restoreStoreDatabase(ref);
+    final result = await restoreStoreDatabase(ref, allowPrompt: true);
     switch (result) {
       case BackupSyncSuccess():
         unawaited(
@@ -286,7 +294,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
       backupStatus: BackupStatus.connecting,
       clearError: true,
     );
-    final result = await uploadStoreDatabase(ref);
+    final result = await uploadStoreDatabase(ref, allowPrompt: true);
     switch (result) {
       case BackupSyncSuccess():
         state = state.copyWith(

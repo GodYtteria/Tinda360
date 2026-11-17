@@ -182,6 +182,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final syncResult = await backupService.downloadDatabaseTo(
       file,
       storeId: 'default',
+      allowPrompt: true,
     );
     if (syncResult is BackupSyncSuccess) {
       for (final suffix in const ['-wal', '-shm']) {

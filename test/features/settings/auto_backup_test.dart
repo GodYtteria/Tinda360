@@ -27,6 +27,7 @@ final class _FakeDriveBackupService implements DriveBackupService {
   Future<BackupSyncResult> uploadDatabase(
     File databaseFile, {
     required String storeId,
+    bool allowPrompt = false,
   }) async {
     uploadCount++;
     return const BackupSyncSuccess();
@@ -36,6 +37,7 @@ final class _FakeDriveBackupService implements DriveBackupService {
   Future<BackupSyncResult> downloadDatabaseTo(
     File destinationFile, {
     required String storeId,
+    bool allowPrompt = false,
   }) async =>
       const BackupSyncSuccess();
 }
