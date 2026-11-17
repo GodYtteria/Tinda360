@@ -27,11 +27,17 @@ final class _FakeDriveBackupService implements DriveBackupService {
   Future<void> signOut() async {}
 
   @override
-  Future<BackupSyncResult> uploadDatabase(File databaseFile) async =>
+  Future<BackupSyncResult> uploadDatabase(
+    File databaseFile, {
+    required String storeId,
+  }) async =>
       const BackupSyncSuccess();
 
   @override
-  Future<BackupSyncResult> downloadDatabaseTo(File destinationFile) async =>
+  Future<BackupSyncResult> downloadDatabaseTo(
+    File destinationFile, {
+    required String storeId,
+  }) async =>
       const BackupSyncSuccess();
 }
 

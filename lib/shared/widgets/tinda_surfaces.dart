@@ -745,22 +745,24 @@ class TindaListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (var index = 0; index < rows; index++) ...[
-          if (index > 0) const SizedBox(height: AppSpacing.s10),
-          const TindaCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TindaSkeleton(width: 180, height: 14),
-                SizedBox(height: AppSpacing.s8),
-                TindaSkeleton(width: 120, height: 12),
-              ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          for (var index = 0; index < rows; index++) ...[
+            if (index > 0) const SizedBox(height: AppSpacing.s10),
+            const TindaCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TindaSkeleton(width: 180, height: 14),
+                  SizedBox(height: AppSpacing.s8),
+                  TindaSkeleton(width: 120, height: 12),
+                ],
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
