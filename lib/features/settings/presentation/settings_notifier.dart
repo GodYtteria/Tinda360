@@ -106,7 +106,12 @@ Future<BackupSyncResult> uploadStoreDatabase(Ref ref) async {
   try {
     await createCompactedBackupSnapshot(database, snapshotFile);
     final uploadTarget = snapshotFile.existsSync() ? snapshotFile : file;
-    return await ref.read(driveBackupServiceProvider).uploadDatabase(uploadTarget);
+    final storeId =
+        ref.read(storeRegistryProvider).value?.activeStoreId ?? 'default';
+    return await ref.read(driveBackupServiceProvider).uploadDatabase(
+      uploadTarget,
+      storeId: storeId,
+    );
   } finally {
     if (snapshotFile.existsSync()) {
       snapshotFile.deleteSync();
@@ -120,7 +125,12 @@ Future<BackupSyncResult> restoreStoreDatabase(Ref ref) async {
   final file = await ref.read(databaseFileProvider)();
   final db = ref.read(appDatabaseProvider);
   await db.close();
-  final result = await ref.read(driveBackupServiceProvider).downloadDatabaseTo(file);
+  final storeId =
+      ref.read(storeRegistryProvider).value?.activeStoreId ?? 'default';
+  final result = await ref.read(driveBackupServiceProvider).downloadDatabaseTo(
+    file,
+    storeId: storeId,
+  );
   if (result is BackupSyncSuccess) {
     _deleteIfExists('${file.path}-wal');
     _deleteIfExists('${file.path}-shm');

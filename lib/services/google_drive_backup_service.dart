@@ -73,10 +73,16 @@ abstract interface class DriveBackupService {
   Future<void> signOut();
 
   /// Uploads [databaseFile] to the user's private Google Drive appDataFolder.
-  Future<BackupSyncResult> uploadDatabase(File databaseFile);
+  Future<BackupSyncResult> uploadDatabase(
+    File databaseFile, {
+    required String storeId,
+  });
 
   /// Downloads the backup into [destinationFile] (replacing it atomically).
-  Future<BackupSyncResult> downloadDatabaseTo(File destinationFile);
+  Future<BackupSyncResult> downloadDatabaseTo(
+    File destinationFile, {
+    required String storeId,
+  });
 }
 
 /// Google Sign-In + Google Drive `drive.appdata` implementation.
@@ -84,7 +90,16 @@ final class GoogleDriveBackupService implements DriveBackupService {
   /// Creates the service.
   GoogleDriveBackupService({required AppLog log}) : _log = log;
 
-  static const String _backupFileName = 'tinda360_backup.sqlite';
+  static const String _legacyBackupFileName = 'tinda360_backup.sqlite';
+
+  /// Each store gets its own Drive file so syncing one store cannot overwrite
+  /// another store's backup.
+  static String backupFileNameForStore(String storeId) {
+    if (storeId.isEmpty || storeId == 'default') return _legacyBackupFileName;
+    final safe = storeId.replaceAll(RegExp('[^a-zA-Z0-9_-]'), '');
+    if (safe.isEmpty) return _legacyBackupFileName;
+    return 'tinda360_backup_$safe.sqlite';
+  }
   static const List<String> _scopes = <String>[drive.DriveApi.driveAppdataScope];
   static const String _clientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
   static const String _serverClientId = String.fromEnvironment(
@@ -155,15 +170,19 @@ final class GoogleDriveBackupService implements DriveBackupService {
   }
 
   @override
-  Future<BackupSyncResult> uploadDatabase(File databaseFile) async {
+  Future<BackupSyncResult> uploadDatabase(
+    File databaseFile, {
+    required String storeId,
+  }) async {
     if (!databaseFile.existsSync()) {
       return const BackupSyncFailed(reason: 'missing_local_database');
     }
+    final backupFileName = backupFileNameForStore(storeId);
     return _withDriveApi((driveApi) async {
-      final existingId = await _findBackupFileId(driveApi);
+      final existingId = await _findBackupFileId(driveApi, backupFileName);
       final length = await databaseFile.length();
       final media = drive.Media(databaseFile.openRead(), length);
-      final metadata = drive.File()..name = _backupFileName;
+      final metadata = drive.File()..name = backupFileName;
       if (existingId != null) {
         await driveApi.files.update(metadata, existingId, uploadMedia: media);
       } else {
@@ -175,9 +194,13 @@ final class GoogleDriveBackupService implements DriveBackupService {
   }
 
   @override
-  Future<BackupSyncResult> downloadDatabaseTo(File destinationFile) async {
+  Future<BackupSyncResult> downloadDatabaseTo(
+    File destinationFile, {
+    required String storeId,
+  }) async {
+    final backupFileName = backupFileNameForStore(storeId);
     return _withDriveApi((driveApi) async {
-      final existingId = await _findBackupFileId(driveApi);
+      final existingId = await _findBackupFileId(driveApi, backupFileName);
       if (existingId == null) {
         return const BackupSyncNoBackup();
       }
@@ -230,10 +253,13 @@ final class GoogleDriveBackupService implements DriveBackupService {
     }
   }
 
-  Future<String?> _findBackupFileId(drive.DriveApi driveApi) async {
+  Future<String?> _findBackupFileId(
+    drive.DriveApi driveApi,
+    String backupFileName,
+  ) async {
     final list = await driveApi.files.list(
       spaces: 'appDataFolder',
-      q: "name = '$_backupFileName' and trashed = false",
+      q: "name = '$backupFileName' and trashed = false",
       $fields: 'files(id, name)',
       pageSize: 1,
     );

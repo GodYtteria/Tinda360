@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/money/currency.dart';
-import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/connection.dart';
 import 'package:tinda360/data/db/id_generator.dart';
@@ -126,7 +125,7 @@ class StoreRegistryNotifier extends AsyncNotifier<StoreRegistry> {
   }
 
   /// Creates a new store database, switches to it, and completes onboarding.
-  Future<void> createAndSwitchStore(String name) async {
+  Future<void> createStore(String name) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) return;
 
@@ -143,24 +142,12 @@ class StoreRegistryNotifier extends AsyncNotifier<StoreRegistry> {
       fileName: fileName,
     );
     final updated = StoreRegistry(
-      activeStoreId: storeId,
+      activeStoreId: current.activeStoreId,
       stores: [...syncedStores, newEntry],
     );
 
-    await ref.read(appDatabaseProvider).close();
     await updated.save();
     state = AsyncData(updated);
-    ref.invalidate(appDatabaseProvider);
-    final onboardingResult = await ref
-        .read(storeProfileRepositoryProvider)
-        .completeOnboarding(trimmedName);
-    if (onboardingResult case Err(:final failure)) {
-      ref.read(appLogProvider).error(
-        'store.create_and_switch_onboarding',
-        failure,
-        StackTrace.current,
-      );
-    }
   }
 
   /// Switches the active store to [storeId] and reopens the database.
@@ -195,7 +182,8 @@ class StoreRegistryNotifier extends AsyncNotifier<StoreRegistry> {
       await ref.read(appDatabaseProvider).close();
     }
 
-    await StoreRegistry.deleteDatabaseFiles(target.fileName);
+    // Keep the database file on disk: removing a store from the registry must
+    // never destroy its sales, products, or ledger data.
 
     final remaining = current.stores
         .where((entry) => entry.id != storeId)
