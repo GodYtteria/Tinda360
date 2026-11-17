@@ -174,12 +174,18 @@ final class StoreRegistry {
     Future<Directory> Function()? directoryProvider,
   }) async {
     try {
-      final directory = await (directoryProvider ?? getApplicationSupportDirectory)();
+      final directory =
+          await (directoryProvider ?? getApplicationSupportDirectory)();
       if (!directory.existsSync()) {
         directory.createSync(recursive: true);
       }
-      File(p.join(directory.path, registryFileName))
-          .writeAsStringSync(jsonEncode(toJson()), flush: true);
+      final file = File(p.join(directory.path, registryFileName));
+      final tempFile = File('${file.path}.tmp');
+      tempFile.writeAsStringSync(jsonEncode(toJson()), flush: true);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+      tempFile.renameSync(file.path);
     } on Exception catch (error, stackTrace) {
       developer.log(
         'Failed to save store registry.',
@@ -187,6 +193,7 @@ final class StoreRegistry {
         error: error,
         stackTrace: stackTrace,
       );
+      rethrow;
     }
   }
 

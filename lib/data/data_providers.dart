@@ -160,12 +160,16 @@ class StoreRegistryNotifier extends AsyncNotifier<StoreRegistry> {
       current.stores,
       current.activeStoreId,
     );
-    await ref.read(appDatabaseProvider).close();
     final updated = StoreRegistry(
       activeStoreId: storeId,
       stores: syncedStores,
     );
     await updated.save();
+    try {
+      await ref.read(appDatabaseProvider).close();
+    } on Exception {
+      // Best effort: proceed with switch after registry is persisted.
+    }
     state = AsyncData(updated);
     ref.invalidate(appDatabaseProvider);
   }
@@ -173,29 +177,30 @@ class StoreRegistryNotifier extends AsyncNotifier<StoreRegistry> {
   /// Deletes [storeId] and its database files, switching or resetting if active.
   Future<void> deleteStore(String storeId) async {
     final current = state.value ?? await StoreRegistry.load();
-    final targetIndex = current.stores.indexWhere((entry) => entry.id == storeId);
+    final targetIndex =
+        current.stores.indexWhere((entry) => entry.id == storeId);
     if (targetIndex == -1) return;
 
     final target = current.stores[targetIndex];
     final wasActive = target.id == current.activeStoreId;
-    if (wasActive) {
-      await ref.read(appDatabaseProvider).close();
-    }
-
-    // Keep the database file on disk: removing a store from the registry must
-    // never destroy its sales, products, or ledger data.
-
-    final remaining = current.stores
-        .where((entry) => entry.id != storeId)
-        .toList();
+    final remaining =
+        current.stores.where((entry) => entry.id != storeId).toList();
     final updated = remaining.isEmpty
         ? StoreRegistry.defaultRegistry()
         : StoreRegistry(
-            activeStoreId: wasActive ? remaining.first.id : current.activeStoreId,
+            activeStoreId:
+                wasActive ? remaining.first.id : current.activeStoreId,
             stores: remaining,
           );
 
     await updated.save();
+    if (wasActive) {
+      try {
+        await ref.read(appDatabaseProvider).close();
+      } on Exception {
+        // Best effort: registry is already persisted.
+      }
+    }
     state = AsyncData(updated);
     if (wasActive || remaining.isEmpty) {
       ref.invalidate(appDatabaseProvider);
