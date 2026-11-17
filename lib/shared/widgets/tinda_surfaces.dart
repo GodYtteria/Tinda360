@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
@@ -53,7 +56,12 @@ class TindaCard extends StatelessWidget {
         color: backgroundColor ?? palette.surface,
         shape: shape,
         child: InkWell(
-          onTap: onTap,
+          onTap: onTap == null
+              ? null
+              : () {
+                  unawaited(HapticFeedback.selectionClick());
+                  onTap!();
+                },
           customBorder: shape,
           splashColor: palette.primary.withValues(alpha: 0.14),
           highlightColor: palette.primary.withValues(alpha: 0.08),
@@ -630,6 +638,118 @@ class TindaBottomSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// Rounded skeleton placeholder block with subtle shimmer.
+class TindaSkeleton extends StatefulWidget {
+  /// Creates a skeleton block.
+  const TindaSkeleton({
+    super.key,
+    this.width,
+    this.height = 16,
+    this.borderRadius,
+  });
+
+  /// Optional fixed width.
+  final double? width;
+
+  /// Block height.
+  final double height;
+
+  /// Optional corner radius.
+  final BorderRadius? borderRadius;
+
+  @override
+  State<TindaSkeleton> createState() => _TindaSkeletonState();
+}
+
+class _TindaSkeletonState extends State<TindaSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final base = palette.surfaceMuted;
+    final highlight = palette.surface;
+    final radius = widget.borderRadius ??
+        BorderRadius.circular(AppRadii.smallButton);
+
+    if (reduceMotion) {
+      return Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(color: base, borderRadius: radius),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final t = _controller.value;
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            gradient: LinearGradient(
+              begin: Alignment(-1.0 + (2.0 * t), 0),
+              end: Alignment(1.0 + (2.0 * t), 0),
+              colors: [base, highlight, base],
+              stops: const [0.2, 0.5, 0.8],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Simple list-loading skeleton for card/list screens.
+class TindaListSkeleton extends StatelessWidget {
+  /// Creates a list skeleton.
+  const TindaListSkeleton({super.key, this.rows = 5});
+
+  /// Number of placeholder rows.
+  final int rows;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var index = 0; index < rows; index++) ...[
+          if (index > 0) const SizedBox(height: AppSpacing.s10),
+          const TindaCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TindaSkeleton(width: 180, height: 14),
+                SizedBox(height: AppSpacing.s8),
+                TindaSkeleton(width: 120, height: 12),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

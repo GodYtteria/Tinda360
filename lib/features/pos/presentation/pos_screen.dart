@@ -320,9 +320,10 @@ class _PosBody extends StatelessWidget {
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       child: productsAsync.when(
-        loading: () => const Center(
+        loading: () => const Padding(
           key: ValueKey('pos-loading'),
-          child: CircularProgressIndicator(),
+          padding: EdgeInsets.all(AppSpacing.s16),
+          child: TindaListSkeleton(),
         ),
         error: (_, _) => Center(
           key: const ValueKey('pos-error'),

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
@@ -196,7 +199,12 @@ class TindaFilterChip extends StatelessWidget {
               : BorderSide(color: palette.borderStrong, width: 1.5),
         ),
         child: InkWell(
-          onTap: onTap,
+          onTap: onTap == null
+              ? null
+              : () {
+                  unawaited(HapticFeedback.selectionClick());
+                  onTap!();
+                },
           borderRadius: BorderRadius.circular(AppRadii.chip),
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(
@@ -257,7 +265,12 @@ class TindaSegmentedControl<T> extends StatelessWidget {
               child: _SegmentButton(
                 label: entry.value,
                 isSelected: entry.key == selected,
-                onTap: () => onChanged(entry.key),
+                onTap: () {
+                  if (entry.key != selected) {
+                    unawaited(HapticFeedback.selectionClick());
+                  }
+                  onChanged(entry.key);
+                },
               ),
             ),
         ],
