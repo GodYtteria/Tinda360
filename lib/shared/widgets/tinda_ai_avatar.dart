@@ -192,3 +192,99 @@ class TindaAiFab extends StatelessWidget {
     );
   }
 }
+
+
+/// Status indicator dot with a gentle breathing pulse while active.
+///
+/// Respects the system "disable animations" setting.
+class TindaStatusDot extends StatefulWidget {
+  /// Creates a status dot.
+  const TindaStatusDot({
+    required this.active,
+    required this.color,
+    super.key,
+    this.size = 8,
+  });
+
+  /// Whether the pulse animation runs.
+  final bool active;
+
+  /// Dot fill color.
+  final Color color;
+
+  /// Dot diameter.
+  final double size;
+
+  @override
+  State<TindaStatusDot> createState() => _TindaStatusDotState();
+}
+
+class _TindaStatusDotState extends State<TindaStatusDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant TindaStatusDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active != widget.active) _sync();
+  }
+
+  void _sync() {
+    if (widget.active &&
+        !MediaQuery.disableAnimationsOf(context)) {
+      _controller.repeat(reverse: true);
+    } else {
+      _controller.stop();
+      _controller.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = 1 + (_controller.value * 0.18);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => Transform.scale(
+        scale: scale,
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            color: widget.color,
+            shape: BoxShape.circle,
+            boxShadow: widget.active
+                ? [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.35),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+}
