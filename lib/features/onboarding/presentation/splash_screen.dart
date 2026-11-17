@@ -101,12 +101,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             child: Column(
               children: [
               const Spacer(),
-              _SplashAnimatedLogo(
+              _SpinningSplashLogo(
                 size: 104,
-                spin: _spinController,
+                controller: _spinController,
                 ringColor: palette.onHeader.withValues(alpha: 0.18),
                 arcColor: palette.accent,
-                storeColor: palette.onHeader,
               ),
               const SizedBox(height: AppSpacing.s20),
               const TindaWordmark(fontSize: 32),
@@ -210,73 +209,135 @@ class _SplashErrorView extends StatelessWidget {
   }
 }
 
-class _SplashAnimatedLogo extends StatelessWidget {
-  const _SplashAnimatedLogo({
+class _SpinningSplashLogo extends StatelessWidget {
+  const _SpinningSplashLogo({
     required this.size,
-    required this.spin,
+    required this.controller,
     required this.ringColor,
     required this.arcColor,
-    required this.storeColor,
   });
 
   final double size;
-  final Animation<double> spin;
+  final AnimationController controller;
   final Color ringColor;
   final Color arcColor;
-  final Color storeColor;
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final logo = SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              value: reduceMotion ? null : null,
+              backgroundColor: ringColor,
+              valueColor: AlwaysStoppedAnimation<Color>(arcColor.withValues(alpha: 0.0)),
+            ),
+          ),
+          if (!reduceMotion)
+            SizedBox(
+              width: size,
+              height: size,
+              child: CircularProgressIndicator(
+                strokeWidth: 5,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(arcColor),
+              ),
+            ),
+          RotationTransition(
+            turns: reduceMotion
+                ? const AlwaysStoppedAnimation(0)
+                : controller,
+            child: TindaLogoMark(size: size * 0.72, onDarkHeader: true),
+          ),
+        ],
+      ),
+    );
+    if (reduceMotion) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: size,
+              height: size,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: ringColor, width: 5),
+                ),
+              ),
+            ),
+            TindaLogoMark(size: size * 0.72, onDarkHeader: true),
+          ],
+        ),
+      );
+    }
     return SizedBox(
       width: size,
       height: size,
-      child: AnimatedBuilder(
-        animation: spin,
-        builder: (context, _) => CustomPaint(
-          painter: _SplashLogoPainter(
-            progress: spin.value,
-            ringColor: ringColor,
-            arcColor: arcColor,
-            storeColor: storeColor,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: controller,
+            builder: (context, _) => CustomPaint(
+              size: Size.square(size),
+              painter: _SplashRingPainter(
+                progress: controller.value,
+                ringColor: ringColor,
+                arcColor: arcColor,
+              ),
+            ),
           ),
-        ),
+          RotationTransition(
+            turns: controller,
+            child: TindaLogoMark(size: size * 0.72, onDarkHeader: true),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SplashLogoPainter extends CustomPainter {
-  const _SplashLogoPainter({
+class _SplashRingPainter extends CustomPainter {
+  const _SplashRingPainter({
     required this.progress,
     required this.ringColor,
     required this.arcColor,
-    required this.storeColor,
   });
 
   final double progress;
   final Color ringColor;
   final Color arcColor;
-  final Color storeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final scale = size.width / 120;
-    final center = Offset(60 * scale, 60 * scale);
-    final radius = 50 * scale;
-
+    final stroke = 5.0;
+    final center = size.center(Offset.zero);
+    final radius = (size.width - stroke) / 2;
     final ringPaint = Paint()
       ..color = ringColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8 * scale;
+      ..strokeWidth = stroke;
     canvas.drawCircle(center, radius, ringPaint);
 
     final arcPaint = Paint()
       ..color = arcColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8 * scale
+      ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
-    const sweepAngle = (80 / 315) * 2 * math.pi;
-    final startAngle = progress * 2 * math.pi;
+    const sweepAngle = math.pi * 0.55;
+    final startAngle = progress * 2 * math.pi - math.pi / 2;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       startAngle,
@@ -284,52 +345,11 @@ class _SplashLogoPainter extends CustomPainter {
       false,
       arcPaint,
     );
-
-    final storePaint = Paint()
-      ..color = storeColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4 * scale
-      ..strokeJoin = StrokeJoin.round;
-
-    final roof = Path()
-      ..moveTo(36 * scale, 52 * scale)
-      ..lineTo(42 * scale, 40 * scale)
-      ..lineTo(78 * scale, 40 * scale)
-      ..lineTo(84 * scale, 52 * scale);
-    canvas.drawPath(roof, storePaint);
-
-    final awning = Path()
-      ..moveTo(36 * scale, 52 * scale)
-      ..quadraticBezierTo(42 * scale, 60 * scale, 48 * scale, 52 * scale)
-      ..quadraticBezierTo(54 * scale, 60 * scale, 60 * scale, 52 * scale)
-      ..quadraticBezierTo(66 * scale, 60 * scale, 72 * scale, 52 * scale)
-      ..quadraticBezierTo(78 * scale, 60 * scale, 84 * scale, 52 * scale);
-    canvas.drawPath(awning, storePaint);
-
-    final walls = Path()
-      ..moveTo(40 * scale, 58 * scale)
-      ..lineTo(40 * scale, 82 * scale)
-      ..lineTo(80 * scale, 82 * scale)
-      ..lineTo(80 * scale, 58 * scale);
-    canvas.drawPath(walls, storePaint);
-
-    final doorPaint = Paint()
-      ..color = arcColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4 * scale
-      ..strokeJoin = StrokeJoin.round;
-    final door = Path()
-      ..moveTo(54 * scale, 82 * scale)
-      ..lineTo(54 * scale, 68 * scale)
-      ..lineTo(66 * scale, 68 * scale)
-      ..lineTo(66 * scale, 82 * scale);
-    canvas.drawPath(door, doorPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _SplashLogoPainter oldDelegate) =>
+  bool shouldRepaint(covariant _SplashRingPainter oldDelegate) =>
       oldDelegate.progress != progress ||
       oldDelegate.ringColor != ringColor ||
-      oldDelegate.arcColor != arcColor ||
-      oldDelegate.storeColor != storeColor;
+      oldDelegate.arcColor != arcColor;
 }
