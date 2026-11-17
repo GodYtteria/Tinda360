@@ -210,23 +210,30 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 (value) => value != null,
                                 orElse: () => null,
                               );
-                          ScaffoldMessenger.of(context)
-                            ..clearSnackBars()
-                            ..showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 4),
-                                content: Text(
-                                  name == null ? 'Removed' : 'Removed $name',
-                                ),
-                                action: SnackBarAction(
-                                  label: localizations.localeName.startsWith('fil')
-                                      ? 'Ibalik'
-                                      : 'Undo',
-                                  onPressed: () => cartNotifier.increment(id),
-                                ),
+                          final messenger = ScaffoldMessenger.of(context)
+                            ..clearSnackBars();
+                          var undoPressed = false;
+                          final controller = messenger.showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 4),
+                              content: Text(
+                                name == null ? 'Removed' : 'Removed $name',
                               ),
-                            );
+                              action: SnackBarAction(
+                                label: localizations.localeName.startsWith('fil')
+                                    ? 'Ibalik'
+                                    : 'Undo',
+                                onPressed: () {
+                                  undoPressed = true;
+                                  cartNotifier.increment(id);
+                                },
+                              ),
+                            ),
+                          );
+                          Timer(const Duration(seconds: 5), () {
+                            if (!undoPressed) controller.close();
+                          });
                         }
                       },
                     ),
