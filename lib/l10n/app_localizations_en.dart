@@ -384,7 +384,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNameLabel => 'Product name';
 
   @override
-  String get productNameHint => 'e.g. Lucky Me Pancit Canton';
+  String get productNameHint => 'e.g. Canned sardines';
 
   @override
   String get productPriceLabel => 'Selling price (₱)';

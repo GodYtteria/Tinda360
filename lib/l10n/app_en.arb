@@ -133,7 +133,7 @@
   "productSheetAddTitle": "Add product",
   "productSheetEditTitle": "Edit product",
   "productNameLabel": "Product name",
-  "productNameHint": "e.g. Lucky Me Pancit Canton",
+  "productNameHint": "e.g. Canned sardines",
   "productPriceLabel": "Selling price (₱)",
   "productCostLabel": "Cost / puhunan (₱)",
   "productNoCountSwitch": "Don't count stock",
