@@ -323,6 +323,7 @@
       </a>
       <div class="nav-right">
         <nav class="nav-links" aria-label="Main navigation">
+          <a href="#story" data-i18n="navStory">Kwento</a>
           <a href="#features" data-i18n="navFeatures">Mga Features</a>
           <a href="#trust" data-i18n="navTrust">Privacy &amp; Open Source</a>
           <a href="/privacy" data-i18n="navPrivacy">Privacy Policy</a>
@@ -356,6 +357,28 @@
       <aside class="phone-frame" aria-label="Tinda 360 live mobile demo">
         <video src="demo.mp4" poster="screenshots/pos.png" autoplay muted loop playsinline controls></video>
       </aside>
+    </div>
+  </section>
+
+  <section id="story" class="section">
+    <div class="section-head">
+      <div class="section-kicker" data-i18n="storyKicker">Bakit Ginawa Ang Tinda 360</div>
+      <h2 data-i18n="storyTitle">Para sa tindahang minsan ay iba ang nagbabantay.</h2>
+      <p class="section-sub" data-i18n="storySub">Ginawa ng Bukluran para sa mga komunidad sa buong Pilipinas.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <h3 data-i18n="storyProblemTitle">Ang problema</h3>
+        <p data-i18n="storyProblemBody">Madalas wala ang may-ari ng sari-sari store, kaya kapamilya o kapitbahay ang nagbabantay. Mahirap magbilang ng stock, sa notebook nakasulat ang utang, at hindi alam ng may-ari kung tama ang kita at kung kulang ang kaha.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="storySolutionTitle">Ang solusyon</h3>
+        <p data-i18n="storySolutionBody">Simpleng app sa phone na gumagana kahit walang internet. Pipindot lang ang bantay para magbenta, hindi mabebenta ang wala nang stock, at awtomatikong naitatala ang utang ng bawat suki. May PIN ang may-ari para sa mga sensitibong gawain, at may bilang ng kaha sa dulo ng araw.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="storyImpactTitle">Para sa komunidad</h3>
+        <p data-i18n="storyImpactBody">Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas malinaw ang tiwala ng may-ari sa bantay. Mahigit 1,000 na ang gumagamit.</p>
+      </div>
     </div>
   </section>
 
@@ -473,6 +496,7 @@
     (function () {
       const translations = {
         fil: {
+          navStory: 'Kwento',
           navFeatures: 'Mga Features',
           navTrust: 'Privacy & Open Source',
           navPrivacy: 'Privacy Policy',
@@ -518,9 +542,19 @@
           t2Title: 'Centavo-Exact Math',
           t2Body: 'Integer minor units at half-up rounding sa bawat item — walang floating-point rounding bugs sa sukli o tubo.',
           t3Title: 'Private Google Drive App Folder',
-          t3Body: 'Kung i-on mo ang Google backup, drive.appdata lang ang scope — hindi nakakabasa ng iba mong Drive files.'
+          t3Body: 'Kung i-on mo ang Google backup, drive.appdata lang ang scope — hindi nakakabasa ng iba mong Drive files.',
+          storyKicker: 'Bakit Ginawa Ang Tinda 360',
+          storyTitle: 'Para sa tindahang minsan ay iba ang nagbabantay.',
+          storySub: 'Ginawa ng Bukluran para sa mga komunidad sa buong Pilipinas.',
+          storyProblemTitle: 'Ang problema',
+          storyProblemBody: 'Madalas wala ang may-ari ng sari-sari store, kaya kapamilya o kapitbahay ang nagbabantay. Mahirap magbilang ng stock, sa notebook nakasulat ang utang, at hindi alam ng may-ari kung tama ang kita at kung kulang ang kaha.',
+          storySolutionTitle: 'Ang solusyon',
+          storySolutionBody: 'Simpleng app sa phone na gumagana kahit walang internet. Pipindot lang ang bantay para magbenta, hindi mabebenta ang wala nang stock, at awtomatikong naitatala ang utang ng bawat suki. May PIN ang may-ari para sa mga sensitibong gawain, at may bilang ng kaha sa dulo ng araw.',
+          storyImpactTitle: 'Para sa komunidad',
+          storyImpactBody: 'Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas malinaw ang tiwala ng may-ari sa bantay. Mahigit 1,000 na ang gumagamit.',
         },
         en: {
+          navStory: 'Our Story',
           navFeatures: 'Features',
           navTrust: 'Privacy & Open Source',
           navPrivacy: 'Privacy Policy',
@@ -566,7 +600,16 @@
           t2Title: 'Centavo-Exact Math',
           t2Body: 'Integer minor-unit accounting and half-up rounding per line — zero floating-point errors on change or profit.',
           t3Title: 'Private Google Drive App Folder',
-          t3Body: 'When you enable Google backup, only the drive.appdata scope is requested — Tinda 360 cannot read your other Drive files.'
+          t3Body: 'When you enable Google backup, only the drive.appdata scope is requested — Tinda 360 cannot read your other Drive files.',
+          storyKicker: 'Why Tinda 360 Exists',
+          storyTitle: 'For the store that someone else sometimes tends.',
+          storySub: 'Built by Bukluran for communities across the Philippines.',
+          storyProblemTitle: 'The problem',
+          storyProblemBody: 'The owner of a sari-sari store is often away, so a relative or neighbor tends it. Counting stock is hard, utang is written in a notebook, and the owner cannot tell if the earnings are right or the cash drawer is short.',
+          storySolutionTitle: 'The solution',
+          storySolutionBody: 'A simple phone app that works without internet. The helper just taps to sell, items with no stock cannot be sold, and each suki\'s utang is recorded automatically. The owner has a PIN for sensitive actions and an end-of-day cash count.',
+          storyImpactTitle: 'For the community',
+          storyImpactBody: 'Free and open source, no monthly fee, and no expensive equipment needed. Utang is clearer, less money goes missing, and the owner can trust the store more. Over 1,000 people already use it.',
         }
       };
 

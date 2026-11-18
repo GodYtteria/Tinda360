@@ -42,58 +42,102 @@ void main() {
     );
   });
 
-  test('buildDraft integrates with ProductRepository create, update, delete', () async {
-    final invalidDraft = ProductFormLogic.buildDraft(
-      name: '',
-      unit: ProductUnit.piece,
-      priceInput: '10',
-      costInput: '8',
-      currency: Currency.php,
-    );
-    final invalidResult = await repos.products.create(invalidDraft);
+  test(
+    'buildDraft integrates with ProductRepository create, update, delete',
+    () async {
+      final invalidDraft = ProductFormLogic.buildDraft(
+        name: '',
+        unit: ProductUnit.piece,
+        priceInput: '10',
+        costInput: '8',
+        currency: Currency.php,
+      );
+      final invalidResult = await repos.products.create(invalidDraft);
+      expect(
+        invalidResult,
+        isA<Err<String, ProductFailure>>().having(
+          (errorResult) => errorResult.failure,
+          'failure',
+          isA<ProductNameRequired>(),
+        ),
+      );
+
+      final validDraft = ProductFormLogic.buildDraft(
+        name: 'Sardinas',
+        unit: ProductUnit.can,
+        priceInput: '24.50',
+        costInput: '20.00',
+        currency: Currency.php,
+        lowStockInput: '5',
+        initialStock: const Quantity.whole(12),
+      );
+      final created = await repos.products.create(validDraft);
+      final productId = switch (created) {
+        Ok(:final value) => value,
+        Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+      };
+
+      var active = await repos.products.watchActive().first;
+      expect(active, hasLength(1));
+      expect(active.first.product.lowStockAt, const Quantity.whole(5));
+      expect(active.first.stock, const Quantity.whole(12));
+
+      final updatedDraft = ProductFormLogic.buildDraft(
+        name: 'Sardinas Spicy',
+        unit: ProductUnit.can,
+        priceInput: '25.00',
+        costInput: '20.00',
+        currency: Currency.php,
+      );
+      final updated = await repos.products.update(productId, updatedDraft);
+      expect(updated, isA<Ok<void, ProductFailure>>());
+
+      final deleted = await repos.products.softDelete(productId);
+      expect(deleted, isA<Ok<void, ProductFailure>>());
+
+      active = await repos.products.watchActive().first;
+      expect(active, isEmpty);
+    },
+  );
+
+  test('parseQuantity accepts decimals only for fraction units', () {
     expect(
-      invalidResult,
-      isA<Err<String, ProductFailure>>().having(
-        (err) => err.failure,
-        'failure',
-        isA<ProductNameRequired>(),
-      ),
+      ProductFormLogic.parseQuantity('2.5', allowsFraction: true),
+      const Quantity.milli(2500),
     );
+    expect(
+      ProductFormLogic.parseQuantity('0.25', allowsFraction: true),
+      const Quantity.milli(250),
+    );
+    expect(
+      ProductFormLogic.parseQuantity('2.5', allowsFraction: false),
+      isNull,
+    );
+    expect(
+      ProductFormLogic.parseQuantity('3', allowsFraction: false),
+      const Quantity.whole(3),
+    );
+    expect(ProductFormLogic.parseQuantity('', allowsFraction: true), isNull);
+    expect(
+      ProductFormLogic.parseQuantity('1..5', allowsFraction: true),
+      isNull,
+    );
+    expect(ProductFormLogic.parseQuantity('-1', allowsFraction: true), isNull);
+    expect(
+      ProductFormLogic.parseQuantity('1.2345', allowsFraction: true),
+      isNull,
+    );
+  });
 
-    final validDraft = ProductFormLogic.buildDraft(
-      name: 'Sardinas',
-      unit: ProductUnit.can,
-      priceInput: '24.50',
-      costInput: '20.00',
+  test('a kilo product keeps a fractional low-stock alert', () {
+    final draft = ProductFormLogic.buildDraft(
+      name: 'Bigas',
+      unit: ProductUnit.kilo,
+      priceInput: '55',
+      costInput: '45',
       currency: Currency.php,
-      lowStockInput: '5',
-      initialStock: const Quantity.whole(12),
+      lowStockInput: '2.5',
     );
-    final created = await repos.products.create(validDraft);
-    final productId = switch (created) {
-      Ok(:final value) => value,
-      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
-    };
-
-    var active = await repos.products.watchActive().first;
-    expect(active, hasLength(1));
-    expect(active.first.product.lowStockAt, const Quantity.whole(5));
-    expect(active.first.stock, const Quantity.whole(12));
-
-    final updatedDraft = ProductFormLogic.buildDraft(
-      name: 'Sardinas Spicy',
-      unit: ProductUnit.can,
-      priceInput: '25.00',
-      costInput: '20.00',
-      currency: Currency.php,
-    );
-    final updated = await repos.products.update(productId, updatedDraft);
-    expect(updated, isA<Ok<void, ProductFailure>>());
-
-    final deleted = await repos.products.softDelete(productId);
-    expect(deleted, isA<Ok<void, ProductFailure>>());
-
-    active = await repos.products.watchActive().first;
-    expect(active, isEmpty);
+    expect(draft.lowStockAt, const Quantity.milli(2500));
   });
 }

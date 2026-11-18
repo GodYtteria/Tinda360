@@ -350,11 +350,65 @@ abstract class AppLocalizations {
   /// **'Stock {qty}'**
   String posStockLabel(String qty);
 
+  /// No description provided for @posOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'No more stock for {name}.'**
+  String posOutOfStock(String name);
+
   /// No description provided for @posLowStockBadge.
   ///
   /// In en, this message translates to:
   /// **'Low'**
   String get posLowStockBadge;
+
+  /// No description provided for @posOutOfStockBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get posOutOfStockBadge;
+
+  /// No description provided for @checkoutExactAmountChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact'**
+  String get checkoutExactAmountChip;
+
+  /// No description provided for @posBackupStaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup in the last 7 days'**
+  String get posBackupStaleTitle;
+
+  /// No description provided for @posBackupNeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your data so it is not lost'**
+  String get posBackupNeverTitle;
+
+  /// No description provided for @posBackupWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open Settings and back up now.'**
+  String get posBackupWarningBody;
+
+  /// No description provided for @posQuantityMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get posQuantityMode;
+
+  /// No description provided for @posAmountMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (₱)'**
+  String get posAmountMode;
+
+  /// No description provided for @posAmountEquals.
+  ///
+  /// In en, this message translates to:
+  /// **'= {quantity}'**
+  String posAmountEquals(String quantity);
 
   /// No description provided for @posCartItems.
   ///
@@ -433,6 +487,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change'**
   String get checkoutChangeLabel;
+
+  /// No description provided for @checkoutPaidNowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid now (₱, optional)'**
+  String get checkoutPaidNowLabel;
+
+  /// No description provided for @checkoutPaidNowRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang for this sale: {amount}'**
+  String checkoutPaidNowRemaining(String amount);
+
+  /// No description provided for @checkoutPaidNowInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid now must be from ₱0 up to the total.'**
+  String get checkoutPaidNowInvalid;
+
+  /// No description provided for @checkoutPriceDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price for {product}'**
+  String checkoutPriceDialogTitle(String product);
+
+  /// No description provided for @checkoutPriceNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal price: {price}'**
+  String checkoutPriceNormal(String price);
+
+  /// No description provided for @checkoutPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price per unit this sale (₱)'**
+  String get checkoutPriceLabel;
+
+  /// No description provided for @checkoutPriceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a price of ₱0 or more.'**
+  String get checkoutPriceInvalid;
+
+  /// No description provided for @checkoutPriceReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to normal price'**
+  String get checkoutPriceReset;
+
+  /// No description provided for @failureSalePaidNowInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid now must be from ₱0 up to the total.'**
+  String get failureSalePaidNowInvalid;
+
+  /// No description provided for @failureSalePriceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Price cannot be negative.'**
+  String get failureSalePriceInvalid;
+
+  /// No description provided for @receiptNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no.'**
+  String get receiptNumberLabel;
+
+  /// No description provided for @receiptSukiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suki'**
+  String get receiptSukiLabel;
+
+  /// No description provided for @receiptReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ref'**
+  String get receiptReferenceLabel;
 
   /// No description provided for @checkoutEwalletRefLabel.
   ///
@@ -518,6 +650,12 @@ abstract class AppLocalizations {
   /// **'Share receipt'**
   String get saleDoneShareReceipt;
 
+  /// No description provided for @saleDoneShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open sharing. Try again.'**
+  String get saleDoneShareFailed;
+
   /// No description provided for @saleDoneReceiptCopied.
   ///
   /// In en, this message translates to:
@@ -563,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @inventorySummary.
   ///
   /// In en, this message translates to:
-  /// **'{total} products · {low} low'**
+  /// **'{total, plural, =1{1 product} other{{total} products}} · {low} low'**
   String inventorySummary(int total, int low);
 
   /// No description provided for @productSheetAddTitle.
@@ -601,6 +739,610 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cost / puhunan (₱)'**
   String get productCostLabel;
+
+  /// No description provided for @productNoCountSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t count stock'**
+  String get productNoCountSwitch;
+
+  /// No description provided for @productNoCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For load, tingi and other items you don\'t count.'**
+  String get productNoCountHint;
+
+  /// No description provided for @productExpiryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry date (optional)'**
+  String get productExpiryLabel;
+
+  /// No description provided for @productExpiryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear expiry date'**
+  String get productExpiryClear;
+
+  /// No description provided for @productDuplicateNameWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'A product with the same name already exists.'**
+  String get productDuplicateNameWarning;
+
+  /// No description provided for @productPriceZeroWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Price is 0. Is that right?'**
+  String get productPriceZeroWarning;
+
+  /// No description provided for @inventoryNoCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not counted'**
+  String get inventoryNoCountLabel;
+
+  /// No description provided for @inventoryExpiryDaysBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Expires today} =1{Expires in 1 day} other{Expires in {count} days}}'**
+  String inventoryExpiryDaysBadge(int count);
+
+  /// No description provided for @inventoryExpiredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get inventoryExpiredBadge;
+
+  /// No description provided for @inventoryExpiringFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon'**
+  String get inventoryExpiringFilter;
+
+  /// No description provided for @inventoryShareShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share shopping list'**
+  String get inventoryShareShoppingList;
+
+  /// No description provided for @shoppingListHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list:'**
+  String get shoppingListHeader;
+
+  /// No description provided for @shoppingListLine.
+  ///
+  /// In en, this message translates to:
+  /// **'- {name}: buy {amount} {unit}'**
+  String shoppingListLine(String name, String amount, String unit);
+
+  /// No description provided for @productRestockCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New cost per unit (₱), optional'**
+  String get productRestockCostLabel;
+
+  /// No description provided for @productStockHistoryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock history'**
+  String get productStockHistoryButton;
+
+  /// No description provided for @stockHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock history'**
+  String get stockHistoryTitle;
+
+  /// No description provided for @stockHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock changes yet.'**
+  String get stockHistoryEmpty;
+
+  /// No description provided for @stockHistoryAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock after: {stock}'**
+  String stockHistoryAfter(String stock);
+
+  /// No description provided for @stockReasonInitial.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial stock'**
+  String get stockReasonInitial;
+
+  /// No description provided for @stockReasonRestock.
+  ///
+  /// In en, this message translates to:
+  /// **'Restock'**
+  String get stockReasonRestock;
+
+  /// No description provided for @stockReasonAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get stockReasonAdjust;
+
+  /// No description provided for @stockReasonReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get stockReasonReturn;
+
+  /// No description provided for @receiptRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get receiptRefunded;
+
+  /// No description provided for @receiptNetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Net total'**
+  String get receiptNetTotal;
+
+  /// No description provided for @checkoutCreditNearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang near credit limit'**
+  String get checkoutCreditNearTitle;
+
+  /// No description provided for @checkoutCreditNearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already has {balance} unpaid utang (credit limit: {limit}).'**
+  String checkoutCreditNearBody(String name, String balance, String limit);
+
+  /// No description provided for @reportsExportCsvError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export the CSV file.'**
+  String get reportsExportCsvError;
+
+  /// No description provided for @ledgerDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this line?'**
+  String get ledgerDeleteConfirmTitle;
+
+  /// No description provided for @ledgerDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} {amount} on {date}. The line stays in the history as deleted and the balance is fixed.'**
+  String ledgerDeleteConfirmBody(String kind, String amount, String date);
+
+  /// No description provided for @ledgerDeleteReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get ledgerDeleteReasonLabel;
+
+  /// No description provided for @ledgerDeleteConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete line'**
+  String get ledgerDeleteConfirmAction;
+
+  /// No description provided for @ledgerDeleteDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Line deleted.'**
+  String get ledgerDeleteDone;
+
+  /// No description provided for @ledgerDeletedWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted: {reason}'**
+  String ledgerDeletedWithReason(String reason);
+
+  /// No description provided for @ledgerDeletedNoReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get ledgerDeletedNoReason;
+
+  /// No description provided for @ledgerNotDeletableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'From a sale. Void the sale instead.'**
+  String get ledgerNotDeletableHint;
+
+  /// No description provided for @failureLedgerEntryNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This line was not found.'**
+  String get failureLedgerEntryNotFound;
+
+  /// No description provided for @failureLedgerEntryAlreadyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This line is already deleted.'**
+  String get failureLedgerEntryAlreadyDeleted;
+
+  /// No description provided for @failureLedgerEntryNotDeletable.
+  ///
+  /// In en, this message translates to:
+  /// **'This line cannot be deleted here. Void the sale instead.'**
+  String get failureLedgerEntryNotDeletable;
+
+  /// No description provided for @failureLedgerDeleteWouldGoNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete this interest. Payments already went over the balance.'**
+  String get failureLedgerDeleteWouldGoNegative;
+
+  /// No description provided for @checkoutInterestLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get checkoutInterestLabel;
+
+  /// No description provided for @checkoutInterestPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutubuan ba? Optional.'**
+  String get checkoutInterestPrompt;
+
+  /// No description provided for @checkoutInterestPercentInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a percent from 0.1 to 50.0, for example 5 or 2.5.'**
+  String get checkoutInterestPercentInvalid;
+
+  /// No description provided for @checkoutInterestAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid peso amount above zero.'**
+  String get checkoutInterestAmountInvalid;
+
+  /// No description provided for @checkoutInterestTooMuch.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest cannot be more than the utang.'**
+  String get checkoutInterestTooMuch;
+
+  /// No description provided for @checkoutInterestPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang {utang} + interest {interest} = {total}'**
+  String checkoutInterestPreview(String utang, String interest, String total);
+
+  /// No description provided for @receiptInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get receiptInterest;
+
+  /// No description provided for @failureSaleInterestInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest must be more than zero, and only for utang with a suki.'**
+  String get failureSaleInterestInvalid;
+
+  /// No description provided for @productUtangPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang price (₱, optional)'**
+  String get productUtangPriceLabel;
+
+  /// No description provided for @checkoutUtangPriceTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang price'**
+  String get checkoutUtangPriceTag;
+
+  /// No description provided for @failureCustomerInterestAmountChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The utang changed, so the interest changed too. Please check and try again.'**
+  String get failureCustomerInterestAmountChanged;
+
+  /// No description provided for @checkoutShortfallPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is short. Put the missing {amount} on utang? Pick a suki below.'**
+  String checkoutShortfallPrompt(String amount);
+
+  /// No description provided for @yumiChipLowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'What is low on stock?'**
+  String get yumiChipLowStock;
+
+  /// No description provided for @yumiChipSalesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'How are sales today?'**
+  String get yumiChipSalesToday;
+
+  /// No description provided for @yumiChipProductCount.
+  ///
+  /// In en, this message translates to:
+  /// **'How many products do I have?'**
+  String get yumiChipProductCount;
+
+  /// No description provided for @yumiChipSlowMoving.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow-moving products?'**
+  String get yumiChipSlowMoving;
+
+  /// No description provided for @yumiChipWhoHasUtang.
+  ///
+  /// In en, this message translates to:
+  /// **'Who has utang?'**
+  String get yumiChipWhoHasUtang;
+
+  /// No description provided for @yumiChipUtangRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang risk?'**
+  String get yumiChipUtangRisk;
+
+  /// No description provided for @yumiChipExpensesWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses this week?'**
+  String get yumiChipExpensesWeek;
+
+  /// No description provided for @yumiChipCompareYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with yesterday'**
+  String get yumiChipCompareYesterday;
+
+  /// No description provided for @yumiChipWhatCanYouDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What can you do?'**
+  String get yumiChipWhatCanYouDo;
+
+  /// No description provided for @yumiHintPos.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Sales. Ask me what is low on stock or how today is going.'**
+  String get yumiHintPos;
+
+  /// No description provided for @yumiHintInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Inventory. Ask me what is low or slow-moving.'**
+  String get yumiHintInventory;
+
+  /// No description provided for @yumiHintUtang.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Utang. Ask me who owes and how much.'**
+  String get yumiHintUtang;
+
+  /// No description provided for @yumiHintReports.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Reports. Ask me about sales, expenses, or yesterday.'**
+  String get yumiHintReports;
+
+  /// No description provided for @yumiHintSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Settings. Ask me what I can do.'**
+  String get yumiHintSettings;
+
+  /// No description provided for @sukiTuboLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest % (optional)'**
+  String get sukiTuboLabel;
+
+  /// No description provided for @sukiTuboHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 5 or 2.5'**
+  String get sukiTuboHint;
+
+  /// No description provided for @sukiTuboInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest must be from 0.1 to 50.0 percent.'**
+  String get sukiTuboInvalid;
+
+  /// No description provided for @ledgerKindTubo.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get ledgerKindTubo;
+
+  /// No description provided for @ledgerAddTubo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add interest'**
+  String get ledgerAddTubo;
+
+  /// No description provided for @ledgerTuboConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add interest?'**
+  String get ledgerTuboConfirmTitle;
+
+  /// No description provided for @ledgerTuboConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{balance} + {percent}% = {amount} interest'**
+  String ledgerTuboConfirmBody(String balance, String percent, String amount);
+
+  /// No description provided for @ledgerTuboConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add interest'**
+  String get ledgerTuboConfirmAction;
+
+  /// No description provided for @ledgerTuboAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest of {amount} added.'**
+  String ledgerTuboAdded(String amount);
+
+  /// No description provided for @ledgerReminderTuboMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi {customerName}! Friendly reminder from {storeName}: Utang {utang} + interest {tubo} = {total}. Salamat po!'**
+  String ledgerReminderTuboMessage(
+    String customerName,
+    String storeName,
+    String utang,
+    String tubo,
+    String total,
+  );
+
+  /// No description provided for @failureCustomerInterestRateNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'This suki has no interest rate set.'**
+  String get failureCustomerInterestRateNotSet;
+
+  /// No description provided for @failureCustomerInterestNoBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'No balance to add interest to.'**
+  String get failureCustomerInterestNoBalance;
+
+  /// No description provided for @stockReasonSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale'**
+  String get stockReasonSale;
+
+  /// No description provided for @reportPdfMetricHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get reportPdfMetricHeader;
+
+  /// No description provided for @reportPdfValueHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get reportPdfValueHeader;
+
+  /// No description provided for @reportPdfProductHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get reportPdfProductHeader;
+
+  /// No description provided for @reportPdfQuantitySoldHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty Sold'**
+  String get reportPdfQuantitySoldHeader;
+
+  /// No description provided for @reportPdfRevenueHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get reportPdfRevenueHeader;
+
+  /// No description provided for @reportPdfPreparedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{storeName} - Prepared by Store Owner'**
+  String reportPdfPreparedBy(String storeName);
+
+  /// No description provided for @sukiEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get sukiEditAction;
+
+  /// No description provided for @sukiDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sukiDeleteAction;
+
+  /// No description provided for @sukiEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit suki'**
+  String get sukiEditTitle;
+
+  /// No description provided for @sukiSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get sukiSaveChanges;
+
+  /// No description provided for @sukiDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete suki?'**
+  String get sukiDeleteConfirmTitle;
+
+  /// No description provided for @sukiDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your suki list. This only works when the balance is zero.'**
+  String sukiDeleteConfirmBody(String name);
+
+  /// No description provided for @failureCustomerHasBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete a suki who still has utang.'**
+  String get failureCustomerHasBalance;
+
+  /// No description provided for @ledgerShareReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Share reminder'**
+  String get ledgerShareReminder;
+
+  /// No description provided for @ledgerCopyReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get ledgerCopyReminder;
+
+  /// No description provided for @ledgerEmptyEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No ledger entries yet.'**
+  String get ledgerEmptyEntries;
+
+  /// No description provided for @ledgerKindUtang.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang'**
+  String get ledgerKindUtang;
+
+  /// No description provided for @ledgerKindPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get ledgerKindPayment;
+
+  /// No description provided for @ledgerReminderDefaultStore.
+  ///
+  /// In en, this message translates to:
+  /// **'our store'**
+  String get ledgerReminderDefaultStore;
+
+  /// No description provided for @ledgerReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi {customerName}! Friendly reminder from {storeName}: your utang balance is {balance}. Salamat po!'**
+  String ledgerReminderMessage(
+    String customerName,
+    String storeName,
+    String balance,
+  );
+
+  /// No description provided for @inventoryCostSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost {amount}'**
+  String inventoryCostSummary(String amount);
 
   /// No description provided for @productProfitPerSale.
   ///
@@ -740,6 +1482,30 @@ abstract class AppLocalizations {
   /// **'Current balance'**
   String get utangCurrentBalance;
 
+  /// No description provided for @utangAgeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String utangAgeDays(int count);
+
+  /// No description provided for @utangExportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export utang (CSV)'**
+  String get utangExportCsv;
+
+  /// No description provided for @checkoutCreditLimitExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the utang limit ({limit})'**
+  String checkoutCreditLimitExceeded(String limit);
+
+  /// No description provided for @checkoutCreditLimitOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner approval'**
+  String get checkoutCreditLimitOverride;
+
   /// No description provided for @utangFullPayment.
   ///
   /// In en, this message translates to:
@@ -839,7 +1605,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsNewUtangCard.
   ///
   /// In en, this message translates to:
-  /// **'New utang'**
+  /// **'Unpaid utang'**
   String get reportsNewUtangCard;
 
   /// No description provided for @reportsChartTitle.
@@ -1291,6 +2057,30 @@ abstract class AppLocalizations {
   /// **'+ New store'**
   String get settingsAddStore;
 
+  /// No description provided for @settingsAddStoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add the store. Try again.'**
+  String get settingsAddStoreFailed;
+
+  /// No description provided for @settingsLocalBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete the backup file action. Try again.'**
+  String get settingsLocalBackupFailed;
+
+  /// No description provided for @ulatExpenseDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the expense. Try again.'**
+  String get ulatExpenseDeleteFailed;
+
+  /// No description provided for @pinLockedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong tries. Wait {seconds} seconds.'**
+  String pinLockedOut(int seconds);
+
   /// No description provided for @settingsDeleteStore.
   ///
   /// In en, this message translates to:
@@ -1416,6 +2206,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cash received is less than the total.'**
   String get failureSalePaymentTooLow;
+
+  /// No description provided for @failureSaleNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale was already voided or no longer exists.'**
+  String get failureSaleNotFound;
+
+  /// No description provided for @failureSaleVoidAfterPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot void: the customer already paid part of this utang.'**
+  String get failureSaleVoidAfterPayment;
+
+  /// No description provided for @failureSaleInsufficientStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough stock for an item in the cart.'**
+  String get failureSaleInsufficientStock;
 
   /// No description provided for @failureSaleStoreUnavailable.
   ///
@@ -1645,6 +2453,196 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get ulatSalePaidLabel;
 
+  /// No description provided for @scannerScannedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned: {count}'**
+  String scannerScannedCount(int count);
+
+  /// No description provided for @ulatShareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share report (text)'**
+  String get ulatShareButton;
+
+  /// No description provided for @ulatShareRevenueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get ulatShareRevenueLabel;
+
+  /// No description provided for @ulatShareProfitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get ulatShareProfitLabel;
+
+  /// No description provided for @ulatShareTransactionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get ulatShareTransactionsLabel;
+
+  /// No description provided for @ulatShareExpensesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get ulatShareExpensesLabel;
+
+  /// No description provided for @ulatShareNetIncomeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Net income'**
+  String get ulatShareNetIncomeLabel;
+
+  /// No description provided for @ulatShareUtangLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid utang'**
+  String get ulatShareUtangLabel;
+
+  /// No description provided for @ulatShareTopProductsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 3 products'**
+  String get ulatShareTopProductsLabel;
+
+  /// No description provided for @ulatShareCashCountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash count: Expected {expected} · Counted {counted} · {difference}'**
+  String ulatShareCashCountLine(
+    String expected,
+    String counted,
+    String difference,
+  );
+
+  /// No description provided for @reportsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get reportsCustom;
+
+  /// No description provided for @reportsThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get reportsThisMonth;
+
+  /// No description provided for @reportsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get reportsLastMonth;
+
+  /// No description provided for @reportsPickDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick dates'**
+  String get reportsPickDates;
+
+  /// No description provided for @reportsRangeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up to 366 days, ending today or earlier.'**
+  String get reportsRangeInvalid;
+
+  /// No description provided for @reportsRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String reportsRangeLabel(String start, String end);
+
+  /// No description provided for @cashCountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close day · Cash count'**
+  String get cashCountTitle;
+
+  /// No description provided for @cashCountExpectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected cash in drawer'**
+  String get cashCountExpectedLabel;
+
+  /// No description provided for @cashCountCountedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted cash'**
+  String get cashCountCountedLabel;
+
+  /// No description provided for @cashCountNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get cashCountNoteLabel;
+
+  /// No description provided for @cashCountSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save cash count'**
+  String get cashCountSaveButton;
+
+  /// No description provided for @cashCountSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash count saved.'**
+  String get cashCountSaved;
+
+  /// No description provided for @cashCountInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the cash you counted.'**
+  String get cashCountInvalidAmount;
+
+  /// No description provided for @cashCountSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the cash count. Please try again.'**
+  String get cashCountSaveFailed;
+
+  /// No description provided for @cashCountOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Over {amount}'**
+  String cashCountOver(String amount);
+
+  /// No description provided for @cashCountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short {amount}'**
+  String cashCountShort(String amount);
+
+  /// No description provided for @cashCountExact.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact'**
+  String get cashCountExact;
+
+  /// No description provided for @cashCountTodayHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts today'**
+  String get cashCountTodayHeading;
+
+  /// No description provided for @cashCountHistoryHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get cashCountHistoryHeading;
+
+  /// No description provided for @cashCountRowSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted {counted} · Expected {expected}'**
+  String cashCountRowSummary(String counted, String expected);
+
+  /// No description provided for @cashCountNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No cash counts yet.'**
+  String get cashCountNoHistory;
+
   /// No description provided for @ulatSaleReferenceLabel.
   ///
   /// In en, this message translates to:
@@ -1656,6 +2654,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Void / Delete Sale'**
   String get ulatVoidSaleButton;
+
+  /// No description provided for @receiptBantayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bantay'**
+  String get receiptBantayLabel;
+
+  /// No description provided for @bantayChipEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Bantay'**
+  String get bantayChipEmpty;
+
+  /// No description provided for @bantayChipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bantay: {name}'**
+  String bantayChipLabel(String name);
+
+  /// No description provided for @bantayDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is minding the store?'**
+  String get bantayDialogTitle;
+
+  /// No description provided for @bantayFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get bantayFieldHint;
+
+  /// No description provided for @settingsAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get settingsAddressLabel;
+
+  /// No description provided for @settingsPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get settingsPhoneLabel;
+
+  /// No description provided for @ledgerDeletedByNoReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted by {name}'**
+  String ledgerDeletedByNoReason(String name);
+
+  /// No description provided for @ledgerDeletedByWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted by {name}: {reason}'**
+  String ledgerDeletedByWithReason(String name, String reason);
+
+  /// No description provided for @ulatReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return items'**
+  String get ulatReturnTitle;
+
+  /// No description provided for @ulatReturnAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Can return: {quantity}'**
+  String ulatReturnAvailable(String quantity);
+
+  /// No description provided for @ulatReturnQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity to return'**
+  String get ulatReturnQuantityLabel;
+
+  /// No description provided for @ulatReturnReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get ulatReturnReasonLabel;
+
+  /// No description provided for @ulatReturnRefundTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund total'**
+  String get ulatReturnRefundTotal;
+
+  /// No description provided for @ulatReturnConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save return'**
+  String get ulatReturnConfirmButton;
+
+  /// No description provided for @ulatReturnNothingReturnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in this sale was already returned.'**
+  String get ulatReturnNothingReturnable;
+
+  /// No description provided for @ulatReturnSuccessCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund {amount}'**
+  String ulatReturnSuccessCash(String amount);
+
+  /// No description provided for @ulatReturnSuccessUtang.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} taken off the customer\'s utang'**
+  String ulatReturnSuccessUtang(String amount);
+
+  /// No description provided for @ulatReturnSuccessUtangPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{credit} taken off utang. Give {cash} back to the customer in cash.'**
+  String ulatReturnSuccessUtangPartial(String credit, String cash);
+
+  /// No description provided for @failureSaleVoidAfterReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale has returned items, so it cannot be voided.'**
+  String get failureSaleVoidAfterReturn;
+
+  /// No description provided for @failureSaleReturnNothingSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a quantity to return.'**
+  String get failureSaleReturnNothingSelected;
+
+  /// No description provided for @failureSaleReturnQuantityInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That return quantity is not valid.'**
+  String get failureSaleReturnQuantityInvalid;
+
+  /// No description provided for @failureSaleReturnTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot return more than was sold.'**
+  String get failureSaleReturnTooMany;
+
+  /// No description provided for @failureSaleReturnSaleVoided.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale was voided, so nothing can be returned.'**
+  String get failureSaleReturnSaleVoided;
+
+  /// No description provided for @failureSaleReturnNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale not found.'**
+  String get failureSaleReturnNotFound;
+
+  /// No description provided for @failureSaleReturnStoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the return. Please try again.'**
+  String get failureSaleReturnStoreUnavailable;
 
   /// No description provided for @ulatVoidSaleConfirmTitle.
   ///
@@ -1836,6 +2990,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{greeting} I\'m Yumi, your Smart Store Assistant. Ask me anything about your store\'s sales, stock, or utang!'**
   String chatWelcomeMessage(String greeting);
+
+  /// No description provided for @pinRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Your Recovery Code'**
+  String get pinRecoveryTitle;
+
+  /// No description provided for @pinRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down or copy this one-time code. You can use it to reset your PIN if you forget it offline.'**
+  String get pinRecoveryBody;
+
+  /// No description provided for @pinRecoveryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code copied.'**
+  String get pinRecoveryCopied;
+
+  /// No description provided for @pinCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get pinCopy;
+
+  /// No description provided for @pinDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pinDone;
+
+  /// No description provided for @pinEnterFourDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 4-digit PIN.'**
+  String get pinEnterFourDigits;
+
+  /// No description provided for @pinIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN. Try again.'**
+  String get pinIncorrect;
+
+  /// No description provided for @pinInvalidRecoveryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid recovery code.'**
+  String get pinInvalidRecoveryCode;
+
+  /// No description provided for @pinBiometricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock failed or cancelled.'**
+  String get pinBiometricFailed;
+
+  /// No description provided for @pinGoogleMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Google account did not match.'**
+  String get pinGoogleMismatch;
+
+  /// No description provided for @pinResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Store PIN'**
+  String get pinResetTitle;
+
+  /// No description provided for @pinUseBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Fingerprint / Screen Lock'**
+  String get pinUseBiometric;
+
+  /// No description provided for @pinForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot PIN?'**
+  String get pinForgot;
+
+  /// No description provided for @pinRecoveryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code (e.g. T360-XXXX)'**
+  String get pinRecoveryCodeLabel;
+
+  /// No description provided for @pinVerifyGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify with Google Account'**
+  String get pinVerifyGoogle;
+
+  /// No description provided for @pinBackToPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to PIN'**
+  String get pinBackToPin;
+
+  /// No description provided for @pinResetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset PIN'**
+  String get pinResetButton;
+
+  /// No description provided for @pinUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get pinUnlock;
+
+  /// No description provided for @pinDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN data is damaged. Unlock with fingerprint, screen lock or Google, then set a new PIN.'**
+  String get pinDamaged;
+
+  /// No description provided for @pinRemoveDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove damaged PIN'**
+  String get pinRemoveDamaged;
+
+  /// No description provided for @pinMustBeFourDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN must be exactly 4 digits.'**
+  String get pinMustBeFourDigits;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match.'**
+  String get pinMismatch;
+
+  /// No description provided for @pinNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New 4-digit PIN'**
+  String get pinNewLabel;
+
+  /// No description provided for @pinConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm 4-digit PIN'**
+  String get pinConfirmLabel;
+
+  /// No description provided for @ledgerHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger History'**
+  String get ledgerHistoryTitle;
+
+  /// No description provided for @ledgerReminderCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder copied to clipboard'**
+  String get ledgerReminderCopied;
+
+  /// No description provided for @receiptPrintDialogFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open print dialog.'**
+  String get receiptPrintDialogFailed;
+
+  /// No description provided for @ulatExpenseInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid expense name and amount.'**
+  String get ulatExpenseInvalid;
+
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
+  /// No description provided for @settingsSwitchStoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not switch store. Try again.'**
+  String get settingsSwitchStoreFailed;
+
+  /// No description provided for @settingsDeleteStoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete store. Try again.'**
+  String get settingsDeleteStoreFailed;
+
+  /// No description provided for @posRemovedFromCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {name}'**
+  String posRemovedFromCart(String name);
+
+  /// No description provided for @receiptTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get receiptTotal;
+
+  /// No description provided for @receiptPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get receiptPayment;
+
+  /// No description provided for @receiptPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get receiptPaid;
+
+  /// No description provided for @receiptChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get receiptChange;
+
+  /// No description provided for @receiptUtang.
+  ///
+  /// In en, this message translates to:
+  /// **'Utang'**
+  String get receiptUtang;
+
+  /// No description provided for @receiptThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you!'**
+  String get receiptThankYou;
+
+  /// No description provided for @receiptNoItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(No items)'**
+  String get receiptNoItems;
+
+  /// No description provided for @inventoryImportSkippedRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Check rows: {rows} (missing name or price, bad number, unknown unit, or duplicate barcode).'**
+  String inventoryImportSkippedRows(String rows);
 }
 
 class _AppLocalizationsDelegate

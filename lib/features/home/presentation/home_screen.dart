@@ -5,10 +5,7 @@ import 'package:tinda360/features/home/presentation/widgets/home_error_view.dart
 import 'package:tinda360/features/home/presentation/widgets/home_ready_view.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
-/// Temporary first screen that proves the database is live. It is replaced
-/// by the Benta screen in step 2.
 class HomeScreen extends ConsumerWidget {
-  /// Creates the screen.
   const HomeScreen({super.key});
 
   @override

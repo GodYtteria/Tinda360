@@ -1,17 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/store_pin_service.dart';
 
-/// Prompts the user to enter their 4-digit store PIN and verifies it against
-/// [pinService], with optional biometric unlock and recovery-code / Google reset.
-///
-/// Returns `true` if unlocked or reset, or `false` if cancelled.
 Future<bool> showPinPromptDialog(
   BuildContext context, {
   required String title,
   required StorePinService pinService,
   Future<bool> Function()? onAuthenticateBiometric,
   Future<bool> Function()? onResetWithGoogle,
+  Future<void> Function()? onRemoveDamagedPin,
 }) async {
   final dialogResult = await showDialog<bool>(
     context: context,
@@ -21,61 +21,59 @@ Future<bool> showPinPromptDialog(
       pinService: pinService,
       onAuthenticateBiometric: onAuthenticateBiometric,
       onResetWithGoogle: onResetWithGoogle,
+      onRemoveDamagedPin: onRemoveDamagedPin,
     ),
   );
   return dialogResult ?? false;
 }
 
-/// Shows the generated one-time recovery code with a Copy button.
 Future<void> showRecoveryCodeDialog(
   BuildContext context, {
   required String recoveryCode,
-}) =>
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Save Your Recovery Code'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Write down or copy this one-time code. You can use it to reset your PIN if you forget it offline.',
-            ),
-            const SizedBox(height: 12),
-            SelectableText(
-              recoveryCode,
-              textAlign: TextAlign.center,
-              style: Theme.of(dialogContext).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ],
+}) => showDialog<void>(
+  context: context,
+  barrierDismissible: false,
+  builder: (dialogContext) => AlertDialog(
+    title: Text(AppLocalizations.of(context).pinRecoveryTitle),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          AppLocalizations.of(context).pinRecoveryBody,
         ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: recoveryCode));
-              if (!dialogContext.mounted) return;
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                const SnackBar(content: Text('Recovery code copied.')),
-              );
-            },
-            child: const Text('Copy'),
+        const SizedBox(height: 12),
+        SelectableText(
+          recoveryCode,
+          textAlign: TextAlign.center,
+          style: Theme.of(dialogContext).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Done'),
-          ),
-        ],
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () async {
+          await Clipboard.setData(ClipboardData(text: recoveryCode));
+          if (!dialogContext.mounted) return;
+          ScaffoldMessenger.of(dialogContext).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).pinRecoveryCopied),
+            ),
+          );
+        },
+        child: Text(AppLocalizations.of(context).pinCopy),
       ),
-    );
+      FilledButton(
+        onPressed: () => Navigator.of(dialogContext).pop(),
+        child: Text(AppLocalizations.of(context).pinDone),
+      ),
+    ],
+  ),
+);
 
-/// Prompts the user to enter and confirm a new 4-digit store PIN.
-///
-/// Returns the validated 4-digit PIN string, or `null` if cancelled.
 Future<String?> showSetPinDialog(
   BuildContext context, {
   required String title,
@@ -93,12 +91,14 @@ final class _PinPromptDialog extends StatefulWidget {
     required this.pinService,
     this.onAuthenticateBiometric,
     this.onResetWithGoogle,
+    this.onRemoveDamagedPin,
   });
 
   final String title;
   final StorePinService pinService;
   final Future<bool> Function()? onAuthenticateBiometric;
   final Future<bool> Function()? onResetWithGoogle;
+  final Future<void> Function()? onRemoveDamagedPin;
 
   @override
   State<_PinPromptDialog> createState() => _PinPromptDialogState();
@@ -112,6 +112,28 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
   String? _errorMessage;
   bool _isVerifying = false;
   bool _isRecoveryMode = false;
+  bool _isPinDamaged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_checkPinDamage());
+  }
+
+  Future<void> _checkPinDamage() async {
+    final damaged = await widget.pinService.isPinDamaged();
+    if (!mounted || !damaged) return;
+    setState(() => _isPinDamaged = true);
+  }
+
+  Future<void> _removeDamagedPin() async {
+    final removeDamagedPin = widget.onRemoveDamagedPin;
+    if (removeDamagedPin == null || _isVerifying) return;
+    setState(() => _isVerifying = true);
+    await removeDamagedPin();
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  }
 
   @override
   void dispose() {
@@ -130,7 +152,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
     final enteredPin = _pinController.text.trim();
     if (!RegExp(r'^\d{4}$').hasMatch(enteredPin)) {
       setState(() {
-        _errorMessage = 'Enter a 4-digit PIN.';
+        _errorMessage = AppLocalizations.of(context).pinEnterFourDigits;
       });
       return;
     }
@@ -150,9 +172,13 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
       return;
     }
 
+    final lockout = await widget.pinService.lockoutRemaining();
+    if (!mounted) return;
     setState(() {
       _isVerifying = false;
-      _errorMessage = 'Incorrect PIN. Try again.';
+      _errorMessage = lockout == null
+          ? AppLocalizations.of(context).pinIncorrect
+          : _lockoutMessage(lockout);
     });
   }
 
@@ -170,10 +196,19 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
       Navigator.of(context).pop(true);
       return;
     }
+    final lockout = await widget.pinService.lockoutRemaining();
+    if (!mounted) return;
     setState(() {
       _isVerifying = false;
-      _errorMessage = 'Invalid recovery code.';
+      _errorMessage = lockout == null
+          ? AppLocalizations.of(context).pinInvalidRecoveryCode
+          : _lockoutMessage(lockout);
     });
+  }
+
+  String _lockoutMessage(Duration remaining) {
+    final seconds = remaining.inSeconds + 1;
+    return AppLocalizations.of(context).pinLockedOut(seconds);
   }
 
   Future<void> _tryBiometric() async {
@@ -188,7 +223,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
     }
     setState(() {
       _isVerifying = false;
-      _errorMessage = 'Biometric unlock failed or cancelled.';
+      _errorMessage = AppLocalizations.of(context).pinBiometricFailed;
     });
   }
 
@@ -206,7 +241,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
     }
     setState(() {
       _isVerifying = false;
-      _errorMessage = 'Google account did not match.';
+      _errorMessage = AppLocalizations.of(context).pinGoogleMismatch;
     });
   }
 
@@ -214,7 +249,11 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       scrollable: true,
-      title: Text(_isRecoveryMode ? 'Reset Store PIN' : widget.title),
+      title: Text(
+        _isRecoveryMode
+            ? AppLocalizations.of(context).pinResetTitle
+            : widget.title,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -238,12 +277,25 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
               ),
               onSubmitted: (_) => _submitPin(),
             ),
+            if (_isPinDamaged) ...[
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).pinDamaged,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              if (widget.onRemoveDamagedPin != null)
+                OutlinedButton.icon(
+                  onPressed: _isVerifying ? null : _removeDamagedPin,
+                  icon: const Icon(Icons.lock_reset),
+                  label: Text(AppLocalizations.of(context).pinRemoveDamaged),
+                ),
+            ],
             if (widget.onAuthenticateBiometric != null) ...[
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _isVerifying ? null : _tryBiometric,
                 icon: const Icon(Icons.fingerprint),
-                label: const Text('Use Fingerprint / Screen Lock'),
+                label: Text(AppLocalizations.of(context).pinUseBiometric),
               ),
             ],
             Align(
@@ -262,7 +314,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
                           }
                         });
                       },
-                child: const Text('Forgot PIN?'),
+                child: Text(AppLocalizations.of(context).pinForgot),
               ),
             ),
           ] else ...[
@@ -272,7 +324,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
-                labelText: 'Recovery code (e.g. T360-XXXX)',
+                labelText: AppLocalizations.of(context).pinRecoveryCodeLabel,
                 errorText: _errorMessage,
               ),
               onSubmitted: (_) => _submitRecoveryCode(),
@@ -282,7 +334,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
               OutlinedButton.icon(
                 onPressed: _isVerifying ? null : _tryGoogleReset,
                 icon: const Icon(Icons.account_circle_outlined),
-                label: const Text('Verify with Google Account'),
+                label: Text(AppLocalizations.of(context).pinVerifyGoogle),
               ),
             ],
             Align(
@@ -301,7 +353,7 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
                           }
                         });
                       },
-                child: const Text('Back to PIN'),
+                child: Text(AppLocalizations.of(context).pinBackToPin),
               ),
             ),
           ],
@@ -312,13 +364,17 @@ final class _PinPromptDialogState extends State<_PinPromptDialog> {
           onPressed: _isVerifying
               ? null
               : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).commonCancel),
         ),
         FilledButton(
           onPressed: _isVerifying
               ? null
               : (_isRecoveryMode ? _submitRecoveryCode : _submitPin),
-          child: Text(_isRecoveryMode ? 'Reset PIN' : 'Unlock'),
+          child: Text(
+            _isRecoveryMode
+                ? AppLocalizations.of(context).pinResetButton
+                : AppLocalizations.of(context).pinUnlock,
+          ),
         ),
       ],
     );
@@ -352,14 +408,14 @@ final class _SetPinDialogState extends State<_SetPinDialog> {
 
     if (!RegExp(r'^\d{4}$').hasMatch(enteredPin)) {
       setState(() {
-        _errorMessage = 'PIN must be exactly 4 digits.';
+        _errorMessage = AppLocalizations.of(context).pinMustBeFourDigits;
       });
       return;
     }
 
     if (enteredPin != confirmedPin) {
       setState(() {
-        _errorMessage = 'PINs do not match.';
+        _errorMessage = AppLocalizations.of(context).pinMismatch;
       });
       return;
     }
@@ -386,8 +442,8 @@ final class _SetPinDialogState extends State<_SetPinDialog> {
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly,
             ],
-            decoration: const InputDecoration(
-              labelText: 'New 4-digit PIN',
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).pinNewLabel,
               counterText: '',
             ),
           ),
@@ -402,7 +458,7 @@ final class _SetPinDialogState extends State<_SetPinDialog> {
               FilteringTextInputFormatter.digitsOnly,
             ],
             decoration: InputDecoration(
-              labelText: 'Confirm 4-digit PIN',
+              labelText: AppLocalizations.of(context).pinConfirmLabel,
               counterText: '',
               errorText: _errorMessage,
             ),
@@ -413,11 +469,11 @@ final class _SetPinDialogState extends State<_SetPinDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).commonCancel),
         ),
         FilledButton(
           onPressed: _savePin,
-          child: const Text('Save'),
+          child: Text(AppLocalizations.of(context).commonSave),
         ),
       ],
     );

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// The color tokens from the design's "Mga kulay (light / dark)" board.
-/// The only file in the app that holds raw color values.
 final class AppPalette {
   const AppPalette._({
     required this.background,
@@ -25,11 +23,9 @@ final class AppPalette {
     required this.scrim,
   });
 
-  /// Resolves the active palette from [context] brightness.
   static AppPalette of(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 
-  /// Light mode tokens.
   static const AppPalette light = AppPalette._(
     background: Color(0xFFF6F8F7),
     surface: Color(0xFFFFFFFF),
@@ -52,7 +48,6 @@ final class AppPalette {
     scrim: Color(0x7314201C),
   );
 
-  /// Dark mode tokens.
   static const AppPalette dark = AppPalette._(
     background: Color(0xFF131C19),
     surface: Color(0xFF1C2924),
@@ -75,60 +70,41 @@ final class AppPalette {
     scrim: Color(0x99000000),
   );
 
-  /// Screen background.
   final Color background;
 
-  /// Cards and sheets.
   final Color surface;
 
-  /// Muted fills (chips, inputs).
   final Color surfaceMuted;
 
-  /// Hairlines and outlines.
   final Color border;
 
-  /// Input and secondary button outlines.
   final Color borderStrong;
 
-  /// Main text.
   final Color text;
 
-  /// Secondary text.
   final Color textMuted;
 
-  /// Brand green; main buttons.
   final Color primary;
 
-  /// Text and icons on [primary].
   final Color onPrimary;
 
-  /// Top bar background.
   final Color header;
 
-  /// Foreground text and icons on [header].
   final Color onHeader;
 
-  /// Mango accent; the AI button and checkout.
   final Color accent;
 
-  /// Text and icons on [accent].
   final Color onAccent;
 
-  /// Low-stock badge and warning banner background.
   final Color accentSoft;
 
-  /// Text and icons on [accentSoft].
   final Color onAccentSoft;
 
-  /// Debts and destructive actions.
   final Color danger;
 
-  /// Utang balance card background.
   final Color dangerSoft;
 
-  /// Positive states.
   final Color success;
 
-  /// Modal barrier scrim behind sheets.
   final Color scrim;
 }

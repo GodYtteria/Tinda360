@@ -1,58 +1,113 @@
 import 'package:tinda360/core/failure.dart';
 import 'package:tinda360/core/money/money.dart';
 
-/// Why a customer or utang change could not be saved.
 sealed class CustomerFailure extends Failure {
   const CustomerFailure();
 }
 
-/// The name is empty.
 final class CustomerNameRequired extends CustomerFailure {
-  /// Creates the failure.
   const CustomerNameRequired();
 
   @override
   String get code => 'customer.name_required';
 }
 
-/// The customer does not exist or was deleted.
 final class CustomerNotFound extends CustomerFailure {
-  /// Creates the failure for [customerId].
   const CustomerNotFound(this.customerId);
 
-  /// The missing customer.
   final String customerId;
 
   @override
   String get code => 'customer.not_found';
 }
 
-/// A payment or limit amount is zero or negative.
 final class CustomerAmountInvalid extends CustomerFailure {
-  /// Creates the failure.
   const CustomerAmountInvalid();
 
   @override
   String get code => 'customer.amount_invalid';
 }
 
-/// The payment is more than what the customer owes.
 final class PaymentExceedsBalance extends CustomerFailure {
-  /// Creates the failure.
   const PaymentExceedsBalance(this.balance);
 
-  /// What the customer currently owes.
   final Money balance;
 
   @override
   String get code => 'customer.payment_exceeds_balance';
 }
 
-/// The database could not complete the write.
 final class CustomerStoreUnavailable extends CustomerFailure {
-  /// Creates the failure.
   const CustomerStoreUnavailable();
 
   @override
   String get code => 'customer.store_unavailable';
+}
+
+final class InterestRateNotSet extends CustomerFailure {
+  const InterestRateNotSet();
+
+  @override
+  String get code => 'customer.interest_rate_not_set';
+}
+
+final class InterestNoBalance extends CustomerFailure {
+  const InterestNoBalance();
+
+  @override
+  String get code => 'customer.interest_no_balance';
+}
+
+final class InterestAmountChanged extends CustomerFailure {
+  const InterestAmountChanged(this.currentAmount);
+
+  final Money currentAmount;
+
+  @override
+  String get code => 'customer.interest_amount_changed';
+}
+
+final class LedgerEntryNotFound extends CustomerFailure {
+  const LedgerEntryNotFound(this.entryId);
+
+  final String entryId;
+
+  @override
+  String get code => 'customer.ledger_entry_not_found';
+}
+
+final class LedgerEntryAlreadyDeleted extends CustomerFailure {
+  const LedgerEntryAlreadyDeleted(this.entryId);
+
+  final String entryId;
+
+  @override
+  String get code => 'customer.ledger_entry_already_deleted';
+}
+
+final class LedgerEntryNotDeletable extends CustomerFailure {
+  const LedgerEntryNotDeletable(this.entryId);
+
+  final String entryId;
+
+  @override
+  String get code => 'customer.ledger_entry_not_deletable';
+}
+
+final class LedgerDeleteWouldGoNegative extends CustomerFailure {
+  const LedgerDeleteWouldGoNegative(this.balance);
+
+  final Money balance;
+
+  @override
+  String get code => 'customer.ledger_delete_would_go_negative';
+}
+
+final class CustomerHasBalance extends CustomerFailure {
+  const CustomerHasBalance(this.balance);
+
+  final Money balance;
+
+  @override
+  String get code => 'customer.has_balance';
 }

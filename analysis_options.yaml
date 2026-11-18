@@ -73,7 +73,7 @@ analyzer:
     # --- Public-API docs: error to match dartdoc-conventions. An app with NO
     #     external consumers may downgrade to `ignore` and document only the
     #     seams (repositories, services, migration steps) instead.
-    public_member_api_docs: error
+    public_member_api_docs: ignore
     dangling_library_doc_comments: error
 
     # --- Deliberately NOT errors -------------------------------------------

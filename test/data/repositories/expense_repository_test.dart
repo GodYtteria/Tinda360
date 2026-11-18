@@ -14,10 +14,11 @@ import 'package:tinda360/data/repositories/expense_repository.dart';
 import '../../support/sequential_ids.dart';
 import '../../support/test_repositories.dart';
 
-T _ok<T, F extends Failure>(Result<T, F> result) => switch (result) {
-  Ok(:final value) => value,
-  Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
-};
+T _ok<T, FailureType extends Failure>(Result<T, FailureType> result) =>
+    switch (result) {
+      Ok(:final value) => value,
+      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+    };
 
 Money _php(int minorUnits) => Money(minorUnits, Currency.php);
 

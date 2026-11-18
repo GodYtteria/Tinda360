@@ -50,6 +50,7 @@ dependencies:
   flutter_svg: ^2.4.0
   mobile_scanner: ^7.5.0
   google_sign_in: ^7.2.0
+  google_sign_in_platform_interface: ^3.1.0
   googleapis: ^19.0.0
   http: ^1.6.0
   pdf: ^3.13.1
@@ -57,7 +58,6 @@ dependencies:
   file_picker: ^13.4.0
   local_auth: ^3.0.2
   share_plus: ^13.3.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -50,7 +50,9 @@ void main() {
 
   test('stock is the sum of movements, never a stored number', () async {
     final id = _idOf(
-      await repos.products.create(_draft(initialStock: const Quantity.whole(10))),
+      await repos.products.create(
+        _draft(initialStock: const Quantity.whole(10)),
+      ),
     );
     expect(
       await repos.products.restock(id, const Quantity.whole(5)),
@@ -66,12 +68,13 @@ void main() {
   });
 
   test('low stock follows the alert level', () async {
-    await repos.products.create(
+    final createResult = await repos.products.create(
       _draft(
         initialStock: const Quantity.whole(3),
         lowStockAt: const Quantity.whole(5),
       ),
     );
+    expect(createResult, isA<Ok<String, ProductFailure>>());
     final products = await repos.products.watchActive().first;
     expect(products.single.isLowOnStock, isTrue);
   });
@@ -81,7 +84,7 @@ void main() {
     expect(
       result,
       isA<Err<String, ProductFailure>>().having(
-        (e) => e.failure,
+        (errorResult) => errorResult.failure,
         'failure',
         isA<ProductNameRequired>(),
       ),
@@ -95,7 +98,7 @@ void main() {
     expect(
       result,
       isA<Err<String, ProductFailure>>().having(
-        (e) => e.failure,
+        (errorResult) => errorResult.failure,
         'failure',
         isA<ProductQuantityInvalid>(),
       ),
@@ -110,7 +113,7 @@ void main() {
     expect(
       second,
       isA<Err<String, ProductFailure>>().having(
-        (e) => e.failure,
+        (errorResult) => errorResult.failure,
         'failure',
         isA<ProductBarcodeTaken>(),
       ),
@@ -119,7 +122,77 @@ void main() {
 
   test('a deleted product leaves the list', () async {
     final id = _idOf(await repos.products.create(_draft()));
-    expect(await repos.products.softDelete(id), isA<Ok<void, ProductFailure>>());
+    expect(
+      await repos.products.softDelete(id),
+      isA<Ok<void, ProductFailure>>(),
+    );
     expect(await repos.products.watchActive().first, isEmpty);
   });
+
+  Future<Quantity> stockOf(String productId) async =>
+      (await repos.products.watchActive().first)
+          .singleWhere((item) => item.product.id == productId)
+          .stock;
+
+  test('an edit and its stock change save together', () async {
+    final productId = _idOf(
+      await repos.products.create(
+        _draft(initialStock: const Quantity.whole(5)),
+      ),
+    );
+
+    final result = await repos.products.update(
+      productId,
+      _draft(name: 'Kape Barako', priceMinor: 1200),
+      stockChange: const Quantity.whole(-2),
+    );
+
+    expect(result, isA<Ok<void, ProductFailure>>());
+    final product = (await repos.products.watchActive().first).single;
+    expect(product.product.name, 'Kape Barako');
+    expect(product.stock, const Quantity.whole(3));
+  });
+
+  test('a stock change below zero rolls back the whole edit', () async {
+    final productId = _idOf(
+      await repos.products.create(
+        _draft(initialStock: const Quantity.whole(2)),
+      ),
+    );
+
+    final result = await repos.products.update(
+      productId,
+      _draft(name: 'Should Not Save'),
+      stockChange: const Quantity.whole(-3),
+    );
+
+    expect(result, isA<Err<void, ProductFailure>>());
+    final product = (await repos.products.watchActive().first).single;
+    expect(product.product.name, 'Kape 3-in-1');
+    expect(await stockOf(productId), const Quantity.whole(2));
+  });
+
+  test(
+    'switching to a whole-only unit is refused while stock is fractional',
+    () async {
+      final productId = _idOf(
+        await repos.products.create(
+          _draft(
+            name: 'Bigas',
+            unit: ProductUnit.kilo,
+            initialStock: const Quantity.milli(2500),
+          ),
+        ),
+      );
+
+      final result = await repos.products.update(
+        productId,
+        _draft(name: 'Bigas', unit: ProductUnit.piece),
+      );
+
+      expect(result, isA<Err<void, ProductFailure>>());
+      final product = (await repos.products.watchActive().first).single;
+      expect(product.product.unit, ProductUnit.kilo);
+    },
+  );
 }

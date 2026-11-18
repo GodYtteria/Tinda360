@@ -1,10 +1,8 @@
 import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/money.dart';
 
-/// A single recorded store expense entry.
 @immutable
 final class ExpenseEntry {
-  /// Creates an expense entry.
   const ExpenseEntry({
     required this.id,
     required this.createdAtMs,
@@ -13,19 +11,14 @@ final class ExpenseEntry {
     required this.amount,
   });
 
-  /// Expense identifier.
   final String id;
 
-  /// UTC epoch milliseconds when the expense was recorded.
   final int createdAtMs;
 
-  /// Local calendar day serial when the expense was recorded.
   final int daySerial;
 
-  /// Description of the expense.
   final String title;
 
-  /// Expense amount.
   final Money amount;
 
   @override
@@ -41,6 +34,5 @@ final class ExpenseEntry {
   int get hashCode => Object.hash(id, createdAtMs, daySerial, title, amount);
 
   @override
-  String toString() =>
-      'ExpenseEntry($id, $title, $amount, day=$daySerial)';
+  String toString() => 'ExpenseEntry($id, $title, $amount, day=$daySerial)';
 }

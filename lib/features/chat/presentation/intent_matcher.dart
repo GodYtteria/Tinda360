@@ -3,101 +3,77 @@ import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 
-/// Recognized user intent for offline Tinda AI queries.
 enum ChatIntent {
-  /// Greeting such as "kumusta" or "hello".
   greeting,
 
-  /// Appreciation such as "salamat" or "thank you".
   thanks,
 
-  /// Asking what Tinda AI can answer.
   help,
 
-  /// Best-selling / top products query.
   topProducts,
 
-  /// Low-stock / restock / inventory query.
   lowStock,
 
-  /// Utang / suki debt query.
   utang,
 
-  /// Sales, revenue, or profit query.
   sales,
 
-  /// Today vs yesterday sales comparison.
   salesCompare,
 
-  /// Slow-moving / unsold products query.
   slowMoving,
 
-  /// Specific product price/stock lookup.
   productLookup,
 
-  /// Credit risk and cashflow warning query.
   utangRisk,
 
-  /// Estimated restock (palengke) budget query.
   restockBudget,
 
-  /// Fallback store overview.
+  storeInfo,
+
+  productCount,
+
+  expenses,
+
   overview,
 }
 
-/// Timeframe extracted from a user's question.
 enum QueryTimeframe {
-  /// Current local day.
   today,
 
-  /// Last 7 local days.
   week,
 
-  /// Last 30 local days.
   month,
 }
 
-/// Parsed intent and timeframe for a normalized user message.
 final class MatchedQuery {
-  /// Creates a matched query result.
   const MatchedQuery({
     required this.intent,
     required this.timeframe,
     required this.normalizedText,
   });
 
-  /// Highest-scoring intent.
   final ChatIntent intent;
 
-  /// Timeframe requested (defaults to [QueryTimeframe.today]).
   final QueryTimeframe timeframe;
 
-  /// Lowercased, shortcut-expanded text used for entity lookups.
   final String normalizedText;
 }
 
-/// Offline Filipino + English intent matcher driven by `assets/ai/intents.json`.
 final class IntentMatcher {
-  /// Creates a matcher from parsed configuration maps.
   const IntentMatcher({
     required this.shortcuts,
     required this.timeframes,
     required this.intents,
   });
 
-  /// Pinoy text-speak shortcuts mapped to canonical words.
   final Map<String, String> shortcuts;
 
-  /// Timeframe keyword lists keyed by `today`, `week`, `month`.
   final Map<String, List<String>> timeframes;
 
-  /// Ordered intent keyword lists keyed by intent id.
   final Map<ChatIntent, List<String>> intents;
 
   static const String _defaultAssetPath = 'assets/ai/intents.json';
 
-  /// Loads `assets/ai/intents.json`, falling back to built-in defaults if
-  /// unavailable in a unit test environment.
   static Future<IntentMatcher> loadFromAsset() async {
     try {
       final rawJson = await rootBundle.loadString(_defaultAssetPath);
@@ -107,7 +83,6 @@ final class IntentMatcher {
     }
   }
 
-  /// Parses an [IntentMatcher] from JSON string [rawJson].
   factory IntentMatcher.fromJsonString(String rawJson) {
     final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
     final rawShortcuts =
@@ -145,7 +120,6 @@ final class IntentMatcher {
     );
   }
 
-  /// Built-in fallback matcher mirroring `assets/ai/intents.json`.
   factory IntentMatcher.fallback() => const IntentMatcher(
     shortcuts: {
       'mgkano': 'magkano',
@@ -167,12 +141,43 @@ final class IntentMatcher {
       ChatIntent.greeting: ['kumusta', 'kamusta', 'hello', 'hi'],
       ChatIntent.thanks: ['salamat', 'thank you', 'thanks'],
       ChatIntent.help: ['help', 'tulong', 'what can you do'],
-      ChatIntent.topProducts: ['pinakamabenta', 'best seller', 'top 3', 'top product'],
-      ChatIntent.lowStock: ['stock', 'low', 'mababa', 'imbentaryo', 'ubos', 'restock'],
+      ChatIntent.topProducts: [
+        'pinakamabenta',
+        'best seller',
+        'top 3',
+        'top product',
+      ],
+      ChatIntent.lowStock: [
+        'stock',
+        'low',
+        'mababa',
+        'imbentaryo',
+        'ubos',
+        'restock',
+      ],
       ChatIntent.utang: ['utang', 'suki', 'bayad', 'credit', 'owes'],
-      ChatIntent.sales: ['sale', 'sales', 'benta', 'kita', 'tubo', 'profit', 'revenue'],
-      ChatIntent.salesCompare: ['kahapon', 'yesterday', 'kumpara', 'compare', 'vs'],
-      ChatIntent.slowMoving: ['matumal', 'dead stock', 'slow moving', 'hindi mabenta'],
+      ChatIntent.sales: [
+        'sale',
+        'sales',
+        'benta',
+        'kita',
+        'tubo',
+        'profit',
+        'revenue',
+      ],
+      ChatIntent.salesCompare: [
+        'kahapon',
+        'yesterday',
+        'kumpara',
+        'compare',
+        'vs',
+      ],
+      ChatIntent.slowMoving: [
+        'matumal',
+        'dead stock',
+        'slow moving',
+        'hindi mabenta',
+      ],
       ChatIntent.productLookup: ['presyo', 'price', 'halaga'],
       ChatIntent.utangRisk: [
         'naluluge',
@@ -193,10 +198,17 @@ final class IntentMatcher {
         'magkano bibilhin',
         'budget sa paninda',
       ],
+      ChatIntent.storeInfo: ['pangalan', 'store name', 'shop name', 'may ari'],
+      ChatIntent.productCount: [
+        'ilan produkto',
+        'how many products',
+        'how many items',
+        'total products',
+      ],
+      ChatIntent.expenses: ['gastos', 'expenses', 'net income', 'spend'],
     },
   );
 
-  /// Normalizes [rawInput] and returns the best matching intent + timeframe.
   MatchedQuery match(String rawInput) {
     final normalized = _normalize(rawInput);
     final words = normalized
@@ -264,7 +276,9 @@ final class IntentMatcher {
         continue;
       }
       if (keyword.length >= 4 &&
-          words.any((word) => word.length >= 4 && _levenshtein(word, keyword) <= 1)) {
+          words.any(
+            (word) => word.length >= 4 && _levenshtein(word, keyword) <= 1,
+          )) {
         score += 1;
       }
     }
@@ -284,6 +298,9 @@ final class IntentMatcher {
     'product_lookup' => ChatIntent.productLookup,
     'utang_risk' => ChatIntent.utangRisk,
     'restock_budget' => ChatIntent.restockBudget,
+    'store_info' => ChatIntent.storeInfo,
+    'product_count' => ChatIntent.productCount,
+    'expenses' => ChatIntent.expenses,
     _ => null,
   };
 

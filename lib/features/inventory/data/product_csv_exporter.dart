@@ -1,15 +1,18 @@
+import 'package:tinda360/core/catalog/expiry_status.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/sale_record.dart';
 
-/// Exports [products] to an RFC 4180 CSV string with header
-/// `name,price,cost,stock,unit,barcode,low_stock`.
 String exportProductsCsv(List<StockedProduct> products) {
-  final lines = <String>['name,price,cost,stock,unit,barcode,low_stock'];
+  final lines = <String>[
+    'name,price,cost,stock,unit,barcode,low_stock,utang_price,expiry,tracks_stock',
+  ];
   for (final stockedProduct in products) {
     final product = stockedProduct.product;
     final lowStockThreshold = product.lowStockAt;
+    final utangPrice = product.utangPrice;
+    final expiryDay = product.expiryDay;
     final fields = <String>[
       product.name,
       _formatDecimalMoney(product.price),
@@ -17,23 +20,25 @@ String exportProductsCsv(List<StockedProduct> products) {
       _formatDecimalQuantity(stockedProduct.stock),
       product.unit.storageName,
       product.barcode ?? '',
-      lowStockThreshold == null ? '' : _formatDecimalQuantity(lowStockThreshold),
+      lowStockThreshold == null
+          ? ''
+          : _formatDecimalQuantity(lowStockThreshold),
+      utangPrice == null ? '' : _formatDecimalMoney(utangPrice),
+      expiryDay == null ? '' : ExpiryRules.formatIso(expiryDay),
+      product.tracksStock ? '1' : '0',
     ];
     lines.add(_encodeCsvRow(fields));
   }
   return lines.join('\r\n');
 }
 
-/// Exports [sales] to an RFC 4180 CSV string with header
-/// `sale_id,created_at_iso,method,customer,total,paid,items`.
 String exportSalesCsv(List<SaleRecord> sales) {
   final lines = <String>[
-    'sale_id,created_at_iso,method,customer,total,paid,items',
+    'sale_id,created_at_iso,method,customer,total,paid,items,interest,refunded,cashier',
   ];
   for (final sale in sales) {
     final createdAtIso = DateTime.fromMillisecondsSinceEpoch(
       sale.createdAtMs,
-      isUtc: true,
     ).toIso8601String();
     final itemsSummary = sale.lines
         .map(
@@ -49,6 +54,9 @@ String exportSalesCsv(List<SaleRecord> sales) {
       _formatDecimalMoney(sale.total),
       _formatDecimalMoney(sale.paid),
       itemsSummary,
+      _formatDecimalMoney(sale.interest),
+      _formatDecimalMoney(sale.refunded),
+      sale.cashierName ?? '',
     ];
     lines.add(_encodeCsvRow(fields));
   }
@@ -59,7 +67,15 @@ String _encodeCsvRow(List<String> fields) {
   return fields.map(_escapeCsvField).join(',');
 }
 
-String _escapeCsvField(String value) {
+const Set<String> _formulaTriggerCharacters = {'=', '+', '-', '@', '\t', '\r'};
+
+String _neutralizeFormula(String value) {
+  if (value.isEmpty || double.tryParse(value) != null) return value;
+  return _formulaTriggerCharacters.contains(value[0]) ? "'$value" : value;
+}
+
+String _escapeCsvField(String rawValue) {
+  final value = _neutralizeFormula(rawValue);
   final needsQuotes =
       value.contains(',') ||
       value.contains('"') ||

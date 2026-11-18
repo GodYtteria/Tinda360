@@ -8,9 +8,7 @@ import 'package:tinda360/core/result.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/db/app_database.dart';
 
-/// Reads and writes the single store profile row.
 final class StoreProfileRepository {
-  /// Creates the repository.
   StoreProfileRepository({
     required AppDatabase db,
     required Clock clock,
@@ -23,7 +21,6 @@ final class StoreProfileRepository {
   final Clock _clock;
   final AppLog _log;
 
-  /// The profile, re-emitted whenever it changes.
   Stream<StoreProfile> watch() =>
       (_db.select(_db.storeProfiles)
             ..where((s) => s.id.equals(AppDatabase.storeProfileId)))
@@ -35,10 +32,48 @@ final class StoreProfileRepository {
                   Currency.tryParse(row.currencyCode) ??
                   (throw StateError('Unknown currency "${row.currencyCode}"')),
               onboardingDone: row.onboardingDone,
+              address: row.address,
+              phone: row.phone,
             ),
           );
 
-  /// Saves the store name and marks first-run setup as done.
+  static const int maxAddressLength = 120;
+
+  static const int maxPhoneLength = 30;
+
+  @useResult
+  Future<Result<void, StoreFailure>> updateContact({
+    String? address,
+    String? phone,
+  }) async {
+    try {
+      await _db.customUpdate(
+        'UPDATE store_profiles SET address = ?, phone = ?, '
+        'updated_at = ?, row_revision = row_revision + 1 WHERE id = ?',
+        variables: [
+          Variable<String>(_cleanedOrNull(address, maxAddressLength)),
+          Variable<String>(_cleanedOrNull(phone, maxPhoneLength)),
+          Variable.withInt(_clock.now().toUtc().millisecondsSinceEpoch),
+          Variable.withString(AppDatabase.storeProfileId),
+        ],
+        updates: {_db.storeProfiles},
+        updateKind: UpdateKind.update,
+      );
+      return const Ok(null);
+    } on Exception catch (error, stack) {
+      _log.error('store.update_contact', error, stack);
+      return const Err(StoreUnavailable());
+    }
+  }
+
+  String? _cleanedOrNull(String? value, int maxLength) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) return null;
+    return trimmed.length <= maxLength
+        ? trimmed
+        : trimmed.substring(0, maxLength).trimRight();
+  }
+
   @useResult
   Future<Result<void, StoreFailure>> completeOnboarding(String name) async {
     final trimmed = name.trim();

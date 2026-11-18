@@ -6,9 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Full-width primary action button (56 dp height, 14 dp radius).
 class TindaPrimaryButton extends StatelessWidget {
-  /// Creates a primary button.
   const TindaPrimaryButton({
     required this.label,
     required this.onPressed,
@@ -16,13 +14,10 @@ class TindaPrimaryButton extends StatelessWidget {
     this.isLoading = false,
   });
 
-  /// Button label.
   final String label;
 
-  /// Tap handler; null disables the button.
   final VoidCallback? onPressed;
 
-  /// Shows a compact spinner when true.
   final bool isLoading;
 
   @override
@@ -67,9 +62,7 @@ class TindaPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Outlined secondary action button (52 dp height, 14 dp radius).
 class TindaSecondaryButton extends StatelessWidget {
-  /// Creates a secondary button.
   const TindaSecondaryButton({
     required this.label,
     required this.onPressed,
@@ -77,13 +70,10 @@ class TindaSecondaryButton extends StatelessWidget {
     this.icon,
   });
 
-  /// Button label.
   final String label;
 
-  /// Tap handler.
   final VoidCallback? onPressed;
 
-  /// Optional leading icon.
   final IconData? icon;
 
   @override
@@ -134,19 +124,15 @@ class TindaSecondaryButton extends StatelessWidget {
   }
 }
 
-/// Compact mango accent button (46 dp height, 12 dp radius), e.g. Bayad.
 class TindaAccentButton extends StatelessWidget {
-  /// Creates an accent button.
   const TindaAccentButton({
     required this.label,
     required this.onPressed,
     super.key,
   });
 
-  /// Button label.
   final String label;
 
-  /// Tap handler.
   final VoidCallback? onPressed;
 
   @override
@@ -176,9 +162,7 @@ class TindaAccentButton extends StatelessWidget {
   }
 }
 
-/// Underlined text link button (48 dp min height).
 class TindaTextLinkButton extends StatelessWidget {
-  /// Creates a text link button.
   const TindaTextLinkButton({
     required this.label,
     required this.onPressed,
@@ -186,13 +170,10 @@ class TindaTextLinkButton extends StatelessWidget {
     this.isDanger = false,
   });
 
-  /// Button label.
   final String label;
 
-  /// Tap handler.
   final VoidCallback? onPressed;
 
-  /// Uses danger color when true (e.g. Delete product).
   final bool isDanger;
 
   @override
@@ -211,39 +192,38 @@ class TindaTextLinkButton extends StatelessWidget {
         style: TextButton.styleFrom(foregroundColor: color),
         child: Text(
           label,
-          style: AppTypography.bodyStrong(
-            color,
-            weight: FontWeight.w700,
-          ).copyWith(
-            decoration: TextDecoration.underline,
-            decorationColor: color,
-          ),
+          style:
+              AppTypography.bodyStrong(
+                color,
+                weight: FontWeight.w700,
+              ).copyWith(
+                decoration: TextDecoration.underline,
+                decorationColor: color,
+              ),
         ),
       ),
     );
   }
 }
 
-/// Google sign-in pill button (44 dp height).
 class TindaGoogleButton extends StatelessWidget {
-  /// Creates a Google sign-in button.
   const TindaGoogleButton({
     required this.label,
     required this.onPressed,
     super.key,
   });
 
-  /// Button label.
   final String label;
 
-  /// Tap handler.
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: AppSizes.touchTargetMin,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSizes.touchTargetMin,
+      ),
       child: OutlinedButton(
         onPressed: onPressed == null
             ? null
@@ -270,12 +250,16 @@ class TindaGoogleButton extends StatelessWidget {
               color: Color(0xFF4285F4),
             ),
             const SizedBox(width: AppSpacing.s8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF1F1F1F),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F1F1F),
+                ),
               ),
             ),
           ],
@@ -285,9 +269,7 @@ class TindaGoogleButton extends StatelessWidget {
   }
 }
 
-/// 44x44 icon button with 12 dp radius and semantic tooltip.
 class TindaIconButton extends StatelessWidget {
-  /// Creates an icon button.
   const TindaIconButton({
     required this.tooltip,
     required this.onPressed,
@@ -297,19 +279,14 @@ class TindaIconButton extends StatelessWidget {
     this.onHeader = false,
   }) : assert(icon != null || svgAsset != null, 'Provide icon or svgAsset');
 
-  /// Icon glyph.
   final IconData? icon;
 
-  /// Optional SVG asset path from `assets/icons/`.
   final String? svgAsset;
 
-  /// Accessible tooltip label.
   final String tooltip;
 
-  /// Tap handler.
   final VoidCallback? onPressed;
 
-  /// Uses translucent white fill on dark header; muted surface in sheets.
   final bool onHeader;
 
   @override

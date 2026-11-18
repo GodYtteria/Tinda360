@@ -1,26 +1,23 @@
 import 'package:tinda360/core/money/money.dart';
 
-/// A suki who can buy on credit.
 final class Customer {
-  /// Creates a customer.
   const Customer({
     required this.id,
     required this.name,
     this.phone,
     this.creditLimit,
+    this.interestPercentTenths,
   });
 
-  /// Stable identifier.
   final String id;
 
-  /// Display name.
   final String name;
 
-  /// Optional mobile number.
   final String? phone;
 
-  /// Optional maximum utang; the app warns, it does not block.
   final Money? creditLimit;
+
+  final int? interestPercentTenths;
 
   @override
   bool operator ==(Object other) =>
@@ -28,8 +25,10 @@ final class Customer {
       other.id == id &&
       other.name == name &&
       other.phone == phone &&
-      other.creditLimit == creditLimit;
+      other.creditLimit == creditLimit &&
+      other.interestPercentTenths == interestPercentTenths;
 
   @override
-  int get hashCode => Object.hash(id, name, phone, creditLimit);
+  int get hashCode =>
+      Object.hash(id, name, phone, creditLimit, interestPercentTenths);
 }

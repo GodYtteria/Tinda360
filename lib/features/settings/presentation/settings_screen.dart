@@ -5,13 +5,22 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tinda360/core/result.dart';
+import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
 import 'package:tinda360/data/db/store_registry.dart';
+import 'package:tinda360/features/pos/presentation/bantay_chip.dart';
+import 'package:tinda360/features/settings/presentation/optional_text_dialog.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/routing/app_router.dart';
+import 'package:tinda360/services/backup_file_name.dart';
+import 'package:tinda360/services/bantay_name_store.dart';
 import 'package:tinda360/services/service_providers.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
+import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/pin_prompt_dialog.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -20,9 +29,9 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Settings screen for backup, Tinda AI status, store info, privacy, and about.
+part 'settings_store_section.dart';
+
 class SettingsScreen extends ConsumerWidget {
-  /// Creates the settings screen.
   const SettingsScreen({super.key});
 
   @override
@@ -31,7 +40,9 @@ class SettingsScreen extends ConsumerWidget {
     final palette = AppPalette.of(context);
     final settingsState = ref.watch(settingsNotifierProvider);
     final storeProfileAsync = ref.watch(storeProfileStreamProvider);
-    final storeName = storeProfileAsync.value?.name ?? '';
+    final storeProfile = storeProfileAsync.value;
+    final storeName = storeProfile?.name ?? '';
+    final bantayName = ref.watch(bantayNameProvider).value;
 
     return Scaffold(
       backgroundColor: palette.background,
@@ -47,79 +58,116 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(localizations.settingsTitle),
           ),
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 720),
-                child: ListView(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                AppSpacing.screenHorizontal,
-                AppSpacing.s20,
-                AppSpacing.screenHorizontal,
-                AppSpacing.s24,
-              ),
-              children: [
-                _SectionHeader(title: localizations.settingsSectionBackup),
-                const SizedBox(height: AppSpacing.s10),
-                _BackupSection(state: settingsState),
-                const SizedBox(height: AppSpacing.s20),
-                _SectionHeader(title: localizations.settingsSectionAi),
-                const SizedBox(height: AppSpacing.s10),
-                _AiSection(),
-                const SizedBox(height: AppSpacing.s20),
-                _SectionHeader(title: localizations.settingsSectionStore),
-                const SizedBox(height: AppSpacing.s10),
-                TindaListRow(
-                  title: localizations.onboardingStoreNameLabel,
-                  subtitle: storeName.isEmpty ? '—' : storeName,
+            child: TindaScreenBody(
+              child: ListView(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.screenHorizontal,
+                  AppSpacing.s20,
+                  AppSpacing.screenHorizontal,
+                  AppSpacing.s24,
                 ),
-                const SizedBox(height: AppSpacing.s10),
-                TindaCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        localizations.settingsLanguageLabel,
-                        style: AppTypography.bodyStrong(palette.text),
-                      ),
-                      const SizedBox(height: AppSpacing.s10),
-                      TindaSegmentedControl<String>(
-                        segments: {
-                          'en': localizations.settingsLanguageEn,
-                          'fil': localizations.settingsLanguagePh,
-                        },
-                        selected: ref.watch(localeProvider).languageCode,
-                        onChanged: (code) {
-                          if (code == ref.read(localeProvider).languageCode) return;
-                          unawaited(HapticFeedback.selectionClick());
-                          ref.read(localeProvider.notifier).setLanguageCode(code);
-                        },
-                      ),
-                    ],
+                children: [
+                  _SectionHeader(title: localizations.settingsSectionBackup),
+                  const SizedBox(height: AppSpacing.s10),
+                  _BackupSection(state: settingsState),
+                  const SizedBox(height: AppSpacing.s20),
+                  _SectionHeader(title: localizations.settingsSectionAi),
+                  const SizedBox(height: AppSpacing.s10),
+                  _AiSection(),
+                  const SizedBox(height: AppSpacing.s20),
+                  _SectionHeader(title: localizations.settingsSectionStore),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaListRow(
+                    title: localizations.onboardingStoreNameLabel,
+                    subtitle: storeName.isEmpty ? '—' : storeName,
+                    onTap: () => unawaited(
+                      _renameStore(context, ref, storeName),
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.s10),
-                _StoreSwitcherSection(activeStoreName: storeName),
-                const SizedBox(height: AppSpacing.s20),
-                _SectionHeader(title: localizations.settingsSectionStorage),
-                const SizedBox(height: AppSpacing.s10),
-                _StorageSection(
-                  isBackupConnected:
-                      settingsState.backupStatus == BackupStatus.connected,
-                ),
-                const SizedBox(height: AppSpacing.s20),
-                _SectionHeader(title: localizations.settingsSectionPrivacy),
-                const SizedBox(height: AppSpacing.s10),
-                _PrivacySection(),
-                const SizedBox(height: AppSpacing.s20),
-                _SectionHeader(title: localizations.settingsSectionAbout),
-                const SizedBox(height: AppSpacing.s10),
-                TindaListRow(
-                  title: localizations.appTitle,
-                  subtitle: localizations.settingsVersion,
-                ),
-              ],
-            ),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaListRow(
+                    title: localizations.receiptBantayLabel,
+                    subtitle: bantayName ?? '—',
+                    onTap: () => unawaited(
+                      editBantayName(context, ref, bantayName),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaListRow(
+                    title: localizations.settingsAddressLabel,
+                    subtitle: storeProfile?.address ?? '—',
+                    onTap: () => unawaited(
+                      _editStoreContact(
+                        context,
+                        ref,
+                        profile: storeProfile,
+                        isAddress: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaListRow(
+                    title: localizations.settingsPhoneLabel,
+                    subtitle: storeProfile?.phone ?? '—',
+                    onTap: () => unawaited(
+                      _editStoreContact(
+                        context,
+                        ref,
+                        profile: storeProfile,
+                        isAddress: false,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          localizations.settingsLanguageLabel,
+                          style: AppTypography.bodyStrong(palette.text),
+                        ),
+                        const SizedBox(height: AppSpacing.s10),
+                        TindaSegmentedControl<String>(
+                          segments: {
+                            'en': localizations.settingsLanguageEn,
+                            'fil': localizations.settingsLanguagePh,
+                          },
+                          selected: ref.watch(localeProvider).languageCode,
+                          onChanged: (code) {
+                            if (code == ref.read(localeProvider).languageCode)
+                              return;
+                            unawaited(HapticFeedback.selectionClick());
+                            ref
+                                .read(localeProvider.notifier)
+                                .setLanguageCode(code);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s10),
+                  _StoreSwitcherSection(activeStoreName: storeName),
+                  const SizedBox(height: AppSpacing.s20),
+                  _SectionHeader(title: localizations.settingsSectionStorage),
+                  const SizedBox(height: AppSpacing.s10),
+                  _StorageSection(
+                    isBackupConnected:
+                        settingsState.backupStatus == BackupStatus.connected,
+                  ),
+                  const SizedBox(height: AppSpacing.s20),
+                  _SectionHeader(title: localizations.settingsSectionPrivacy),
+                  const SizedBox(height: AppSpacing.s10),
+                  _PrivacySection(),
+                  const SizedBox(height: AppSpacing.s20),
+                  _SectionHeader(title: localizations.settingsSectionAbout),
+                  const SizedBox(height: AppSpacing.s10),
+                  TindaListRow(
+                    title: localizations.appTitle,
+                    subtitle: localizations.settingsVersion,
+                  ),
+                ],
               ),
             ),
           ),
@@ -141,262 +189,21 @@ class _SectionHeader extends StatelessWidget {
   );
 }
 
-class _StoreSwitcherSection extends ConsumerWidget {
-  const _StoreSwitcherSection({required this.activeStoreName});
-
-  final String activeStoreName;
-
-  Future<void> _showAddStoreDialog(BuildContext context, WidgetRef ref) async {
-    final createdName = await showDialog<String>(
-      context: context,
-      builder: (_) => const _AddStoreDialog(),
-    );
-    if (createdName == null || createdName.isEmpty) return;
-    await ref.read(storeRegistryProvider.notifier).createStore(createdName);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${AppLocalizations.of(context).settingsAddStore}: $createdName',
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmSwitchStore(
-    BuildContext context,
-    WidgetRef ref,
-    StoreEntry store,
-    String displayName,
-  ) async {
-    final localizations = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.settingsSwitchStore),
-        content: Text(localizations.settingsSwitchStoreConfirm(displayName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(localizations.commonCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              unawaited(HapticFeedback.mediumImpact());
-              Navigator.of(dialogContext).pop(true);
-            },
-            child: Text(localizations.commonSwitch),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    if (!context.mounted) return;
-    try {
-      await ref.read(storeRegistryProvider.notifier).switchStore(store.id);
-    } on Exception {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            localizations.localeName.startsWith('fil')
-                ? 'Hindi malipat ang store. Subukan ulit.'
-                : 'Could not switch store. Try again.',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _confirmDeleteStore(
-    BuildContext context,
-    WidgetRef ref,
-    StoreEntry store,
-    String displayName,
-  ) async {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.settingsDeleteStore),
-        content: Text(localizations.settingsDeleteStoreConfirm(displayName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(localizations.commonCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              unawaited(HapticFeedback.mediumImpact());
-              Navigator.of(dialogContext).pop(true);
-            },
-            style: TextButton.styleFrom(foregroundColor: palette.danger),
-            child: Text(localizations.commonDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    try {
-      await ref.read(storeRegistryProvider.notifier).deleteStore(store.id);
-    } on Exception {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            localizations.localeName.startsWith('fil')
-                ? 'Hindi matanggal ang store. Subukan ulit.'
-                : 'Could not delete store. Try again.',
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    final registry =
-        ref.watch(storeRegistryProvider).value ?? StoreRegistry.defaultRegistry();
-
-    return TindaCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            localizations.settingsSwitchStore,
-            style: AppTypography.bodyStrong(palette.text),
-          ),
-          const SizedBox(height: AppSpacing.s10),
-          for (final store in registry.stores) ...[
-            _StoreRow(
-              displayName: store.name.isNotEmpty
-                  ? store.name
-                  : (store.id == registry.activeStoreId && activeStoreName.isNotEmpty
-                        ? activeStoreName
-                        : '—'),
-              isActive: store.id == registry.activeStoreId,
-              onSwitch: store.id == registry.activeStoreId
-                  ? null
-                  : () {
-                      unawaited(HapticFeedback.selectionClick());
-                      unawaited(
-                        _confirmSwitchStore(
-                          context,
-                          ref,
-                          store,
-                          store.name.isNotEmpty
-                              ? store.name
-                              : (store.id == registry.activeStoreId &&
-                                      activeStoreName.isNotEmpty
-                                  ? activeStoreName
-                                  : '—'),
-                        ),
-                      );
-                    },
-              onDelete: () => unawaited(
-                _confirmDeleteStore(
-                  context,
-                  ref,
-                  store,
-                  store.name.isNotEmpty
-                      ? store.name
-                      : (store.id == registry.activeStoreId &&
-                                activeStoreName.isNotEmpty
-                            ? activeStoreName
-                            : store.id),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-          const SizedBox(height: AppSpacing.s4),
-          TindaSecondaryButton(
-            label: localizations.settingsAddStore,
-            onPressed: () {
-              unawaited(HapticFeedback.lightImpact());
-              unawaited(_showAddStoreDialog(context, ref));
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StoreRow extends StatelessWidget {
-  const _StoreRow({
-    required this.displayName,
-    required this.isActive,
-    required this.onSwitch,
-    required this.onDelete,
-  });
-
-  final String displayName;
-  final bool isActive;
-  final VoidCallback? onSwitch;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    return AnimatedContainer(
-      duration: Duration(
-        milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 180,
-      ),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: isActive ? palette.surfaceMuted : palette.surface,
-        borderRadius: BorderRadius.circular(AppRadii.smallButton),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onSwitch,
-          borderRadius: BorderRadius.circular(AppRadii.smallButton),
-          child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s8,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  displayName,
-                  style: AppTypography.bodyStrong(palette.text),
-                ),
-              ),
-              if (isActive) ...[
-                const SizedBox(width: AppSpacing.s8),
-                TindaBadge(label: localizations.settingsActiveBadge),
-              ],
-              const SizedBox(width: AppSpacing.s4),
-              IconButton(
-                icon: Icon(Icons.delete_outline, color: palette.danger, size: 20),
-                tooltip: localizations.settingsDeleteStore,
-                onPressed: () {
-                  unawaited(HapticFeedback.selectionClick());
-                  onDelete();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      ),
-    );
-  }
-}
-
 class _BackupSection extends ConsumerWidget {
   const _BackupSection({required this.state});
 
   final SettingsState state;
+
+  Future<void> _disconnectBackupWithPin(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsNotifier notifier,
+  ) async {
+    final title = AppLocalizations.of(context).settingsPinPromptTitle;
+    final pinVerified = await confirmStorePinIfSet(context, ref, title: title);
+    if (!pinVerified) return;
+    await notifier.disconnectBackup();
+  }
 
   String _backupErrorLabel(
     AppLocalizations localizations,
@@ -404,22 +211,30 @@ class _BackupSection extends ConsumerWidget {
   ) {
     final isFilipino = localizations.localeName.startsWith('fil');
     return switch (reason) {
-      'no_backup_found' => isFilipino
-          ? 'Walang nahanap na backup sa Google Drive.'
-          : 'No backup found in Google Drive.',
-      'not_signed_in' => isFilipino
-          ? 'Hindi naka-sign in sa Google.'
-          : 'Not signed in to Google.',
-      'authorization_denied' => isFilipino
-          ? 'Hindi pinayagan ang access sa Google Drive.'
-          : 'Google Drive access was not granted.',
-      'missing_local_database' => isFilipino
-          ? 'Walang lokal na database na ma-upload.'
-          : 'No local database found to upload.',
-      'invalid_media_response' => isFilipino
-          ? 'Hindi mabasa ang backup file mula sa Drive.'
-          : 'Could not read backup file from Drive.',
-      _ => reason,
+      'no_backup_found' =>
+        isFilipino
+            ? 'Walang nahanap na backup sa Google Drive.'
+            : 'No backup found in Google Drive.',
+      'not_signed_in' =>
+        isFilipino
+            ? 'Hindi naka-sign in sa Google.'
+            : 'Not signed in to Google.',
+      'authorization_denied' =>
+        isFilipino
+            ? 'Hindi pinayagan ang access sa Google Drive.'
+            : 'Google Drive access was not granted.',
+      'missing_local_database' =>
+        isFilipino
+            ? 'Walang lokal na database na ma-upload.'
+            : 'No local database found to upload.',
+      'invalid_media_response' || 'invalid_backup_file' =>
+        isFilipino
+            ? 'Hindi mabasa ang backup file mula sa Drive.'
+            : 'Could not read backup file from Drive.',
+      _ =>
+        isFilipino
+            ? 'Hindi natapos ang backup. Tingnan ang internet at subukan ulit.'
+            : 'Backup did not finish. Check your internet and try again.',
     };
   }
 
@@ -448,22 +263,25 @@ class _BackupSection extends ConsumerWidget {
               Row(
                 children: [
                   TindaStatusDot(
-                    active: state.backupStatus == BackupStatus.connected ||
+                    active:
+                        state.backupStatus == BackupStatus.connected ||
                         state.backupStatus == BackupStatus.choosing,
-                    color: state.backupStatus == BackupStatus.connected ||
+                    color:
+                        state.backupStatus == BackupStatus.connected ||
                             state.backupStatus == BackupStatus.choosing
                         ? palette.success
                         : (state.backupStatus == BackupStatus.failed
-                            ? palette.danger
-                            : palette.textMuted),
+                              ? palette.danger
+                              : palette.textMuted),
                     size: 10,
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
                     child: AnimatedSwitcher(
                       duration: Duration(
-                        milliseconds:
-                            MediaQuery.disableAnimationsOf(context) ? 0 : 180,
+                        milliseconds: MediaQuery.disableAnimationsOf(context)
+                            ? 0
+                            : 180,
                       ),
                       child: Text(
                         state.accountEmail ?? statusLabel,
@@ -479,8 +297,9 @@ class _BackupSection extends ConsumerWidget {
               const SizedBox(height: AppSpacing.s12),
               AnimatedSwitcher(
                 duration: Duration(
-                  milliseconds:
-                      MediaQuery.disableAnimationsOf(context) ? 0 : 220,
+                  milliseconds: MediaQuery.disableAnimationsOf(context)
+                      ? 0
+                      : 220,
                 ),
                 switchInCurve: Curves.easeOut,
                 switchOutCurve: Curves.easeIn,
@@ -498,7 +317,10 @@ class _BackupSection extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.s12),
                         TindaPrimaryButton(
                           label: localizations.settingsBackupUsePhone,
-                          onPressed: () { unawaited(HapticFeedback.selectionClick()); unawaited(notifier.choosePhoneData()); },
+                          onPressed: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            unawaited(notifier.choosePhoneData());
+                          },
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         TindaSecondaryButton(
@@ -508,7 +330,8 @@ class _BackupSection extends ConsumerWidget {
                             unawaited(notifier.chooseRestoreBackup());
                           },
                         ),
-                      ] else if (state.backupStatus == BackupStatus.connected) ...[
+                      ] else if (state.backupStatus ==
+                          BackupStatus.connected) ...[
                         if (state.syncedJustNow) ...[
                           Text(
                             localizations.settingsBackupLastSync(
@@ -523,7 +346,10 @@ class _BackupSection extends ConsumerWidget {
                         ],
                         TindaSecondaryButton(
                           label: localizations.settingsBackupSyncNow,
-                          onPressed: () { unawaited(HapticFeedback.lightImpact()); unawaited(notifier.syncNow()); },
+                          onPressed: () {
+                            unawaited(HapticFeedback.lightImpact());
+                            unawaited(notifier.syncNow());
+                          },
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         Center(
@@ -532,19 +358,26 @@ class _BackupSection extends ConsumerWidget {
                             isDanger: true,
                             onPressed: () {
                               unawaited(HapticFeedback.selectionClick());
-                              unawaited(notifier.disconnectBackup());
+                              unawaited(
+                                _disconnectBackupWithPin(
+                                  context,
+                                  ref,
+                                  notifier,
+                                ),
+                              );
                             },
                           ),
                         ),
                       ] else
                         TindaGoogleButton(
                           label: localizations.onboardingGoogleButton,
-                          onPressed: state.backupStatus == BackupStatus.connecting
+                          onPressed:
+                              state.backupStatus == BackupStatus.connecting
                               ? null
                               : () {
-                                    unawaited(HapticFeedback.mediumImpact());
-                                    unawaited(notifier.connectBackup());
-                                  },
+                                  unawaited(HapticFeedback.mediumImpact());
+                                  unawaited(notifier.connectBackup());
+                                },
                         ),
                     ],
                   ),
@@ -576,32 +409,38 @@ class _BackupSection extends ConsumerWidget {
                   key: const ValueKey('backup-failed'),
                   padding: const EdgeInsets.only(top: AppSpacing.s10),
                   child: TindaCard(
-            backgroundColor: palette.dangerSoft,
-            borderColor: palette.danger.withValues(alpha: 0.3),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  localizations.settingsBackupFailed,
-                  style: AppTypography.body(palette.danger),
-                ),
-                if (state.errorReason != null &&
-                    state.errorReason!.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.s4),
-                  Text(
-                    _backupErrorLabel(localizations, state.errorReason!),
-                    style: AppTypography.meta(palette.danger),
+                    backgroundColor: palette.dangerSoft,
+                    borderColor: palette.danger.withValues(alpha: 0.3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          localizations.settingsBackupFailed,
+                          style: AppTypography.body(palette.danger),
+                        ),
+                        if (state.errorReason != null &&
+                            state.errorReason!.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.s4),
+                          Text(
+                            _backupErrorLabel(
+                              localizations,
+                              state.errorReason!,
+                            ),
+                            style: AppTypography.meta(palette.danger),
+                          ),
+                        ],
+                        const SizedBox(height: AppSpacing.s12),
+                        TindaSecondaryButton(
+                          label: localizations.commonRetry,
+                          onPressed: () {
+                            unawaited(HapticFeedback.lightImpact());
+                            unawaited(notifier.retryBackup());
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-                const SizedBox(height: AppSpacing.s12),
-                TindaSecondaryButton(
-                  label: localizations.commonRetry,
-                  onPressed: () { unawaited(HapticFeedback.lightImpact()); unawaited(notifier.retryBackup()); },
-                ),
-              ],
-            ),
-          ),
                 )
               : const SizedBox.shrink(key: ValueKey('backup-ok')),
         ),
@@ -681,67 +520,6 @@ class _PrivacySection extends StatelessWidget {
   }
 }
 
-class _AddStoreDialog extends StatefulWidget {
-  const _AddStoreDialog();
-
-  @override
-  State<_AddStoreDialog> createState() => _AddStoreDialogState();
-}
-
-class _AddStoreDialogState extends State<_AddStoreDialog> {
-  final TextEditingController _controller = TextEditingController();
-  String? _inlineError;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit(AppLocalizations localizations) {
-    final trimmed = _controller.text.trim();
-    if (trimmed.isEmpty) {
-      unawaited(HapticFeedback.heavyImpact());
-      setState(() => _inlineError = localizations.failureStoreNameRequired);
-      return;
-    }
-    unawaited(HapticFeedback.selectionClick());
-    Navigator.of(context).pop(trimmed);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(localizations.settingsAddStore),
-      content: TindaTextInput(
-        label: localizations.onboardingStoreNameLabel,
-        hintText: localizations.onboardingStoreNameHint,
-        controller: _controller,
-        errorText: _inlineError,
-        autofocus: true,
-        textInputAction: TextInputAction.done,
-        onChanged: (_) {
-          if (_inlineError != null) {
-            setState(() => _inlineError = null);
-          }
-        },
-        onSubmitted: (_) => _submit(localizations),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(localizations.commonCancel),
-        ),
-        TextButton(
-          onPressed: () => _submit(localizations),
-          child: Text(localizations.commonSave),
-        ),
-      ],
-    );
-  }
-}
-
 class _StorageSection extends ConsumerStatefulWidget {
   const _StorageSection({required this.isBackupConnected});
 
@@ -810,22 +588,29 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    localizations.settingsStorageSizeLabel,
-                    style: AppTypography.bodyStrong(palette.text),
-                  ),
-                  AnimatedSwitcher(
-                    duration: Duration(
-                      milliseconds:
-                          MediaQuery.disableAnimationsOf(context) ? 0 : 180,
-                    ),
+                  Flexible(
                     child: Text(
-                      sizeLabel,
-                      key: ValueKey<String>(sizeLabel),
-                      style: AppTypography.meta(
-                        palette.primary,
-                        size: 13,
-                        weight: FontWeight.w700,
+                      localizations.settingsStorageSizeLabel,
+                      style: AppTypography.bodyStrong(palette.text),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Flexible(
+                    child: AnimatedSwitcher(
+                      duration: Duration(
+                        milliseconds: MediaQuery.disableAnimationsOf(context)
+                            ? 0
+                            : 180,
+                      ),
+                      child: Text(
+                        sizeLabel,
+                        key: ValueKey<String>(sizeLabel),
+                        textAlign: TextAlign.end,
+                        style: AppTypography.meta(
+                          palette.primary,
+                          size: 13,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -902,23 +687,31 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
         database: database,
         databaseFile: databaseFile,
       );
+      final storeProfile = await ref
+          .read(storeProfileRepositoryProvider)
+          .watch()
+          .first;
       final savedPath = await FilePicker.saveFile(
         dialogTitle: localizations.settingsLocalExportButton,
-        fileName: 'tinda360_backup.sqlite',
+        fileName: backupFileNameFor(storeProfile.name, DateTime.now()),
         bytes: bytes,
       );
       if (savedPath == null) return;
       messenger.showSnackBar(
         SnackBar(content: Text(localizations.settingsLocalExportSuccess)),
       );
-    } on Exception catch (error) {
+    } on Exception catch (error, stack) {
+      ref.read(appLogProvider).error('settings.local_backup', error, stack);
       messenger.showSnackBar(
-        SnackBar(content: Text(error.toString())),
+        SnackBar(content: Text(localizations.settingsLocalBackupFailed)),
       );
     }
   }
 
   Future<void> _importLocalBackup(BuildContext context, WidgetRef ref) async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final router = ref.read(appRouterProvider);
+    final log = ref.read(appLogProvider);
     final localizations = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
@@ -938,23 +731,35 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !context.mounted) return;
+
+    final pinVerified = await confirmStorePinIfSet(
+      context,
+      ref,
+      title: localizations.settingsPinPromptTitle,
+    );
+    if (!pinVerified) return;
 
     final pickedFiles = await FilePicker.pickFiles(type: FileType.any);
-    final pickedPath = pickedFiles?.firstOrNull?.path;
+    final pickedPath = pickedFiles.firstOrNull?.path;
     if (pickedPath == null) return;
 
     try {
-      final service = ref.read(localBackupServiceProvider);
-      final database = ref.read(appDatabaseProvider);
-      final targetFile = await ref.read(databaseFileProvider)();
+      final service = container.read(localBackupServiceProvider);
+      final database = container.read(appDatabaseProvider);
+      final targetFile = await container.read(databaseFileProvider)();
       await service.importDatabaseFile(
         sourceFile: File(pickedPath),
+        keepSourceFile: true,
         targetFile: targetFile,
-        closeActiveDatabase: database.close,
+        closeActiveDatabase: () async {
+          await leaveScreensReadingDatabase(router);
+          await database.close();
+        },
         invalidateDatabase: () {
-          ref.invalidate(appDatabaseProvider);
-          ref.invalidate(ulatNotifierProvider);
+          container
+            ..invalidate(appDatabaseProvider)
+            ..invalidate(ulatNotifierProvider);
         },
       );
       messenger.showSnackBar(
@@ -964,9 +769,10 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
       messenger.showSnackBar(
         SnackBar(content: Text(localizations.settingsLocalImportInvalid)),
       );
-    } on Exception catch (error) {
+    } on Exception catch (error, stack) {
+      log.error('settings.local_backup', error, stack);
       messenger.showSnackBar(
-        SnackBar(content: Text(error.toString())),
+        SnackBar(content: Text(localizations.settingsLocalBackupFailed)),
       );
     }
   }

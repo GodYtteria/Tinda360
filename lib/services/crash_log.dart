@@ -5,15 +5,17 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:tinda360/core/app_log.dart';
 
-/// A small, local-only error log file. Writes are synchronous so an entry
-/// survives a hard crash, and the file is cleared once it grows too large.
 final class CrashLog implements AppLog {
   CrashLog._(this._file);
 
-  /// Opens (or creates) the log in the app's private support directory.
   static Future<CrashLog> open() async {
-    final dir = await getApplicationSupportDirectory();
-    return CrashLog._(File(p.join(dir.path, 'errors.log')));
+    Directory directory;
+    try {
+      directory = await getApplicationSupportDirectory();
+    } on Exception {
+      directory = Directory.systemTemp;
+    }
+    return CrashLog._(File(p.join(directory.path, 'errors.log')));
   }
 
   static const int _maxBytes = 256 * 1024;
@@ -28,7 +30,7 @@ final class CrashLog implements AppLog {
       }
       final at = clock.now().toUtc().toIso8601String();
       _file.writeAsStringSync(
-        '$at $event $error\n$stack\n\n',
+        '$at $event ${redactBoundValues(error.toString())}\n$stack\n\n',
         mode: FileMode.append,
         flush: true,
       );
@@ -37,3 +39,14 @@ final class CrashLog implements AppLog {
     }
   }
 }
+
+final RegExp _boundValues = RegExp(
+  r'(parameters|args|arguments):.*',
+  caseSensitive: false,
+  dotAll: true,
+);
+
+String redactBoundValues(String message) => message.replaceAllMapped(
+  _boundValues,
+  (match) => '${match.group(1)}: [redacted]',
+);

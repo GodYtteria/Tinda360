@@ -1,3 +1,4 @@
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -5,10 +6,7 @@ import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 
-/// Pure form-parsing and profit helpers for [ProductSheet].
 abstract final class ProductFormLogic {
-  /// Computes live profit per unit from raw [priceInput] and [costInput].
-  /// Returns null if either input cannot be parsed as a valid non-negative amount.
   static Money? computeProfitPerSale({
     required String priceInput,
     required String costInput,
@@ -20,8 +18,6 @@ abstract final class ProductFormLogic {
     return price - cost;
   }
 
-  /// Parses a non-negative whole-unit quantity from [rawInput], or returns null
-  /// when blank or invalid.
   static Quantity? parseWholeQuantity(String rawInput) {
     final trimmed = rawInput.trim();
     if (trimmed.isEmpty) return null;
@@ -30,10 +26,26 @@ abstract final class ProductFormLogic {
     return Quantity.whole(parsed);
   }
 
-  /// Builds a [ProductDraft] from raw form inputs.
-  ///
-  /// Missing or unparseable price/cost default to `-1` minor units so the
-  /// repository returns `ProductAmountInvalid` consistently.
+  static String decimalText(Quantity quantity) {
+    if (quantity.isWhole) {
+      return (quantity.milli ~/ Quantity.milliPerUnit).toString();
+    }
+    final text = (quantity.milli / Quantity.milliPerUnit).toStringAsFixed(3);
+    return text.replaceFirst(RegExp(r'0+$'), '');
+  }
+
+  static Quantity? parseQuantity(
+    String rawInput, {
+    required bool allowsFraction,
+  }) {
+    if (!allowsFraction) return parseWholeQuantity(rawInput);
+    final trimmed = rawInput.trim();
+    if (!RegExp(r'^\d{1,6}(\.\d{1,3})?$').hasMatch(trimmed)) return null;
+    return Quantity.milli(
+      (double.parse(trimmed) * Quantity.milliPerUnit).round(),
+    );
+  }
+
   static ProductDraft buildDraft({
     required String name,
     required ProductUnit unit,
@@ -44,6 +56,9 @@ abstract final class ProductFormLogic {
     String barcodeInput = '',
     String lowStockInput = '',
     Quantity initialStock = Quantity.zero,
+    String utangPriceInput = '',
+    bool tracksStock = true,
+    LocalDay? expiryDay,
   }) {
     final invalidAmount = Money(-1, currency);
     final price = parseMoneyInput(priceInput, currency) ?? invalidAmount;
@@ -51,10 +66,15 @@ abstract final class ProductFormLogic {
     final trimmedCategory = categoryInput.trim();
     final trimmedBarcode = barcodeInput.trim();
     final trimmedLowStock = lowStockInput.trim();
+    final trimmedUtangPrice = utangPriceInput.trim();
 
-    final lowStockAt = trimmedLowStock.isEmpty
+    final lowStockAt = (trimmedLowStock.isEmpty || !tracksStock)
         ? null
-        : (parseWholeQuantity(trimmedLowStock) ?? const Quantity.milli(-1));
+        : (parseQuantity(
+                trimmedLowStock,
+                allowsFraction: unit.allowsFraction,
+              ) ??
+              const Quantity.milli(-1));
 
     return ProductDraft(
       name: name,
@@ -64,7 +84,17 @@ abstract final class ProductFormLogic {
       categoryId: trimmedCategory.isEmpty ? null : trimmedCategory,
       barcode: trimmedBarcode.isEmpty ? null : trimmedBarcode,
       lowStockAt: lowStockAt,
-      initialStock: initialStock,
+      initialStock: tracksStock ? initialStock : Quantity.zero,
+      tracksStock: tracksStock,
+      expiryDay: expiryDay,
+      utangPrice: trimmedUtangPrice.isEmpty
+          ? null
+          : (parseMoneyInput(trimmedUtangPrice, currency) ?? invalidAmount),
     );
+  }
+
+  static bool isUtangPriceInputValid(String rawInput, Currency currency) {
+    final trimmed = rawInput.trim();
+    return trimmed.isEmpty || parseMoneyInput(trimmed, currency) != null;
   }
 }

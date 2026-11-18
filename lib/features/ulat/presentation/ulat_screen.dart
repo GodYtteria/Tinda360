@@ -5,11 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_report_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:tinda360/core/achievements/store_milestone.dart';
+import 'package:tinda360/core/calendar/day_range.dart';
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/expenses/expense_entry.dart';
+import 'package:tinda360/core/failures/cash_count_failure.dart';
 import 'package:tinda360/core/failures/expense_failure.dart';
+import 'package:tinda360/data/repositories/cash_count_providers.dart';
+import 'package:tinda360/data/repositories/cash_count_repository.dart';
+import 'package:tinda360/features/ulat/presentation/ulat_range_math.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
 import 'package:tinda360/core/money/currency.dart';
@@ -21,14 +29,16 @@ import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/inventory/data/product_csv_exporter.dart';
+import 'package:tinda360/services/service_providers.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
 import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
+import 'package:tinda360/features/ulat/presentation/sale_return_sheet.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/report_pdf_service.dart';
-import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
@@ -36,13 +46,17 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
+part 'ulat_recent_sales_section.dart';
+part 'ulat_expenses_section.dart';
+part 'ulat_range_bar.dart';
+part 'ulat_cash_count_section.dart';
+part 'ulat_share_report_button.dart';
 
 final _ulatStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
   (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
 );
-/// Reports (Ulat) tab showing sales, profit, transactions, utang, and trend.
+
 class UlatScreen extends ConsumerWidget {
-  /// Creates the reports screen.
   const UlatScreen({
     required this.onOpenSettings,
     required this.onOpenAiChat,
@@ -50,18 +64,15 @@ class UlatScreen extends ConsumerWidget {
     this.onOpenTab,
   });
 
-  /// Callback to open settings.
   final VoidCallback onOpenSettings;
 
-  /// Callback to open Tinda AI chat.
   final VoidCallback onOpenAiChat;
 
-  /// Switches the shell tab (0=POS,1=Inventory,2=Utang,3=Reports).
   final ValueChanged<int>? onOpenTab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final selectedPeriod = ref.watch(ulatPeriodProvider);
     final reportAsync = ref.watch(ulatNotifierProvider);
@@ -85,10 +96,22 @@ class UlatScreen extends ConsumerWidget {
                 ReportPeriod.today: localizations.reportsToday,
                 ReportPeriod.week: localizations.reportsWeek,
                 ReportPeriod.month: localizations.reportsMonth,
+                ReportPeriod.custom: localizations.reportsCustom,
               },
               selected: selectedPeriod,
-              onChanged: (period) =>
-                  ref.read(ulatPeriodProvider.notifier).select(period),
+              onChanged: (period) {
+                if (period != ReportPeriod.custom) {
+                  ref.read(ulatPeriodProvider.notifier).select(period);
+                  return;
+                }
+                if (ref.read(ulatCustomRangeProvider) != null) {
+                  ref
+                      .read(ulatPeriodProvider.notifier)
+                      .select(ReportPeriod.custom);
+                  return;
+                }
+                unawaited(_pickCustomRange(context, ref));
+              },
             ),
           ),
           Expanded(
@@ -113,15 +136,14 @@ class UlatScreen extends ConsumerWidget {
                     onPressed: () => ref.invalidate(ulatNotifierProvider),
                   ),
                 ),
-                data: (state) => Center(
-                  key: ValueKey('ulat-${state.period.name}-${state.summary.revenue.minorUnits}-${state.summary.saleCount}'),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: _ReportContent(
-                      state: state,
-                      onOpenAiChat: onOpenAiChat,
-                      onOpenTab: onOpenTab,
-                    ),
+                data: (state) => TindaScreenBody(
+                  key: ValueKey(
+                    'ulat-${state.period.name}-${state.range.first.serial}-${state.range.last.serial}-${state.summary.revenue.minorUnits}-${state.summary.saleCount}',
+                  ),
+                  child: _ReportContent(
+                    state: state,
+                    onOpenAiChat: onOpenAiChat,
+                    onOpenTab: onOpenTab,
                   ),
                 ),
               ),
@@ -161,17 +183,30 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
           .read(storeProfileRepositoryProvider)
           .watch()
           .first;
+      final expenses = await ref.read(ulatExpensesProvider.future);
+      final totalExpenses = expenses.fold(
+        Money.zero(widget.state.summary.profit.currency),
+        (sum, entry) => sum + entry.amount,
+      );
       final bytes = await ReportPdfService.buildReportPdf(
         storeName: profile.name,
-        periodLabel: _periodLabel(localizations, widget.state.period),
+        totalExpenses: totalExpenses,
+        periodLabel: _periodLabel(
+          localizations,
+          widget.state.period,
+          widget.state.range,
+        ),
         state: widget.state,
         localizations: localizations,
       );
       await Printing.sharePdf(
         bytes: bytes,
-        filename: 'tinda360_report_${widget.state.period.name}.pdf',
+        filename: 'tinda360_report_${_rangeFileSuffix(widget.state)}.pdf',
       );
-    } on Exception {
+    } on Exception catch (error, stackTrace) {
+      ref
+          .read(appLogProvider)
+          .error('ulat_export_pdf_failed', error, stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(localizations.reportsExportPdfError)),
@@ -189,7 +224,7 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
     try {
       final sales = await ref
           .read(saleRepositoryProvider)
-          .watchRecentSales(widget.state.range)
+          .watchRecentSales(widget.state.range, limit: null)
           .first;
       final csvContent = exportSalesCsv(sales);
       final parsed = parseCsvForPreview(csvContent);
@@ -199,14 +234,17 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
         title: localizations.reportsExportCsv,
         headers: parsed.headers,
         rows: parsed.rows,
-        fileName: 'tinda360_sales_${widget.state.period.name}.csv',
+        fileName: 'tinda360_sales_${_rangeFileSuffix(widget.state)}.csv',
         csvContent: csvContent,
         successMessage: localizations.reportsExportCsvSuccess,
       );
-    } on Exception {
+    } on Exception catch (error, stackTrace) {
+      ref
+          .read(appLogProvider)
+          .error('ulat_export_csv_failed', error, stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizations.reportsExportPdfError)),
+        SnackBar(content: Text(localizations.reportsExportCsvError)),
       );
     }
   }
@@ -224,18 +262,26 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
         AppSpacing.s24,
       ),
       children: [
+        if (widget.state.period == ReportPeriod.custom)
+          _RangeBar(range: widget.state.range),
         _StatsGrid(state: widget.state),
         const SizedBox(height: AppSpacing.s16),
         _SalesTrendCard(
           period: widget.state.period,
+          range: widget.state.range,
           summary: summary,
           totalUtang: widget.state.totalUtang,
         ),
         const SizedBox(height: AppSpacing.s16),
         _TopProductsCard(
           period: widget.state.period,
+          range: widget.state.range,
           topProducts: widget.state.topProducts,
         ),
+        if (widget.state.period == ReportPeriod.today) ...[
+          const SizedBox(height: AppSpacing.s16),
+          const _CashCountSection(),
+        ],
         const SizedBox(height: AppSpacing.s12),
         TindaSecondaryButton(
           label: localizations.reportsExportPdf,
@@ -248,6 +294,8 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
           icon: Icons.table_view_outlined,
           onPressed: () => unawaited(_exportSalesCsv()),
         ),
+        const SizedBox(height: AppSpacing.s10),
+        _ShareReportTextButton(state: widget.state),
         const SizedBox(height: AppSpacing.s12),
         SizedBox(
           width: double.infinity,
@@ -255,11 +303,11 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
           child: FilledButton.icon(
             onPressed: () {
               unawaited(HapticFeedback.selectionClick());
-              final periodLabel = switch (widget.state.period) {
-                ReportPeriod.today => localizations.reportsToday,
-                ReportPeriod.week => localizations.reportsWeek,
-                ReportPeriod.month => localizations.reportsMonth,
-              };
+              final periodLabel = _periodLabel(
+                localizations,
+                widget.state.period,
+                widget.state.range,
+              );
               unawaited(
                 ChatSheet.show(
                   context,
@@ -411,10 +459,13 @@ class _StatCard extends StatelessWidget {
                 child: child,
               ),
             ),
-            child: Text(
-              value,
+            child: SizedBox(
               key: ValueKey<String>(value),
-              style: AppTypography.title(valueColor),
+              width: double.infinity,
+              child: MoneyText.text(
+                value,
+                style: AppTypography.title(valueColor),
+              ),
             ),
           ),
         ],
@@ -423,21 +474,31 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-String _periodLabel(AppLocalizations localizations, ReportPeriod period) =>
-    switch (period) {
-      ReportPeriod.today => localizations.reportsToday,
-      ReportPeriod.week => localizations.reportsWeek,
-      ReportPeriod.month => localizations.reportsMonth,
-    };
+String _periodLabel(
+  AppLocalizations localizations,
+  ReportPeriod period,
+  DayRange range,
+) => switch (period) {
+  ReportPeriod.today => localizations.reportsToday,
+  ReportPeriod.week => localizations.reportsWeek,
+  ReportPeriod.month => localizations.reportsMonth,
+  ReportPeriod.custom => _formatRangeLabel(localizations, range),
+};
+
+String _rangeFileSuffix(UlatState state) => state.period == ReportPeriod.custom
+    ? '${state.range.first.serial}_${state.range.last.serial}'
+    : state.period.name;
 
 class _SalesTrendCard extends StatelessWidget {
   const _SalesTrendCard({
     required this.period,
+    required this.range,
     required this.summary,
     required this.totalUtang,
   });
 
   final ReportPeriod period;
+  final DayRange range;
   final SalesSummary summary;
   final Money totalUtang;
 
@@ -446,7 +507,7 @@ class _SalesTrendCard extends StatelessWidget {
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
     final hasActivity = summary.saleCount > 0 || totalUtang.isPositive;
-    final periodLabel = _periodLabel(localizations, period);
+    final periodLabel = _periodLabel(localizations, period, range);
     final chartTitle = localizations.reportsChartTitlePeriod(periodLabel);
     final emptyTitle = localizations.reportsEmptyTitlePeriod(periodLabel);
 
@@ -487,8 +548,9 @@ class _SalesTrendCard extends StatelessWidget {
                   ),
                   tween: Tween(begin: 0, end: 1),
                   duration: Duration(
-                    milliseconds:
-                        MediaQuery.disableAnimationsOf(context) ? 0 : 450,
+                    milliseconds: MediaQuery.disableAnimationsOf(context)
+                        ? 0
+                        : 450,
                   ),
                   curve: Curves.easeOutCubic,
                   builder: (context, progress, _) => CustomPaint(
@@ -550,7 +612,14 @@ class _ChartLegendItem extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: AppSpacing.s8),
-        Text(label, style: AppTypography.meta(palette.textMuted)),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.meta(palette.textMuted),
+          ),
+        ),
       ],
     );
   }
@@ -625,16 +694,21 @@ class _SalesTrendPainter extends CustomPainter {
 }
 
 class _TopProductsCard extends StatelessWidget {
-  const _TopProductsCard({required this.period, required this.topProducts});
+  const _TopProductsCard({
+    required this.period,
+    required this.range,
+    required this.topProducts,
+  });
 
   final ReportPeriod period;
+  final DayRange range;
   final List<TopProduct> topProducts;
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
-    final periodLabel = _periodLabel(localizations, period);
+    final periodLabel = _periodLabel(localizations, period, range);
     return TindaCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +738,11 @@ class _TopProductsCard extends StatelessWidget {
                     key: ValueKey<int>(topProducts.length),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      for (var index = 0; index < topProducts.length; index++) ...[
+                      for (
+                        var index = 0;
+                        index < topProducts.length;
+                        index++
+                      ) ...[
                         if (index > 0) const SizedBox(height: AppSpacing.s12),
                         _AnimatedListEntry(
                           index: index,
@@ -744,7 +822,6 @@ class _TopProductRow extends StatelessWidget {
   }
 }
 
-
 class _AnimatedListEntry extends StatelessWidget {
   const _AnimatedListEntry({required this.index, required this.child});
 
@@ -771,564 +848,6 @@ class _AnimatedListEntry extends StatelessWidget {
   }
 }
 
-class _RecentSalesSection extends ConsumerWidget {
-  const _RecentSalesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    final salesAsync = ref.watch(ulatRecentSalesProvider);
-    final sales = salesAsync.value ?? const <SaleRecord>[];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          localizations.ulatRecentSales,
-          style: AppTypography.meta(
-            palette.textMuted,
-            size: 13,
-            weight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.s8),
-        AnimatedSwitcher(
-          duration: Duration(
-            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
-          ),
-          child: sales.isEmpty
-              ? TindaCard(
-                  key: const ValueKey('recent-empty'),
-                  child: Text(
-                    localizations.ulatNoRecentSales,
-                    style: AppTypography.body(palette.textMuted),
-                  ),
-                )
-              : Column(
-                  key: ValueKey<int>(sales.length),
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var index = 0; index < sales.length; index++) ...[
-                      _AnimatedListEntry(
-                        index: index,
-                        child: TindaCard(
-                          onTap: () {
-                            unawaited(HapticFeedback.selectionClick());
-                            _showSaleDetailSheet(context, ref, sales[index]);
-                          },
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        TindaBadge(
-                                          label: _methodLabel(
-                                            localizations,
-                                            sales[index].method,
-                                          ),
-                                          isDanger:
-                                              sales[index].method ==
-                                              PaymentMethod.utang,
-                                        ),
-                                        if (sales[index].customerName != null) ...[
-                                          const SizedBox(width: AppSpacing.s8),
-                                          Expanded(
-                                            child: Text(
-                                              sales[index].customerName!,
-                                              style: AppTypography.meta(
-                                                palette.textMuted,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    const SizedBox(height: AppSpacing.s4),
-                                    Text(
-                                      '${DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(sales[index].createdAtMs).toLocal())} · '
-                                      '${localizations.ulatSaleItemsCount(sales[index].lines.length)}',
-                                      style: AppTypography.meta(
-                                        palette.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s8),
-                              Text(
-                                formatMoney(sales[index].total),
-                                style: AppTypography.bodyStrong(palette.text),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (index < sales.length - 1)
-                        const SizedBox(height: AppSpacing.s8),
-                    ],
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-
-  String _methodLabel(AppLocalizations localizations, PaymentMethod method) =>
-      switch (method) {
-        PaymentMethod.cash => localizations.checkoutMethodCash,
-        PaymentMethod.ewallet => localizations.checkoutMethodEwallet,
-        PaymentMethod.utang => localizations.checkoutMethodUtang,
-      };
-
-  void _showSaleDetailSheet(
-    BuildContext context,
-    WidgetRef ref,
-    SaleRecord sale,
-  ) {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: palette.scrim,
-        builder: (sheetContext) => TindaBottomSheet(
-          title: localizations.ulatSaleDetailTitle,
-          closeTooltip: localizations.commonClose,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final line in sale.lines)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${line.productName} × '
-                          '${formatQuantity(line.quantity, line.unit)} '
-                          '${localizedUnit(localizations, line.unit)}',
-                          style: AppTypography.body(palette.text),
-                        ),
-                      ),
-                      Text(
-                        formatMoney(line.lineTotal),
-                        style: AppTypography.bodyStrong(palette.text),
-                      ),
-                    ],
-                  ),
-                ),
-              Divider(color: palette.border),
-              const SizedBox(height: AppSpacing.s8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    localizations.ulatSaleTotalLabel,
-                    style: AppTypography.bodyStrong(palette.text),
-                  ),
-                  Text(
-                    formatMoney(sale.total),
-                    style: AppTypography.title(palette.primary),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    localizations.ulatSalePaidLabel,
-                    style: AppTypography.meta(palette.textMuted),
-                  ),
-                  Text(
-                    formatMoney(sale.paid),
-                    style: AppTypography.meta(palette.textMuted),
-                  ),
-                ],
-              ),
-              if (sale.ewalletReference != null &&
-                  sale.ewalletReference!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  '${localizations.ulatSaleReferenceLabel}: '
-                  '${sale.ewalletReference}',
-                  style: AppTypography.meta(palette.textMuted),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.s16),
-              TindaSecondaryButton(
-                label: localizations.receiptPrint58mm,
-                icon: Icons.print_outlined,
-                onPressed: () {
-                  unawaited(HapticFeedback.lightImpact());
-                  unawaited(HapticFeedback.lightImpact());
-                  final storeName =
-                      ref.read(_ulatStoreProfileProvider).asData?.value.name ?? '';
-                  unawaited(
-                    ReceiptPreviewSheet.show(
-                      sheetContext,
-                      storeName: storeName.trim().isEmpty
-                          ? localizations.appTitle
-                          : storeName,
-                      lines: [
-                        for (final line in sale.lines)
-                          '${line.productName} x${formatQuantity(line.quantity, line.unit)} '
-                              '${localizedUnit(localizations, line.unit)} = ${formatMoney(line.lineTotal)}',
-                      ],
-                      total: sale.total,
-                      paid: sale.paid,
-                      change: sale.paid.minorUnits >= sale.total.minorUnits
-                          ? sale.paid - sale.total
-                          : Money.zero(sale.total.currency),
-                      paymentLabel: _methodLabel(localizations, sale.method),
-                      timestamp: DateTime.fromMillisecondsSinceEpoch(
-                        sale.createdAtMs,
-                      ).toLocal(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: AppSpacing.s8),
-              TindaTextLinkButton(
-                label: localizations.ulatVoidSaleButton,
-                isDanger: true,
-                onPressed: () {
-                  unawaited(HapticFeedback.selectionClick());
-                  unawaited(_confirmVoidSale(sheetContext, context, ref, sale));
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmVoidSale(
-    BuildContext sheetContext,
-    BuildContext parentContext,
-    WidgetRef ref,
-    SaleRecord sale,
-  ) async {
-    final localizations = AppLocalizations.of(parentContext);
-    final messenger = ScaffoldMessenger.of(parentContext);
-    final confirmed = await showDialog<bool>(
-      context: sheetContext,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.ulatVoidSaleConfirmTitle),
-        content: Text(localizations.ulatVoidSaleConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(localizations.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(localizations.ulatVoidSaleButton),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    final pinService = ref.read(storePinServiceProvider);
-    if (await pinService.hasPin()) {
-      if (!sheetContext.mounted) return;
-      final verified = await verifyStorePin(
-        sheetContext,
-        ref,
-        title: localizations.settingsPinPromptTitle,
-      );
-      if (!verified) return;
-    }
-    if (sheetContext.mounted) {
-      Navigator.of(sheetContext).pop();
-    }
-    await ref.read(saleRepositoryProvider).voidSale(sale.id);
-    messenger.showSnackBar(
-      SnackBar(content: Text(localizations.ulatVoidSaleSuccess)),
-    );
-  }
-}
-
-class _ExpensesSection extends ConsumerWidget {
-  const _ExpensesSection({required this.grossProfit});
-
-  final Money grossProfit;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final localizations = AppLocalizations.of(context);
-    final palette = AppPalette.of(context);
-    final expenses = ref.watch(ulatExpensesProvider).value ?? const <ExpenseEntry>[];
-    final totalExpenses = expenses.fold(
-      Money.zero(grossProfit.currency),
-      (sum, entry) => sum + entry.amount,
-    );
-    final netIncome = grossProfit - totalExpenses;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              localizations.ulatExpensesTitle,
-              style: AppTypography.meta(
-                palette.textMuted,
-                size: 13,
-                weight: FontWeight.w700,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                unawaited(HapticFeedback.lightImpact());
-                unawaited(_showAddExpenseDialog(context, ref));
-              },
-              child: Text(localizations.ulatAddExpenseButton),
-            ),
-          ],
-        ),
-        TindaCard(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  localizations.ulatNetIncomeLabel,
-                  style: AppTypography.body(palette.textMuted),
-                ),
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.2),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                ),
-                child: Text(
-                  formatMoney(netIncome),
-                  key: ValueKey(netIncome.minorUnits),
-                  style: AppTypography.title(
-                    netIncome.isNegative ? palette.danger : palette.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.s8),
-        AnimatedSwitcher(
-          duration: Duration(
-            milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 200,
-          ),
-          child: expenses.isEmpty
-              ? TindaCard(
-                  key: const ValueKey('expenses-empty'),
-                  child: Text(
-                    localizations.ulatNoExpenses,
-                    style: AppTypography.body(palette.textMuted),
-                  ),
-                )
-              : Column(
-                  key: ValueKey<int>(expenses.length),
-                  children: [
-                    for (var index = 0; index < expenses.length; index++) ...[
-                      _AnimatedListEntry(
-                        index: index,
-                        child: TindaCard(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  expenses[index].title,
-                                  style: AppTypography.bodyStrong(palette.text),
-                                ),
-                              ),
-                              Text(
-                                formatMoney(expenses[index].amount),
-                                style: AppTypography.bodyStrong(palette.danger),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.delete_outline,
-                                  color: palette.textMuted,
-                                ),
-                                onPressed: () {
-                                  unawaited(HapticFeedback.selectionClick());
-                                  unawaited(
-                                    ref
-                                        .read(expenseRepositoryProvider)
-                                        .deleteExpense(expenses[index].id),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (index < expenses.length - 1)
-                        const SizedBox(height: AppSpacing.s8),
-                    ],
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _showAddExpenseDialog(BuildContext context, WidgetRef ref) async {
-    final localizations = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final isFilipino = localizations.localeName.startsWith('fil');
-
-    final saveRequest = await showDialog<({String title, Money amount})>(
-      context: context,
-      builder: (dialogContext) =>
-          _AddExpenseDialog(currency: ref.read(storeCurrencyProvider)),
-    );
-    if (saveRequest == null) return;
-
-    final result = await ref.read(expenseRepositoryProvider).addExpense(
-      title: saveRequest.title,
-      amount: saveRequest.amount,
-    );
-    if (!context.mounted) return;
-    switch (result) {
-      case Ok<String, ExpenseFailure>():
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(localizations.ulatExpenseSaved),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      case Err<String, ExpenseFailure>(:final failure):
-        final errorMessage = switch (failure) {
-          ExpenseTitleRequired() => isFilipino
-              ? 'Kailangan ang pangalan ng gastos.'
-              : 'Expense name is required.',
-          ExpenseAmountInvalid() => isFilipino
-              ? 'Hindi wasto ang halaga ng gastos.'
-              : 'Expense amount is invalid.',
-          ExpenseUnavailable() => isFilipino
-              ? 'Hindi ma-save ang gastos ngayon. Subukan ulit.'
-              : 'Could not save expense. Please try again.',
-        };
-        messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
-    }
-  }
-}
-
-class _AddExpenseDialog extends StatefulWidget {
-  const _AddExpenseDialog({required this.currency});
-
-  final Currency currency;
-
-  @override
-  State<_AddExpenseDialog> createState() => _AddExpenseDialogState();
-}
-
-class _AddExpenseDialogState extends State<_AddExpenseDialog> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
-  String? _validationMessage;
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  void _clearValidation() {
-    if (_validationMessage == null) return;
-    setState(() => _validationMessage = null);
-  }
-
-  void _save() {
-    final localizations = AppLocalizations.of(context);
-    final title = _titleController.text.trim();
-    final amount = parseMoneyInput(_amountController.text, widget.currency);
-    if (title.isEmpty || amount == null || !amount.isPositive) {
-      setState(() {
-        _validationMessage = localizations.localeName.startsWith('fil')
-            ? 'Ilagay ang tamang pangalan at halaga ng gastos.'
-            : 'Enter a valid expense name and amount.';
-      });
-      return;
-    }
-    Navigator.of(context).pop((title: title, amount: amount));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    return AlertDialog(
-      scrollable: true,
-      title: Text(localizations.ulatAddExpenseButton),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (_validationMessage case final message?) ...[
-            Text(
-              message,
-              style: AppTypography.meta(
-                AppPalette.of(context).danger,
-                size: 13,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s12),
-          ],
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              labelText: localizations.ulatExpenseTitleLabel,
-            ),
-            textInputAction: TextInputAction.next,
-            onChanged: (_) => _clearValidation(),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          TextField(
-            controller: _amountController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: localizations.ulatExpenseAmountLabel,
-            ),
-            onChanged: (_) => _clearValidation(),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(localizations.commonCancel),
-        ),
-        TextButton(
-          onPressed: _save,
-          child: Text(localizations.commonSave),
-        ),
-      ],
-    );
-  }
-}
-
 class _MilestonesSection extends ConsumerWidget {
   const _MilestonesSection({
     required this.saleCount,
@@ -1350,8 +869,9 @@ class _MilestonesSection extends ConsumerWidget {
       totalRevenueMinor: totalRevenueMinor,
       productCount: productCount,
     );
-    final unlockedCount =
-        milestones.where((milestone) => milestone.isUnlocked).length;
+    final unlockedCount = milestones
+        .where((milestone) => milestone.isUnlocked)
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1359,14 +879,17 @@ class _MilestonesSection extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              isFilipino ? 'Mga Tagumpay' : 'Store Achievements',
-              style: AppTypography.meta(
-                palette.textMuted,
-                size: 13,
-                weight: FontWeight.w700,
+            Flexible(
+              child: Text(
+                isFilipino ? 'Mga Tagumpay' : 'Store Achievements',
+                style: AppTypography.meta(
+                  palette.textMuted,
+                  size: 13,
+                  weight: FontWeight.w700,
+                ),
               ),
             ),
+            const SizedBox(width: AppSpacing.s8),
             TindaBadge(label: '$unlockedCount / ${milestones.length}'),
           ],
         ),
@@ -1375,7 +898,8 @@ class _MilestonesSection extends ConsumerWidget {
           child: Column(
             children: [
               for (var index = 0; index < milestones.length; index++) ...[
-                if (index > 0) Divider(color: palette.border, height: AppSpacing.s16),
+                if (index > 0)
+                  Divider(color: palette.border, height: AppSpacing.s16),
                 _MilestoneRow(
                   milestone: milestones[index],
                   isFilipino: isFilipino,
@@ -1441,7 +965,9 @@ class _MilestoneRow extends StatelessWidget {
                     minHeight: 6,
                     backgroundColor: palette.surfaceMuted,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      milestone.isUnlocked ? palette.primary : palette.borderStrong,
+                      milestone.isUnlocked
+                          ? palette.primary
+                          : palette.borderStrong,
                     ),
                   ),
                 ),

@@ -6,31 +6,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
+import 'package:tinda360/routing/app_router.dart';
+import 'package:tinda360/services/backup_status.dart';
 import 'package:tinda360/services/google_drive_backup_service.dart';
 import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/pin_prompt_dialog.dart';
 
-/// Connection state for Google Drive backup.
 enum BackupStatus {
-  /// No Google account connected yet (`off`).
   notConnected,
 
-  /// Account picker / sign-in is in progress.
   connecting,
 
-  /// Signed in; user chooses between phone data or Drive backup (`choose`).
   choosing,
 
-  /// Backup is connected and active (`on`).
   connected,
 
-  /// Last backup attempt failed; local data remains safe.
   failed,
 }
 
-/// Immutable state for the Settings screen.
 final class SettingsState {
-  /// Creates a settings state.
   const SettingsState({
     required this.backupStatus,
     required this.autoBackupEnabled,
@@ -39,22 +33,16 @@ final class SettingsState {
     this.errorReason,
   });
 
-  /// Current backup connection status.
   final BackupStatus backupStatus;
 
-  /// Whether automatic backup is toggled on (defaults to true, Wi-Fi only).
   final bool autoBackupEnabled;
 
-  /// Connected Google account email, if any.
   final String? accountEmail;
 
-  /// True after "Sync ngayon" or choosing a backup source completes.
   final bool syncedJustNow;
 
-  /// Diagnostic error reason when [backupStatus] is [BackupStatus.failed].
   final String? errorReason;
 
-  /// Returns a copy with updated fields.
   SettingsState copyWith({
     BackupStatus? backupStatus,
     bool? autoBackupEnabled,
@@ -71,25 +59,30 @@ final class SettingsState {
   );
 }
 
-/// Live stream of the store's profile.
 final storeProfileStreamProvider = StreamProvider.autoDispose<StoreProfile>(
   (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
 );
 
-/// Riverpod provider for settings backup and preferences state.
+void _savePreferenceInBackground(Ref ref, Future<void> pendingWrite) {
+  final appLog = ref.read(appLogProvider);
+  unawaited(
+    pendingWrite.catchError((Object error, StackTrace stack) {
+      appLog.error('settings.save_preference', error, stack);
+    }),
+  );
+}
+
 final settingsNotifierProvider =
     NotifierProvider<SettingsNotifier, SettingsState>(
       SettingsNotifier.new,
     );
 
-/// Live disk size in bytes for the active store's SQLite database.
 final databaseSizeBytesProvider = FutureProvider.autoDispose<int>((ref) async {
   ref.watch(appDatabaseProvider);
   final file = await ref.watch(databaseFileProvider)();
   return measureDatabaseBytes(file);
 });
 
-/// Compacts the active database and returns the new size in bytes.
 Future<int> compactStoreDatabase(Ref ref) async {
   final database = ref.read(appDatabaseProvider);
   await compactDatabase(database);
@@ -98,24 +91,59 @@ Future<int> compactStoreDatabase(Ref ref) async {
   return measureDatabaseBytes(file);
 }
 
-/// Creates a compacted `VACUUM INTO` snapshot and uploads it to Google Drive.
+Future<void> _uploadQueue = Future<void>.value();
+
 Future<BackupSyncResult> uploadStoreDatabase(
   Ref ref, {
   bool allowPrompt = false,
+}) {
+  final upload = _uploadQueue.then(
+    (_) => _uploadStoreDatabaseNow(ref, allowPrompt: allowPrompt),
+  );
+  _uploadQueue = upload.then<void>(
+    (_) {},
+    onError: (Object error) => debugPrint('drive upload failed: $error'),
+  );
+  return upload;
+}
+
+Future<BackupSyncResult> _uploadStoreDatabaseNow(
+  Ref ref, {
+  required bool allowPrompt,
 }) async {
   final database = ref.read(appDatabaseProvider);
+  final storeId =
+      ref.read(storeRegistryProvider).value?.activeStoreId ?? 'default';
   final file = await ref.read(databaseFileProvider)();
   final snapshotFile = File('${file.path}.snapshot');
   try {
     await createCompactedBackupSnapshot(database, snapshotFile);
-    final uploadTarget = snapshotFile.existsSync() ? snapshotFile : file;
-    final storeId =
-        ref.read(storeRegistryProvider).value?.activeStoreId ?? 'default';
-    return await ref.read(driveBackupServiceProvider).uploadDatabase(
-      uploadTarget,
-      storeId: storeId,
-      allowPrompt: allowPrompt,
-    );
+    if (!snapshotFile.existsSync()) {
+      return const BackupSyncFailed(reason: 'backup_snapshot_missing');
+    }
+    final uploadResult = await ref
+        .read(driveBackupServiceProvider)
+        .uploadDatabase(
+          snapshotFile,
+          storeId: storeId,
+          accountEmail: await ref
+              .read(backupPreferencesProvider)
+              .readConnectedEmail(),
+          allowPrompt: allowPrompt,
+        );
+    if (uploadResult is BackupSyncSuccess) {
+      try {
+        await ref
+            .read(backupStatusStoreProvider)
+            .writeLastSuccessfulBackup(ref.read(clockProvider).now());
+      } on Object catch (error, stack) {
+        ref.read(appLogProvider).error('backup.status', error, stack);
+      }
+    }
+    return uploadResult;
+  } on Exception catch (error, stack) {
+    ref.read(appLogProvider).error('backup.upload', error, stack);
+    return const BackupSyncFailed(reason: 'backup_snapshot_failed');
   } finally {
     if (snapshotFile.existsSync()) {
       snapshotFile.deleteSync();
@@ -123,28 +151,49 @@ Future<BackupSyncResult> uploadStoreDatabase(
   }
 }
 
-/// Downloads the Google Drive backup, replaces the local SQLite file, and
-/// invalidates [appDatabaseProvider] so repositories reopen the restored DB.
 Future<BackupSyncResult> restoreStoreDatabase(
   Ref ref, {
   bool allowPrompt = false,
 }) async {
   final file = await ref.read(databaseFileProvider)();
-  final db = ref.read(appDatabaseProvider);
-  await db.close();
+  final downloadedFile = File('${file.path}.downloaded');
   final storeId =
       ref.read(storeRegistryProvider).value?.activeStoreId ?? 'default';
-  final result = await ref.read(driveBackupServiceProvider).downloadDatabaseTo(
-    file,
-    storeId: storeId,
-    allowPrompt: allowPrompt,
-  );
-  if (result is BackupSyncSuccess) {
-    _deleteIfExists('${file.path}-wal');
-    _deleteIfExists('${file.path}-shm');
+  try {
+    final result = await ref
+        .read(driveBackupServiceProvider)
+        .downloadDatabaseTo(
+          downloadedFile,
+          storeId: storeId,
+          accountEmail: await ref
+              .read(backupPreferencesProvider)
+              .readConnectedEmail(),
+          allowPrompt: allowPrompt,
+        );
+    if (result is! BackupSyncSuccess) return result;
+    try {
+      await ref
+          .read(localBackupServiceProvider)
+          .importDatabaseFile(
+            sourceFile: downloadedFile,
+            keepSourceFile: false,
+            targetFile: file,
+            closeActiveDatabase: () async {
+              await leaveScreensReadingDatabase(ref.read(appRouterProvider));
+              await ref.read(appDatabaseProvider).close();
+            },
+            invalidateDatabase: () => ref.invalidate(appDatabaseProvider),
+          );
+    } on FormatException {
+      return const BackupSyncFailed(reason: 'invalid_backup_file');
+    } on Exception catch (error, stack) {
+      ref.read(appLogProvider).error('backup.restore', error, stack);
+      return const BackupSyncFailed(reason: 'restore_failed');
+    }
+    return result;
+  } finally {
+    _deleteIfExists(downloadedFile.path);
   }
-  ref.invalidate(appDatabaseProvider);
-  return result;
 }
 
 void _deleteIfExists(String path) {
@@ -154,13 +203,13 @@ void _deleteIfExists(String path) {
   }
 }
 
-/// Manages backup connection state and auto-backup preference.
 class SettingsNotifier extends Notifier<SettingsState> {
   bool _isAutoSyncing = false;
+  Future<void> _savedPreferencesLoaded = Future<void>.value();
 
   @override
   SettingsState build() {
-    unawaited(_loadAutoBackupPreference());
+    _savedPreferencesLoaded = _loadAutoBackupPreference();
     return const SettingsState(
       backupStatus: BackupStatus.notConnected,
       autoBackupEnabled: true,
@@ -185,7 +234,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     }
   }
 
-  /// Starts Google Drive backup connection (`off` -> `choose`).
   Future<void> connectBackup() async {
     if (state.backupStatus == BackupStatus.connecting) return;
     state = state.copyWith(
@@ -195,7 +243,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
     final result = await ref.read(driveBackupServiceProvider).signIn();
     switch (result) {
       case BackupAuthSuccess(:final email):
-        unawaited(
+        _savePreferenceInBackground(
+          ref,
           ref.read(backupPreferencesProvider).writeConnectedEmail(email),
         );
         state = state.copyWith(
@@ -216,7 +265,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     }
   }
 
-  /// Completes the `choose` step by uploading local phone data (`choose` -> `on`).
   Future<void> choosePhoneData() async {
     state = state.copyWith(
       backupStatus: BackupStatus.connecting,
@@ -225,7 +273,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
     final result = await uploadStoreDatabase(ref, allowPrompt: true);
     switch (result) {
       case BackupSyncSuccess():
-        unawaited(
+        _savePreferenceInBackground(
+          ref,
           ref.read(backupPreferencesProvider).writeBackupConnected(true),
         );
         state = state.copyWith(
@@ -246,7 +295,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     }
   }
 
-  /// Completes the `choose` step by restoring Drive backup (`choose` -> `on`).
   Future<void> chooseRestoreBackup() async {
     state = state.copyWith(
       backupStatus: BackupStatus.connecting,
@@ -255,7 +303,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
     final result = await restoreStoreDatabase(ref, allowPrompt: true);
     switch (result) {
       case BackupSyncSuccess():
-        unawaited(
+        _savePreferenceInBackground(
+          ref,
           ref.read(backupPreferencesProvider).writeBackupConnected(true),
         );
         state = state.copyWith(
@@ -276,7 +325,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     }
   }
 
-  /// Triggers an immediate sync (`on` state).
   Future<void> syncNow() async {
     if (state.backupStatus != BackupStatus.connected) return;
     state = state.copyWith(
@@ -304,16 +352,16 @@ class SettingsNotifier extends Notifier<SettingsState> {
     }
   }
 
-  /// Retries backup after a failure.
   Future<void> retryBackup() => connectBackup();
 
-  /// Disconnects the current backup account (`on` -> `off`).
   Future<void> disconnectBackup() async {
     await ref.read(driveBackupServiceProvider).signOut();
-    unawaited(
+    _savePreferenceInBackground(
+      ref,
       ref.read(backupPreferencesProvider).writeBackupConnected(false),
     );
-    unawaited(
+    _savePreferenceInBackground(
+      ref,
       ref.read(backupPreferencesProvider).writeConnectedEmail(null),
     );
     state = SettingsState(
@@ -322,16 +370,17 @@ class SettingsNotifier extends Notifier<SettingsState> {
     );
   }
 
-  /// Updates and persists the auto-backup toggle.
   void toggleAutoBackup(bool enabled) {
     state = state.copyWith(autoBackupEnabled: enabled);
-    unawaited(
+    _savePreferenceInBackground(
+      ref,
       ref.read(backupPreferencesProvider).writeAutoBackupEnabled(enabled),
     );
   }
 
-  /// Quietly uploads the database after a sale when connected and enabled.
   Future<void> triggerAutoBackupIfEnabled() async {
+    await _savedPreferencesLoaded;
+    if (!ref.mounted) return;
     if (state.backupStatus != BackupStatus.connected) return;
     if (!state.autoBackupEnabled) return;
     if (_isAutoSyncing) return;
@@ -349,12 +398,10 @@ class SettingsNotifier extends Notifier<SettingsState> {
   }
 }
 
-/// Active app locale; defaults to English (`en`), switchable to Taglish (`fil`).
 final localeProvider = NotifierProvider<LocaleNotifier, Locale>(
   LocaleNotifier.new,
 );
 
-/// Manages switching between English (`en`) and Filipino (`fil`).
 class LocaleNotifier extends Notifier<Locale> {
   @override
   Locale build() {
@@ -363,21 +410,34 @@ class LocaleNotifier extends Notifier<Locale> {
   }
 
   Future<void> _loadSavedLocale() async {
-    final savedCode = await ref.read(backupPreferencesProvider).readLocaleCode();
+    final savedCode = await ref
+        .read(backupPreferencesProvider)
+        .readLocaleCode();
     if (!ref.mounted || savedCode == null) return;
     if (savedCode == 'en' || savedCode == 'fil') {
       state = Locale(savedCode);
     }
   }
 
-  /// Switches the active locale by language code (`'fil'` or `'en'`).
   void setLanguageCode(String code) {
     state = Locale(code);
-    unawaited(ref.read(backupPreferencesProvider).writeLocaleCode(code));
+    _savePreferenceInBackground(
+      ref,
+      ref.read(backupPreferencesProvider).writeLocaleCode(code),
+    );
   }
 }
 
-/// Prompts for the 4-digit store PIN with biometric unlock and recovery reset.
+Future<bool> confirmStorePinIfSet(
+  BuildContext context,
+  WidgetRef ref, {
+  required String title,
+}) async {
+  if (!await ref.read(storePinServiceProvider).hasPin()) return true;
+  if (!context.mounted) return false;
+  return verifyStorePin(context, ref, title: title);
+}
+
 Future<bool> verifyStorePin(
   BuildContext context,
   WidgetRef ref, {
@@ -396,12 +456,15 @@ Future<bool> verifyStorePin(
     onAuthenticateBiometric: canUseBiometric
         ? () => biometricService.authenticate(localizedReason: title)
         : null,
+    onRemoveDamagedPin: !canUseBiometric && connectedEmail == null
+        ? pinService.clearPin
+        : null,
     onResetWithGoogle: () async {
       final authResult = await ref.read(driveBackupServiceProvider).signIn();
       return switch (authResult) {
         BackupAuthSuccess(:final email) =>
-          connectedEmail == null ||
-          email.toLowerCase() == connectedEmail.toLowerCase(),
+          connectedEmail != null &&
+              email.toLowerCase() == connectedEmail.toLowerCase(),
         _ => false,
       };
     },

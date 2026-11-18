@@ -14,9 +14,7 @@ import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/id_generator.dart';
 
-/// Reads and writes store expense entries.
 final class ExpenseRepository {
-  /// Creates the repository.
   ExpenseRepository({
     required AppDatabase db,
     required Clock clock,
@@ -90,7 +88,6 @@ WHERE id = ? AND is_deleted = 0
     }
   }
 
-  /// Watches active expenses in [range], ordered newest first.
   Stream<List<ExpenseEntry>> watchInRange(DayRange range) {
     return Stream<List<ExpenseEntry>>.multi((controller) {
       var isClosed = false;
@@ -146,7 +143,6 @@ WHERE id = ? AND is_deleted = 0
         .toList();
   }
 
-  /// Records a new expense with [title] and [amount], returning its id.
   @useResult
   Future<Result<String, ExpenseFailure>> addExpense({
     required String title,
@@ -183,11 +179,19 @@ WHERE id = ? AND is_deleted = 0
     }
   }
 
-  /// Soft-deletes the expense with [expenseId].
-  Future<void> deleteExpense(String expenseId) async {
-    await _ensureTable();
-    final nowMs = _clock.now().toUtc().millisecondsSinceEpoch;
-    await _database.customStatement(_softDeleteExpenseSql, [nowMs, expenseId]);
+  Future<bool> deleteExpense(String expenseId) async {
+    try {
+      await _ensureTable();
+      final nowMs = _clock.now().toUtc().millisecondsSinceEpoch;
+      await _database.customStatement(_softDeleteExpenseSql, [
+        nowMs,
+        expenseId,
+      ]);
+    } on Exception catch (error, stack) {
+      _log.error('expense.delete', error, stack);
+      return false;
+    }
     _notifyChange();
+    return true;
   }
 }

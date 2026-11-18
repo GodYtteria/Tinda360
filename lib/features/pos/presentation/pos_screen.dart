@@ -8,32 +8,42 @@ import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/features/pos/data/popular_sort.dart';
+import 'package:tinda360/features/pos/data/product_popularity_provider.dart';
+import 'package:tinda360/features/pos/presentation/backup_warning_banner.dart';
+import 'package:tinda360/features/pos/presentation/bantay_chip.dart';
+import 'package:tinda360/features/pos/presentation/cart_price_override_provider.dart';
+import 'package:tinda360/features/pos/presentation/cart_quantity_dialog.dart';
 import 'package:tinda360/features/pos/presentation/checkout_sheet.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_logo.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
+import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Watches the store profile for the POS header subtitle.
 final posStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
   (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
 );
 
-/// Watches active stocked products for the POS catalog.
-final posProductsProvider = StreamProvider.autoDispose<List<StockedProduct>>(
-  (ref) => ref.watch(productRepositoryProvider).watchActive(),
-);
+final posProductsProvider = StreamProvider.autoDispose<List<StockedProduct>>((
+  ref,
+) {
+  final unitsSold = ref.watch(productPopularityProvider).value ?? const {};
+  return ref
+      .watch(productRepositoryProvider)
+      .watchActive()
+      .map((products) => sortProductsByPopularity(products, unitsSold));
+});
 
-/// Main POS selling screen with search, category filter, cart bar, and AI FAB.
 class PosScreen extends ConsumerStatefulWidget {
-  /// Creates the POS screen.
   const PosScreen({
     required this.onOpenSettings,
     required this.onOpenAiChat,
@@ -41,13 +51,10 @@ class PosScreen extends ConsumerStatefulWidget {
     this.showStorageWarning = false,
   });
 
-  /// Opens the settings screen.
   final VoidCallback onOpenSettings;
 
-  /// Opens the Tinda AI chat sheet.
   final VoidCallback onOpenAiChat;
 
-  /// Displays a non-blocking storage warning banner when true.
   final bool showStorageWarning;
 
   @override
@@ -58,7 +65,25 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedCategory;
+  static const double _minHeightForGreeting = 700;
+
+  static const double _compactChromeMaxWidth = 400;
   bool _showGreeting = true;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual<AsyncValue<List<StockedProduct>>>(
+      posProductsProvider,
+      (previousProducts, nextProducts) {
+        final liveProducts = nextProducts.value;
+        if (liveProducts != null) {
+          ref.read(posCartProvider.notifier).keepWithinStock(liveProducts);
+        }
+      },
+      fireImmediately: true,
+    );
+  }
 
   @override
   void dispose() {
@@ -98,28 +123,27 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     PosCartNotifier cartNotifier,
     AppLocalizations localizations,
   ) async {
-    final code = await BarcodeScannerSheet.show(context);
-    if (code == null || !mounted) return;
-    final match = products.where((item) => item.product.barcode == code);
-    if (match.isNotEmpty) {
-      final product = match.first.product;
-      cartNotifier.increment(product.id);
-      unawaited(HapticFeedback.mediumImpact());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✓ ${product.name}'),
-          duration: const Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-    unawaited(HapticFeedback.heavyImpact());
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(localizations.scannerProductNotFound(code)),
-        behavior: SnackBarBehavior.floating,
-      ),
+    await BarcodeScannerSheet.show(
+      context,
+      continuous: true,
+      onCode: (code) {
+        if (!mounted) return false;
+        final match = products.where((item) => item.product.barcode == code);
+        if (match.isNotEmpty) {
+          if (addToCartOrWarn(context, cartNotifier, match.first)) {
+            unawaited(HapticFeedback.mediumImpact());
+          }
+          return true;
+        }
+        unawaited(HapticFeedback.heavyImpact());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizations.scannerProductNotFound(code)),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return true;
+      },
     );
   }
 
@@ -149,6 +173,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final currency = ref.watch(storeCurrencyProvider);
     final products = productsAsync.value ?? const <StockedProduct>[];
     final hasCartItems = cart.isNotEmpty;
+    final screenSize = MediaQuery.sizeOf(context);
+    final useCompactChrome =
+        screenSize.width < _compactChromeMaxWidth ||
+        AdaptiveLayout.textScaleOf(context) > AdaptiveLayout.largeTextThreshold;
+    final showGreetingBubble =
+        _showGreeting &&
+        screenSize.height >= _minHeightForGreeting &&
+        AdaptiveLayout.textScaleOf(context) <=
+            AdaptiveLayout.largeTextThreshold;
 
     return Scaffold(
       backgroundColor: palette.background,
@@ -160,7 +193,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 leading: const TindaLogoMark(size: 32, onDarkHeader: true),
                 title: const TindaWordmark(),
                 subtitle: storeName,
+                belowSubtitle: useCompactChrome
+                    ? const Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: BantayChip(),
+                      )
+                    : null,
                 actions: [
+                  if (!useCompactChrome) const BantayChip(),
                   TindaIconButton(
                     svgAsset: 'assets/icons/scan_barcode.svg',
                     tooltip: localizations.posScanBarcode,
@@ -183,66 +223,92 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ),
               ),
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: _PosBody(
-                      productsAsync: productsAsync,
-                      filteredProducts: _filterProducts(products),
-                      categories: _extractCategories(products),
-                      selectedCategory: _selectedCategory,
-                      showStorageWarning: widget.showStorageWarning,
-                      hasCartItems: hasCartItems,
-                      cart: cart,
-                      onCategorySelected: (category) =>
-                          setState(() => _selectedCategory = category),
-                      onIncrement: cartNotifier.increment,
-                      onDecrement: (id) {
-                        final quantity = cart[id];
-                        cartNotifier.decrement(id);
-                        if (quantity != null &&
-                            quantity.milli <= Quantity.milliPerUnit) {
-                          final name = products
-                              .where((item) => item.product.id == id)
-                              .map((item) => item.product.name)
-                              .cast<String?>()
-                              .firstWhere(
-                                (value) => value != null,
-                                orElse: () => null,
-                              );
-                          final messenger = ScaffoldMessenger.of(context)
-                            ..clearSnackBars();
-                          var undoPressed = false;
-                          final controller = messenger.showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 4),
-                              content: Text(
-                                name == null ? 'Removed' : 'Removed $name',
-                              ),
-                              action: SnackBarAction(
-                                label: localizations.localeName.startsWith('fil')
-                                    ? 'Ibalik'
-                                    : 'Undo',
-                                onPressed: () {
-                                  undoPressed = true;
-                                  cartNotifier.increment(id);
-                                },
-                              ),
-                            ),
-                          );
-                          Timer(const Duration(seconds: 5), () {
-                            if (!undoPressed) controller.close();
-                          });
-                        }
-                      },
+                child: TindaScreenBody(
+                  child: _PosBody(
+                    productsAsync: productsAsync,
+                    filteredProducts: _filterProducts(products),
+                    categories: _extractCategories(products),
+                    selectedCategory: _selectedCategory,
+                    showStorageWarning: widget.showStorageWarning,
+                    onOpenSettings: widget.onOpenSettings,
+                    hasCartItems: hasCartItems,
+                    cart: cart,
+                    onCategorySelected: (category) =>
+                        setState(() => _selectedCategory = category),
+                    onIncrement: (item) =>
+                        addToCartOrWarn(context, cartNotifier, item),
+                    onSetQuantity: (item) => unawaited(
+                      askAndSetCartQuantity(
+                        context,
+                        cartNotifier: cartNotifier,
+                        stocked: item,
+                        currentQuantity:
+                            cart[item.product.id] ?? const Quantity.whole(1),
+                      ),
                     ),
+                    onDecrement: (id) {
+                      final quantity = cart[id];
+                      cartNotifier.decrement(id);
+                      if (quantity != null &&
+                          quantity.milli <= Quantity.milliPerUnit) {
+                        final name = products
+                            .where((item) => item.product.id == id)
+                            .map((item) => item.product.name)
+                            .cast<String?>()
+                            .firstWhere(
+                              (value) => value != null,
+                              orElse: () => null,
+                            );
+                        final messenger = ScaffoldMessenger.of(context)
+                          ..clearSnackBars();
+                        messenger.showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 4),
+                            persist: false,
+                            content: Text(
+                              localizations.posRemovedFromCart(name ?? '—'),
+                            ),
+                            action: SnackBarAction(
+                              label: localizations.commonUndo,
+                              onPressed: () {
+                                final liveItem =
+                                    (ref.read(posProductsProvider).value ??
+                                            products)
+                                        .where(
+                                          (entry) => entry.product.id == id,
+                                        )
+                                        .firstOrNull;
+                                final restored =
+                                    liveItem != null &&
+                                    cartNotifier.setQuantity(
+                                      id,
+                                      quantity,
+                                      available: liveItem.sellCap,
+                                    );
+                                if (!restored && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        localizations.posOutOfStock(
+                                          name ?? '—',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
             ],
           ),
-          if (_showGreeting)
+          if (showGreetingBubble)
             Positioned(
               right: 88,
               bottom: hasCartItems ? 96 : 20,
@@ -259,7 +325,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             ),
           Positioned(
             right: AppSpacing.screenHorizontal,
-            bottom: hasCartItems ? 92 : AppSpacing.s16,
+            bottom: hasCartItems
+                ? TindaScreenBody.floatingBottomPadding(context)
+                : AppSpacing.s16,
             child: TindaAiFab(
               onPressed: widget.onOpenAiChat,
               tooltip: localizations.chatOpenTindaAi,
@@ -278,9 +346,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 builder: (context, scale, child) =>
                     Transform.scale(scale: scale, child: child),
                 child: TindaCartBar(
-                  itemsLabel: localizations.posCartItems(cartNotifier.itemCount),
+                  itemsLabel: localizations.posCartItems(
+                    cartNotifier.itemCount,
+                  ),
                   totalLabel: formatMoney(
-                    cartNotifier.totalFor(products, currency),
+                    cartNotifier.totalFor(
+                      products,
+                      currency,
+                      priceOverrides: ref.watch(cartPriceOverrideProvider),
+                    ),
                   ),
                   payLabel: localizations.posPayButton,
                   onPay: () {
@@ -296,6 +370,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 }
 
+const double _cartBarExtraClearance = 72;
+
 class _PosBody extends StatelessWidget {
   const _PosBody({
     required this.productsAsync,
@@ -303,10 +379,12 @@ class _PosBody extends StatelessWidget {
     required this.categories,
     required this.selectedCategory,
     required this.showStorageWarning,
+    required this.onOpenSettings,
     required this.hasCartItems,
     required this.cart,
     required this.onCategorySelected,
     required this.onIncrement,
+    required this.onSetQuantity,
     required this.onDecrement,
   });
 
@@ -315,10 +393,12 @@ class _PosBody extends StatelessWidget {
   final List<String> categories;
   final String? selectedCategory;
   final bool showStorageWarning;
+  final VoidCallback onOpenSettings;
   final bool hasCartItems;
   final Map<String, Quantity> cart;
   final ValueChanged<String?> onCategorySelected;
-  final ValueChanged<String> onIncrement;
+  final ValueChanged<StockedProduct> onIncrement;
+  final ValueChanged<StockedProduct> onSetQuantity;
   final ValueChanged<String> onDecrement;
 
   @override
@@ -376,8 +456,9 @@ class _PosBody extends StatelessWidget {
                     child: _PosProductRow(
                       item: filteredProducts[index],
                       cartQuantity: cart[filteredProducts[index].product.id],
-                      onAdd: () =>
-                          onIncrement(filteredProducts[index].product.id),
+                      onAdd: () => onIncrement(filteredProducts[index]),
+                      onSetQuantity: () =>
+                          onSetQuantity(filteredProducts[index]),
                       onRemove: () =>
                           onDecrement(filteredProducts[index].product.id),
                     ),
@@ -391,7 +472,8 @@ class _PosBody extends StatelessWidget {
               AppSpacing.screenHorizontal,
               AppSpacing.s14,
               AppSpacing.screenHorizontal,
-              hasCartItems ? 168 : 96,
+              TindaScreenBody.floatingBottomPadding(context) +
+                  (hasCartItems ? _cartBarExtraClearance : 0),
             ),
             children: [
               if (showStorageWarning) ...[
@@ -402,6 +484,7 @@ class _PosBody extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s12),
               ],
+              BackupWarningBanner(onOpenSettings: onOpenSettings),
               if (categories.isNotEmpty) ...[
                 _CategoryChipsRow(
                   categories: categories,
@@ -527,7 +610,6 @@ class _CategoryChipsRow extends StatelessWidget {
   }
 }
 
-
 class _AnimatedPosRow extends StatelessWidget {
   const _AnimatedPosRow({
     required this.index,
@@ -563,12 +645,14 @@ class _PosProductRow extends StatelessWidget {
     required this.item,
     required this.cartQuantity,
     required this.onAdd,
+    required this.onSetQuantity,
     required this.onRemove,
   });
 
   final StockedProduct item;
   final Quantity? cartQuantity;
   final VoidCallback onAdd;
+  final VoidCallback onSetQuantity;
   final VoidCallback onRemove;
 
   @override
@@ -576,9 +660,9 @@ class _PosProductRow extends StatelessWidget {
     final palette = AppPalette.of(context);
     final localizations = AppLocalizations.of(context);
     final product = item.product;
-    final stockText = localizations.posStockLabel(
-      formatQuantity(item.stock, product.unit),
-    );
+    final stockText = item.tracksStock
+        ? localizations.posStockLabel(formatQuantity(item.stock, product.unit))
+        : localizations.inventoryNoCountLabel;
     final subtitle =
         '${formatMoney(product.price)} ${localizedUnit(localizations, product.unit)} · $stockText';
 
@@ -592,30 +676,41 @@ class _PosProductRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  product.name,
-                  style: AppTypography.bodyStrong(palette.text),
+            child: AdaptiveBadges(
+              content: InkWell(
+                onTap: onSetQuantity,
+                borderRadius: BorderRadius.circular(AppRadii.chip),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.name,
+                      style: AppTypography.bodyStrong(palette.text),
+                    ),
+                    const SizedBox(height: AppSpacing.s4),
+                    Text(
+                      subtitle,
+                      style: AppTypography.meta(palette.textMuted),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  subtitle,
-                  style: AppTypography.meta(palette.textMuted),
-                ),
+              ),
+              badges: [
+                if (!item.isSellable)
+                  TindaBadge(
+                    label: localizations.posOutOfStockBadge,
+                    isWarning: true,
+                  )
+                else if (item.isLowOnStock)
+                  TindaBadge(
+                    label: localizations.posLowStockBadge,
+                    isWarning: true,
+                  ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.s8),
-          if (item.isLowOnStock) ...[
-            TindaBadge(
-              label: localizations.posLowStockBadge,
-              isWarning: true,
-            ),
-            const SizedBox(width: AppSpacing.s8),
-          ],
           if (cartQuantity != null) ...[
             _RemoveFromCartButton(
               tooltip: localizations.posRemoveFromCart(product.name),
@@ -630,6 +725,7 @@ class _PosProductRow extends StatelessWidget {
                 ? null
                 : formatQuantity(cartQuantity!, product.unit),
             onPressed: onAdd,
+            isInStock: item.isSellable,
             palette: palette,
           ),
         ],
@@ -687,12 +783,14 @@ class _AddToCartButton extends StatelessWidget {
     required this.tooltip,
     required this.countLabel,
     required this.onPressed,
+    required this.isInStock,
     required this.palette,
   });
 
   final String tooltip;
   final String? countLabel;
   final VoidCallback onPressed;
+  final bool isInStock;
   final AppPalette palette;
 
   @override
@@ -703,7 +801,7 @@ class _AddToCartButton extends StatelessWidget {
       child: Tooltip(
         message: tooltip,
         child: Material(
-          color: palette.primary,
+          color: isInStock ? palette.primary : palette.surfaceMuted,
           borderRadius: BorderRadius.circular(AppRadii.button),
           child: InkWell(
             onTap: () {
@@ -724,7 +822,11 @@ class _AddToCartButton extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add, size: 20, color: palette.onPrimary),
+                    Icon(
+                      Icons.add,
+                      size: 20,
+                      color: isInStock ? palette.onPrimary : palette.textMuted,
+                    ),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 150),
                       transitionBuilder: (child, animation) => ScaleTransition(

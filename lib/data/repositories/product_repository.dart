@@ -2,10 +2,12 @@ import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
 import 'package:tinda360/core/app_log.dart';
+import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
+import 'package:tinda360/core/catalog/stock_history_entry.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/failures/product_failure.dart';
 import 'package:tinda360/core/money/currency.dart';
@@ -14,9 +16,19 @@ import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/id_generator.dart';
 
-/// The single write path for products and their stock.
+Future<Quantity> readProductStock(AppDatabase db, String productId) async {
+  final row = await db
+      .customSelect(
+        'SELECT COALESCE(SUM(qty_delta_milli), 0) AS stock_milli '
+        'FROM stock_movements WHERE product_id = ? AND is_deleted = 0',
+        variables: [Variable.withString(productId)],
+        readsFrom: {db.stockMovements},
+      )
+      .getSingle();
+  return Quantity.milli(row.read<int>('stock_milli'));
+}
+
 final class ProductRepository {
-  /// Creates the repository.
   ProductRepository({
     required AppDatabase db,
     required Clock clock,
@@ -37,7 +49,8 @@ final class ProductRepository {
 
   static const String _activeWithStockSql = '''
 SELECT p.id, p.name, p.unit, p.price_minor, p.cost_minor, p.category_id,
-       p.barcode, p.low_stock_at_milli,
+       p.barcode, p.low_stock_at_milli, p.utang_price_minor,
+       p.tracks_stock, p.expiry_day_serial,
        COALESCE((SELECT SUM(m.qty_delta_milli) FROM stock_movements m
                  WHERE m.product_id = p.id AND m.is_deleted = 0), 0)
          AS stock_milli
@@ -46,8 +59,6 @@ WHERE p.is_deleted = 0
 ORDER BY p.name COLLATE NOCASE
 ''';
 
-  /// Every active product with its current stock, re-emitted on every
-  /// committed change to products or stock.
   Stream<List<StockedProduct>> watchActive() => _db
       .customSelect(
         _activeWithStockSql,
@@ -56,10 +67,43 @@ ORDER BY p.name COLLATE NOCASE
       .watch()
       .map((rows) => [for (final row in rows) _toStocked(row)]);
 
-  /// Adds a product and, if given, its starting stock, in one transaction.
+  static const String _stockHistorySql = '''
+SELECT id, created_at, reason, qty_delta_milli, stock_after_milli
+FROM (
+  SELECT m.id, m.created_at, m.reason, m.qty_delta_milli, m.rowid AS row_order,
+         SUM(m.qty_delta_milli) OVER (
+           ORDER BY m.created_at, m.rowid
+         ) AS stock_after_milli
+  FROM stock_movements m
+  WHERE m.product_id = ? AND m.is_deleted = 0
+)
+ORDER BY created_at DESC, row_order DESC
+''';
+
+  Stream<List<StockHistoryEntry>> watchStockHistory(String productId) => _db
+      .customSelect(
+        _stockHistorySql,
+        variables: [Variable.withString(productId)],
+        readsFrom: {_db.stockMovements},
+      )
+      .watch()
+      .map(
+        (rows) => [
+          for (final row in rows)
+            StockHistoryEntry(
+              id: row.read<String>('id'),
+              createdAtMs: row.read<int>('created_at'),
+              reason: row.read<String>('reason'),
+              change: Quantity.milli(row.read<int>('qty_delta_milli')),
+              stockAfter: Quantity.milli(row.read<int>('stock_after_milli')),
+            ),
+        ],
+      );
+
   @useResult
   Future<Result<String, ProductFailure>> create(ProductDraft draft) async {
-    final invalid = _validate(draft) ?? _validateStock(draft.unit, draft.initialStock);
+    final invalid =
+        _validate(draft) ?? _validateStock(draft.unit, draft.initialStock);
     if (invalid != null) return Err(invalid);
 
     final id = _ids.next();
@@ -67,21 +111,26 @@ ORDER BY p.name COLLATE NOCASE
     try {
       await _db.transaction(() async {
         await _requireBarcodeFree(draft.barcode, exceptId: null);
-        await _db.into(_db.products).insert(
-          ProductsCompanion.insert(
-            id: id,
-            createdAt: nowMs,
-            updatedAt: nowMs,
-            name: draft.name.trim(),
-            unit: draft.unit.storageName,
-            priceMinor: draft.price.minorUnits,
-            costMinor: draft.cost.minorUnits,
-            categoryId: Value(draft.categoryId),
-            barcode: Value(_cleanBarcode(draft.barcode)),
-            lowStockAtMilli: Value(draft.lowStockAt?.milli),
-          ),
-        );
-        if (draft.initialStock.isPositive) {
+        await _db
+            .into(_db.products)
+            .insert(
+              ProductsCompanion.insert(
+                id: id,
+                createdAt: nowMs,
+                updatedAt: nowMs,
+                name: draft.name.trim(),
+                unit: draft.unit.storageName,
+                priceMinor: draft.price.minorUnits,
+                costMinor: draft.cost.minorUnits,
+                categoryId: Value(draft.categoryId),
+                barcode: Value(_cleanBarcode(draft.barcode)),
+                lowStockAtMilli: Value(draft.lowStockAt?.milli),
+                utangPriceMinor: Value(draft.utangPrice?.minorUnits),
+                tracksStock: Value(draft.tracksStock),
+                expiryDaySerial: Value(draft.expiryDay?.serial),
+              ),
+            );
+        if (draft.tracksStock && draft.initialStock.isPositive) {
           await _insertMovement(id, draft.initialStock, 'initial', nowMs);
         }
       });
@@ -94,22 +143,24 @@ ORDER BY p.name COLLATE NOCASE
     }
   }
 
-  /// Saves edits to an existing product. Stock is not changed here.
   @useResult
   Future<Result<void, ProductFailure>> update(
     String productId,
-    ProductDraft draft,
-  ) async {
+    ProductDraft draft, {
+    Quantity stockChange = Quantity.zero,
+    String stockReason = 'adjust',
+  }) async {
     final invalid = _validate(draft);
     if (invalid != null) return Err(invalid);
 
     try {
       final changed = await _db.transaction(() async {
         await _requireBarcodeFree(draft.barcode, exceptId: productId);
-        return _db.customUpdate(
+        final updatedRows = await _db.customUpdate(
           'UPDATE products SET name = ?, unit = ?, price_minor = ?, '
           'cost_minor = ?, category_id = ?, barcode = ?, '
-          'low_stock_at_milli = ?, updated_at = ?, '
+          'low_stock_at_milli = ?, utang_price_minor = ?, tracks_stock = ?, '
+          'expiry_day_serial = ?, updated_at = ?, '
           'row_revision = row_revision + 1 '
           'WHERE id = ? AND is_deleted = 0',
           variables: [
@@ -120,12 +171,24 @@ ORDER BY p.name COLLATE NOCASE
             Variable<String>(draft.categoryId),
             Variable<String>(_cleanBarcode(draft.barcode)),
             Variable<int>(draft.lowStockAt?.milli),
+            Variable<int>(draft.utangPrice?.minorUnits),
+            Variable.withBool(draft.tracksStock),
+            Variable<int>(draft.expiryDay?.serial),
             Variable.withInt(_nowMs()),
             Variable.withString(productId),
           ],
           updates: {_db.products},
           updateKind: UpdateKind.update,
         );
+        if (updatedRows == 0) return 0;
+        if (stockChange != Quantity.zero) {
+          await _applyStockChange(productId, stockChange, stockReason);
+        }
+        final stockAfter = await readProductStock(_db, productId);
+        if (!draft.unit.allowsFraction && !stockAfter.isWhole) {
+          throw const _ProductRejected(ProductQuantityInvalid());
+        }
+        return updatedRows;
       });
       if (changed == 0) return Err(ProductNotFound(productId));
       return const Ok(null);
@@ -137,12 +200,15 @@ ORDER BY p.name COLLATE NOCASE
     }
   }
 
-  /// Adds [amount] to a product's stock.
   @useResult
   Future<Result<void, ProductFailure>> restock(
     String productId,
-    Quantity amount,
-  ) async {
+    Quantity amount, {
+    Money? newCost,
+  }) async {
+    if (newCost != null && newCost.isNegative) {
+      return const Err(ProductAmountInvalid());
+    }
     try {
       await _db.transaction(() async {
         final unit = await _requireActiveUnit(productId);
@@ -150,7 +216,9 @@ ORDER BY p.name COLLATE NOCASE
         if (invalid != null || !amount.isPositive) {
           throw const _ProductRejected(ProductQuantityInvalid());
         }
-        await _insertMovement(productId, amount, 'restock', _nowMs());
+        final nowMs = _nowMs();
+        await _insertMovement(productId, amount, 'restock', nowMs);
+        await _applyLatestCost(productId, newCost, nowMs);
       });
       return const Ok(null);
     } on _ProductRejected catch (rejection) {
@@ -161,7 +229,6 @@ ORDER BY p.name COLLATE NOCASE
     }
   }
 
-  /// Corrects stock by [delta] after a physical count (can be negative).
   @useResult
   Future<Result<void, ProductFailure>> adjust(
     String productId,
@@ -185,22 +252,22 @@ ORDER BY p.name COLLATE NOCASE
     }
   }
 
-  /// Records a stock adjustment of [delta] with [reason] in a transaction.
   @useResult
   Future<Result<void, ProductFailure>> adjustStock(
     String productId,
     Quantity delta, {
     String reason = 'adjust',
+    Money? newCost,
   }) async {
     if (delta == Quantity.zero) return const Err(ProductQuantityInvalid());
+    if (newCost != null && newCost.isNegative) {
+      return const Err(ProductAmountInvalid());
+    }
     final movementReason = reason == 'adjustment' ? 'adjust' : reason;
     try {
       await _db.transaction(() async {
-        final unit = await _requireActiveUnit(productId);
-        if (!unit.allowsFraction && !delta.isWhole) {
-          throw const _ProductRejected(ProductQuantityInvalid());
-        }
-        await _insertMovement(productId, delta, movementReason, _nowMs());
+        await _applyStockChange(productId, delta, movementReason);
+        await _applyLatestCost(productId, newCost, _nowMs());
       });
       return const Ok(null);
     } on _ProductRejected catch (rejection) {
@@ -211,7 +278,43 @@ ORDER BY p.name COLLATE NOCASE
     }
   }
 
-  /// Hides a product. Past sales keep pointing to it.
+  Future<void> _applyLatestCost(
+    String productId,
+    Money? newCost,
+    int nowMs,
+  ) async {
+    if (newCost == null) return;
+    await _db.customUpdate(
+      'UPDATE products SET cost_minor = ?, updated_at = ?, '
+      'row_revision = row_revision + 1 WHERE id = ? AND is_deleted = 0',
+      variables: [
+        Variable.withInt(newCost.minorUnits),
+        Variable.withInt(nowMs),
+        Variable.withString(productId),
+      ],
+      updates: {_db.products},
+      updateKind: UpdateKind.update,
+    );
+  }
+
+  Future<void> _applyStockChange(
+    String productId,
+    Quantity delta,
+    String movementReason,
+  ) async {
+    final unit = await _requireActiveUnit(productId);
+    if (!unit.allowsFraction && !delta.isWhole) {
+      throw const _ProductRejected(ProductQuantityInvalid());
+    }
+    if (delta.isNegative) {
+      final stockAfter = await readProductStock(_db, productId) + delta;
+      if (stockAfter.isNegative) {
+        throw const _ProductRejected(ProductQuantityInvalid());
+      }
+    }
+    await _insertMovement(productId, delta, movementReason, _nowMs());
+  }
+
   @useResult
   Future<Result<void, ProductFailure>> softDelete(String productId) async {
     try {
@@ -238,6 +341,9 @@ ORDER BY p.name COLLATE NOCASE
   ProductFailure? _validate(ProductDraft draft) {
     if (draft.name.trim().isEmpty) return const ProductNameRequired();
     if (draft.price.isNegative || draft.cost.isNegative) {
+      return const ProductAmountInvalid();
+    }
+    if (draft.utangPrice?.isNegative ?? false) {
       return const ProductAmountInvalid();
     }
     final lowStockAt = draft.lowStockAt;
@@ -288,16 +394,18 @@ ORDER BY p.name COLLATE NOCASE
     Quantity delta,
     String reason,
     int nowMs,
-  ) => _db.into(_db.stockMovements).insert(
-    StockMovementsCompanion.insert(
-      id: _ids.next(),
-      createdAt: nowMs,
-      updatedAt: nowMs,
-      productId: productId,
-      qtyDeltaMilli: delta.milli,
-      reason: reason,
-    ),
-  );
+  ) => _db
+      .into(_db.stockMovements)
+      .insert(
+        StockMovementsCompanion.insert(
+          id: _ids.next(),
+          createdAt: nowMs,
+          updatedAt: nowMs,
+          productId: productId,
+          qtyDeltaMilli: delta.milli,
+          reason: reason,
+        ),
+      );
 
   StockedProduct _toStocked(QueryRow row) => StockedProduct(
     product: Product(
@@ -310,6 +418,15 @@ ORDER BY p.name COLLATE NOCASE
       barcode: row.readNullable<String>('barcode'),
       lowStockAt: switch (row.readNullable<int>('low_stock_at_milli')) {
         final int milli => Quantity.milli(milli),
+        null => null,
+      },
+      utangPrice: switch (row.readNullable<int>('utang_price_minor')) {
+        final int minor => Money(minor, _currency),
+        null => null,
+      },
+      tracksStock: row.read<bool>('tracks_stock'),
+      expiryDay: switch (row.readNullable<int>('expiry_day_serial')) {
+        final int serial => LocalDay(serial),
         null => null,
       },
     ),
@@ -328,7 +445,6 @@ ORDER BY p.name COLLATE NOCASE
   int _nowMs() => _clock.now().toUtc().millisecondsSinceEpoch;
 }
 
-/// Aborts a transaction with a typed failure; caught in the same method.
 final class _ProductRejected implements Exception {
   const _ProductRejected(this.failure);
 

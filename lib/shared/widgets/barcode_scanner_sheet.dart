@@ -1,29 +1,33 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/shared/widgets/scan_debouncer.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Modal bottom sheet wrapping [MobileScanner] with a manual barcode fallback
-/// for devices without a camera.
 class BarcodeScannerSheet extends StatefulWidget {
-  /// Creates the scanner sheet.
-  const BarcodeScannerSheet({super.key});
+  const BarcodeScannerSheet({super.key, this.continuous = false, this.onCode});
 
-  /// Opens the scanner sheet and returns the scanned/entered barcode string.
-  static Future<String?> show(BuildContext context) =>
-      showModalBottomSheet<String>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: AppPalette.of(context).scrim,
-        builder: (_) => const BarcodeScannerSheet(),
-      );
+  final bool continuous;
+  final bool Function(String code)? onCode;
+
+  static Future<String?> show(
+    BuildContext context, {
+    bool continuous = false,
+    bool Function(String code)? onCode,
+  }) => showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: AppPalette.of(context).scrim,
+    builder: (_) => BarcodeScannerSheet(continuous: continuous, onCode: onCode),
+  );
 
   @override
   State<BarcodeScannerSheet> createState() => _BarcodeScannerSheetState();
@@ -34,6 +38,8 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
   final TextEditingController _manualController = TextEditingController();
   bool _hasPopped = false;
   bool _torchEnabled = false;
+  final ScanDebouncer _debouncer = ScanDebouncer();
+  int _scannedCount = 0;
 
   @override
   void dispose() {
@@ -57,8 +63,26 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
   void _submitCode(String rawCode) {
     final trimmed = rawCode.trim();
     if (_hasPopped || trimmed.isEmpty || !mounted) return;
+    if (widget.continuous) {
+      _acceptContinuous(trimmed);
+      return;
+    }
     _hasPopped = true;
     Navigator.of(context).pop(trimmed);
+  }
+
+  void _acceptContinuous(String code) {
+    if (!_debouncer.accept(code)) return;
+    unawaited(HapticFeedback.lightImpact());
+    setState(() {
+      _scannedCount++;
+    });
+    _manualController.clear();
+    final keepScanning = widget.onCode?.call(code) ?? false;
+    if (!keepScanning && mounted) {
+      _hasPopped = true;
+      Navigator.of(context).pop(code);
+    }
   }
 
   @override
@@ -146,6 +170,13 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
               ),
             ),
           ),
+          if (widget.continuous) ...[
+            const SizedBox(height: AppSpacing.s8),
+            Text(
+              localizations.scannerScannedCount(_scannedCount),
+              style: AppTypography.bodyStrong(palette.text),
+            ),
+          ],
           const SizedBox(height: AppSpacing.s14),
           TindaTextInput(
             label: localizations.productBarcodeLabel,
@@ -164,7 +195,6 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
     );
   }
 }
-
 
 class _ScanLine extends StatefulWidget {
   const _ScanLine();

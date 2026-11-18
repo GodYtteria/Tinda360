@@ -1,6 +1,4 @@
-/// A store achievement milestone with English and Filipino labels.
 final class StoreMilestone {
-  /// Creates a [StoreMilestone].
   const new({
     required this.id,
     required this.titleEn,
@@ -10,34 +8,26 @@ final class StoreMilestone {
     required this.isUnlocked,
   });
 
-  /// Stable identifier for this milestone.
   final String id;
 
-  /// English display title.
   final String titleEn;
 
-  /// Filipino display title.
   final String titleFil;
 
-  /// Current progress value toward [target].
   final int current;
 
-  /// Target value required to unlock this milestone.
   final int target;
 
-  /// Whether the milestone has been reached.
   final bool isUnlocked;
 }
 
-/// Computes the five offline store milestones from current store totals.
 List<StoreMilestone> computeStoreMilestones({
   required int saleCount,
   required int totalRevenueMinor,
   required int productCount,
 }) {
   final normalizedSaleCount = saleCount < 0 ? 0 : saleCount;
-  final normalizedRevenueMinor =
-      totalRevenueMinor < 0 ? 0 : totalRevenueMinor;
+  final normalizedRevenueMinor = totalRevenueMinor < 0 ? 0 : totalRevenueMinor;
   final normalizedProductCount = productCount < 0 ? 0 : productCount;
 
   return <StoreMilestone>[

@@ -12,6 +12,7 @@ import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
 import 'package:tinda360/l10n/app_localizations_en.dart';
+import 'package:tinda360/l10n/app_localizations_fil.dart';
 import 'package:tinda360/services/report_pdf_service.dart';
 
 void main() {
@@ -19,6 +20,22 @@ void main() {
 
   final localizations = AppLocalizationsEn();
   final today = LocalDay.fromLocal(DateTime(2026, 11, 17));
+
+  test('PDF table and signature strings are localized for Filipino', () {
+    final filipino = AppLocalizationsFil();
+    expect(localizations.reportPdfMetricHeader, 'Metric');
+    expect(
+      localizations.reportPdfPreparedBy('Tindahan'),
+      'Tindahan - Prepared by Store Owner',
+    );
+    expect(filipino.reportPdfMetricHeader, isNot('Metric'));
+    expect(filipino.reportPdfProductHeader, isNot('Product'));
+    expect(
+      filipino.reportPdfPreparedBy('Tindahan'),
+      isNot(contains('Prepared')),
+    );
+    expect(filipino.reportsProfitCard, 'Tubo');
+  });
 
   test('buildReportPdf produces valid PDF bytes for empty UlatState', () async {
     final emptyState = UlatState(
@@ -39,6 +56,7 @@ void main() {
       periodLabel: localizations.reportsToday,
       state: emptyState,
       localizations: localizations,
+      totalExpenses: const Money.zero(Currency.php),
       logoBytes: Uint8List(0),
     );
 
@@ -82,6 +100,7 @@ void main() {
         periodLabel: localizations.reportsWeek,
         state: populatedState,
         localizations: localizations,
+        totalExpenses: const Money(2500, Currency.php),
       );
 
       expect(bytes, isNotEmpty);

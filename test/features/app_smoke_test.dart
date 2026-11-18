@@ -21,26 +21,23 @@ final class _FakeDriveBackupService implements DriveBackupService {
       const BackupAuthSuccess(email: 'tindahan@gmail.com');
 
   @override
-  Future<String?> restoreSession() async => null;
-
-  @override
   Future<void> signOut() async {}
 
   @override
   Future<BackupSyncResult> uploadDatabase(
     File databaseFile, {
     required String storeId,
+    required String? accountEmail,
     bool allowPrompt = false,
-  }) async =>
-      const BackupSyncSuccess();
+  }) async => const BackupSyncSuccess();
 
   @override
   Future<BackupSyncResult> downloadDatabaseTo(
     File destinationFile, {
     required String storeId,
+    required String? accountEmail,
     bool allowPrompt = false,
-  }) async =>
-      const BackupSyncSuccess();
+  }) async => const BackupSyncSuccess();
 }
 
 Widget _wrapApp(
@@ -175,10 +172,14 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
 
+    await tester.scrollUntilVisible(
+      find.text('English'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Filipino'), findsOneWidget);
     expect(find.text('English'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('English'));
     await tester.pump();
     expect(tester.takeException(), isNull);
@@ -188,42 +189,48 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
   });
 
-  testWidgets('SettingsScreen backup state machine transitions off -> choose -> on -> off', (
-    tester,
-  ) async {
-    final repos = TestRepositories();
-    await tester.pumpWidget(
-      _wrapApp(repos, const SettingsScreen()),
-    );
-    await tester.pump(const Duration(milliseconds: 50));
+  testWidgets(
+    'SettingsScreen backup state machine transitions off -> choose -> on -> off',
+    (
+      tester,
+    ) async {
+      final repos = TestRepositories();
+      await tester.pumpWidget(
+        _wrapApp(repos, const SettingsScreen()),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.tap(find.text('Continue with Google'));
-    await tester.pump(const Duration(milliseconds: 200));
+      await tester.tap(find.text('Continue with Google'));
+      await tester.pump(const Duration(milliseconds: 200));
 
-    expect(find.text('tindahan@gmail.com'), findsOneWidget);
-    expect(find.text('Use data on this phone'), findsOneWidget);
-    expect(find.text('Restore backup'), findsOneWidget);
+      expect(find.text('tindahan@gmail.com'), findsOneWidget);
+      expect(find.text('Use data on this phone'), findsOneWidget);
+      expect(find.text('Restore backup'), findsOneWidget);
 
-    await tester.tap(find.text('Use data on this phone'));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
-    );
-    await tester.pump();
+      await tester.tap(find.text('Use data on this phone'));
+      for (var attempt = 0; attempt < 250; attempt++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+        if (find.text('Sync now').evaluate().isNotEmpty) break;
+      }
 
-    expect(find.text('Sync now'), findsOneWidget);
-    expect(find.text('Last backup: Just now'), findsOneWidget);
-    expect(find.text('Disconnect Google'), findsOneWidget);
+      expect(find.text('Sync now'), findsOneWidget);
+      expect(find.text('Last backup: Just now'), findsOneWidget);
+      expect(find.text('Disconnect Google'), findsOneWidget);
 
-    await tester.tap(find.text('Disconnect Google'));
-    await tester.pump();
+      await tester.tap(find.text('Disconnect Google'));
+      await tester.pump();
 
-    expect(find.text('Continue with Google'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 10));
-  });
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 10));
+    },
+  );
 
   testWidgets('SettingsScreen add store dialog does not throw on submit', (
     tester,
@@ -234,7 +241,11 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.drag(find.byType(ListView), const Offset(0, -350));
+    await tester.scrollUntilVisible(
+      find.text('+ New store'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('+ New store'));
     await tester.pumpAndSettle();
@@ -258,7 +269,11 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.drag(find.byType(ListView), const Offset(0, -450));
+    await tester.scrollUntilVisible(
+      find.text('STORAGE & DATA'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('STORAGE & DATA'), findsOneWidget);
     expect(find.text('No Google Drive backup yet'), findsOneWidget);

@@ -7,44 +7,39 @@ import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/customers/customer_draft.dart';
 import 'package:tinda360/core/failures/customer_failure.dart';
 import 'package:tinda360/core/money/money.dart';
+import 'package:tinda360/data/repositories/customer_repository.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
+import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Whether the user is paying the full utang balance or a partial amount.
 enum UtangPaymentMode {
-  /// Pays the entire outstanding balance.
   full,
 
-  /// Pays a user-entered partial amount.
   partial,
 }
 
-/// Computes the preview balance after [payment] is applied to [currentBalance].
 Money computeRemainingBalance(Money currentBalance, Money? payment) {
   if (payment == null || !payment.isPositive) return currentBalance;
-  if (payment > currentBalance) return Money.zero(currentBalance.currency);
+  if (payment > currentBalance) return currentBalance;
   return currentBalance - payment;
 }
 
-/// Bottom sheet for recording a suki payment or adding a new suki.
 class UtangPaySheet extends ConsumerStatefulWidget {
-  /// Opens the sheet in payment mode for [balance].
   const UtangPaySheet.pay({required CustomerBalance balance, super.key})
     : _balance = balance;
 
-  /// Opens the sheet in new-suki creation mode.
   const UtangPaySheet.newSuki({super.key}) : _balance = null;
 
   final CustomerBalance? _balance;
 
-  /// Presents the payment sheet for [balance].
   static Future<void> showPay(
     BuildContext context,
     CustomerBalance balance,
@@ -56,9 +51,8 @@ class UtangPaySheet extends ConsumerStatefulWidget {
     builder: (_) => UtangPaySheet.pay(balance: balance),
   );
 
-  /// Presents the new-suki sheet.
-  static Future<void> showNewSuki(BuildContext context) =>
-      showModalBottomSheet<void>(
+  static Future<String?> showNewSuki(BuildContext context) =>
+      showModalBottomSheet<String>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -83,8 +77,6 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
   String? _limitError;
   String? _generalError;
 
-  bool get _isPayMode => widget._balance != null;
-
   @override
   void dispose() {
     _amountController.dispose();
@@ -97,8 +89,16 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    if (_isPayMode) {
-      return _buildPaySheet(context, localizations, widget._balance!);
+    final openedWith = widget._balance;
+    if (openedWith != null) {
+      final liveBalance =
+          ref
+              .watch(utangBalancesProvider)
+              .value
+              ?.where((entry) => entry.customer.id == openedWith.customer.id)
+              .firstOrNull ??
+          openedWith;
+      return _buildPaySheet(context, localizations, liveBalance);
     }
     return _buildNewSukiSheet(context, localizations);
   }
@@ -284,12 +284,23 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
     if (_isSubmitting) return;
     unawaited(HapticFeedback.mediumImpact());
     final currency = balance.balance.currency;
-    final amount = _paymentMode == UtangPaymentMode.full
-        ? balance.balance
-        : parseMoneyInput(_amountController.text, currency);
+    final isFullPayment = _paymentMode == UtangPaymentMode.full;
+    final repository = ref.read(customerRepositoryProvider);
+    _isSubmitting = true;
+    final Money? amount;
+    try {
+      amount = isFullPayment
+          ? await _currentBalanceOf(repository, balance)
+          : parseMoneyInput(_amountController.text, currency);
+    } on Object {
+      _isSubmitting = false;
+      rethrow;
+    }
+    if (!mounted) return;
 
     if (amount == null || !amount.isPositive) {
       setState(() {
+        _isSubmitting = false;
         _amountError = localizations.failureCustomerAmountInvalid;
       });
       return;
@@ -301,9 +312,7 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
       _generalError = null;
     });
 
-    final result = await ref
-        .read(customerRepositoryProvider)
-        .recordPayment(balance.customer.id, amount);
+    final result = await repository.recordPayment(balance.customer.id, amount);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -314,14 +323,26 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
       case Err(:final failure):
         final message = localizedFailureMessage(localizations, failure);
         setState(() {
-          if (failure is PaymentExceedsBalance ||
-              failure is CustomerAmountInvalid) {
+          if (!isFullPayment &&
+              (failure is PaymentExceedsBalance ||
+                  failure is CustomerAmountInvalid)) {
             _amountError = message;
           } else {
             _generalError = message;
           }
         });
     }
+  }
+
+  Future<Money> _currentBalanceOf(
+    CustomerRepository repository,
+    CustomerBalance snapshot,
+  ) async {
+    final balances = await repository.watchBalances().first;
+    final current = balances.where(
+      (entry) => entry.customer.id == snapshot.customer.id,
+    );
+    return current.isEmpty ? snapshot.balance : current.first.balance;
   }
 
   Future<void> _submitNewSuki(AppLocalizations localizations) async {
@@ -361,8 +382,8 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
     setState(() => _isSubmitting = false);
 
     switch (result) {
-      case Ok():
-        Navigator.of(context).pop();
+      case Ok(:final value):
+        Navigator.of(context).pop(value);
       case Err(:final failure):
         final message = localizedFailureMessage(localizations, failure);
         setState(() {
@@ -373,6 +394,14 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
               _limitError = message;
             case CustomerNotFound() ||
                 PaymentExceedsBalance() ||
+                CustomerHasBalance() ||
+                LedgerEntryNotFound() ||
+                LedgerEntryAlreadyDeleted() ||
+                LedgerEntryNotDeletable() ||
+                LedgerDeleteWouldGoNegative() ||
+                InterestRateNotSet() ||
+                InterestNoBalance() ||
+                InterestAmountChanged() ||
                 CustomerStoreUnavailable():
               _generalError = message;
           }
@@ -413,9 +442,12 @@ class _CurrentBalanceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.s12),
-          Text(
-            formatMoney(balance.balance),
-            style: AppTypography.title(palette.danger),
+          Flexible(
+            child: MoneyText(
+              balance.balance,
+              alignment: AlignmentDirectional.centerEnd,
+              style: AppTypography.title(palette.danger),
+            ),
           ),
         ],
       ),
@@ -455,12 +487,16 @@ class _NewBalancePreview extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            formatMoney(amount),
-            style: AppTypography.bodyStrong(
-              palette.text,
-              size: 16,
-              weight: FontWeight.w700,
+          const SizedBox(width: AppSpacing.s8),
+          Flexible(
+            child: MoneyText(
+              amount,
+              alignment: AlignmentDirectional.centerEnd,
+              style: AppTypography.bodyStrong(
+                palette.text,
+                size: 16,
+                weight: FontWeight.w700,
+              ),
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -6,14 +7,18 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-/// Persists and verifies a salted SHA-256 hash of the 4-digit store PIN.
 final class StorePinService {
-  /// Creates a [StorePinService] backed by `tinda360_pin.json` in the app
-  /// support directory, or in [directoryProvider] when overridden for tests.
-  new({Future<Directory> Function()? directoryProvider})
-    : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
+  new({
+    Future<Directory> Function()? directoryProvider,
+    DateTime Function()? now,
+  }) : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory,
+       _now = now ?? DateTime.now;
 
   static const String _fileName = 'tinda360_pin.json';
+  static const String _attemptsFileName = 'tinda360_pin_attempts.json';
+  static const int _freeAttempts = 5;
+  static const Duration _firstLockout = Duration(seconds: 30);
+  static const Duration _maxLockout = Duration(hours: 1);
   static const int _saltByteLength = 16;
   static const int _hashRounds = 1000;
   static const String _recoveryAlphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -22,18 +27,37 @@ final class StorePinService {
   static final RegExp _fourDigitPattern = RegExp(r'^\d{4}$');
 
   final Future<Directory> Function() _directoryProvider;
+  final DateTime Function() _now;
+  DateTime? _unsavedLockoutUntil;
 
-  /// Returns whether a valid store PIN is currently configured.
-  Future<bool> hasPin() async {
-    final storedRecord = await _readRecord();
-    return storedRecord != null;
+  Future<Duration?> lockoutRemaining() async {
+    final now = _now();
+    final unsavedRemaining = _unsavedLockoutUntil?.difference(now);
+    if (unsavedRemaining != null && unsavedRemaining > Duration.zero) {
+      return unsavedRemaining;
+    }
+    final attempts = await _readAttempts();
+    final remaining = attempts.lockedUntil?.difference(now);
+    if (remaining == null || remaining <= Duration.zero) return null;
+    if (remaining <= _maxLockout) return remaining;
+    await _saveAttemptsOrLockBriefly(
+      failures: attempts.failures,
+      lockedUntil: now.add(_maxLockout),
+    );
+    return _maxLockout;
   }
 
-  /// Validates that [pin] is exactly 4 digits, stores salted SHA-256 hashes
-  /// of both the PIN and a newly generated one-time recovery code in
-  /// `tinda360_pin.json`, and returns the formatted recovery code (`T360-XXXX`).
-  ///
-  /// Throws a [FormatException] if [pin] is not 4 ASCII digits.
+  Future<bool> isPinDamaged() async {
+    final pinFile = await _resolveFile();
+    if (!pinFile.existsSync()) return false;
+    return await _readRecord() == null;
+  }
+
+  Future<bool> hasPin() async {
+    final pinFile = await _resolveFile();
+    return pinFile.existsSync();
+  }
+
   Future<String> setPin(String pin) async {
     if (!_fourDigitPattern.hasMatch(pin)) {
       throw const FormatException('Store PIN must be exactly 4 digits.');
@@ -42,7 +66,9 @@ final class StorePinService {
     final saltHex = _generateSaltHex();
     final pinHashHex = _hashSecret(saltHex: saltHex, secret: pin);
     final formattedRecoveryCode = _generateRecoveryCode();
-    final normalizedRecoveryCode = _normalizeRecoveryCode(formattedRecoveryCode);
+    final normalizedRecoveryCode = _normalizeRecoveryCode(
+      formattedRecoveryCode,
+    );
     final recoverySaltHex = _generateSaltHex();
     final recoveryHashHex = _hashSecret(
       saltHex: recoverySaltHex,
@@ -57,15 +83,19 @@ final class StorePinService {
       'recoverySalt': recoverySaltHex,
       'recoveryHash': recoveryHashHex,
     });
-    await pinFile.writeAsString(payload, flush: true);
+    final stagedFile = File('${pinFile.path}.tmp');
+    await stagedFile.writeAsString(payload, flush: true);
+    await stagedFile.rename(pinFile.path);
+    await _recordGuess(succeeded: true);
     return formattedRecoveryCode;
   }
 
-  /// Returns whether [pin] matches the currently stored store PIN.
   Future<bool> verifyPin(String pin) async {
     if (!_fourDigitPattern.hasMatch(pin)) {
       return false;
     }
+
+    if (await lockoutRemaining() != null) return false;
 
     final storedRecord = await _readRecord();
     if (storedRecord == null) {
@@ -76,16 +106,17 @@ final class StorePinService {
       saltHex: storedRecord.saltHex,
       secret: pin,
     );
-    return _constantTimeEquals(candidateHash, storedRecord.hashHex);
+    final matches = _constantTimeEquals(candidateHash, storedRecord.hashHex);
+    await _recordGuess(succeeded: matches);
+    return matches;
   }
 
-  /// Verifies [code] against the stored one-time recovery code hash, clearing
-  /// the stored PIN if valid.
   Future<bool> resetWithRecoveryCode(String code) async {
     final normalizedCode = _normalizeRecoveryCode(code);
     if (normalizedCode.isEmpty) {
       return false;
     }
+    if (await lockoutRemaining() != null) return false;
 
     final storedRecord = await _readRecord();
     final recoverySaltHex = storedRecord?.recoverySaltHex;
@@ -99,19 +130,133 @@ final class StorePinService {
       secret: normalizedCode,
     );
     if (!_constantTimeEquals(candidateHash, recoveryHashHex)) {
+      await _recordGuess(succeeded: false);
       return false;
     }
 
+    await _recordGuess(succeeded: true);
     await clearPin();
     return true;
   }
 
-  /// Removes the stored PIN file if one exists.
   Future<void> clearPin() async {
     final pinFile = await _resolveFile();
     if (pinFile.existsSync()) {
       await pinFile.delete();
     }
+  }
+
+  Future<void> _recordGuess({required bool succeeded}) async {
+    final attemptsFile = await _resolveAttemptsFile();
+    if (succeeded) {
+      _unsavedLockoutUntil = null;
+      try {
+        if (attemptsFile.existsSync()) await attemptsFile.delete();
+      } on FileSystemException catch (error, stack) {
+        developer.log(
+          'pin attempts reset failed',
+          error: error,
+          stackTrace: stack,
+        );
+      }
+      return;
+    }
+    final failures = (await _readAttempts()).failures + 1;
+    DateTime? lockedUntil;
+    if (failures >= _freeAttempts) {
+      final doublings = failures - _freeAttempts;
+      final lockout = doublings >= 7
+          ? _maxLockout
+          : _firstLockout * (1 << doublings);
+      lockedUntil = _now().add(
+        lockout > _maxLockout ? _maxLockout : lockout,
+      );
+    }
+    await _saveAttemptsOrLockBriefly(
+      failures: failures,
+      lockedUntil: lockedUntil,
+    );
+  }
+
+  Future<void> _saveAttemptsOrLockBriefly({
+    required int failures,
+    required DateTime? lockedUntil,
+  }) async {
+    try {
+      await _writeAttempts(failures: failures, lockedUntil: lockedUntil);
+    } on FileSystemException catch (error, stack) {
+      developer.log(
+        'pin attempts save failed',
+        error: error,
+        stackTrace: stack,
+      );
+      _unsavedLockoutUntil = _now().add(_firstLockout);
+    }
+  }
+
+  Future<void> _writeAttempts({
+    required int failures,
+    required DateTime? lockedUntil,
+  }) async {
+    final attemptsFile = await _resolveAttemptsFile();
+    await attemptsFile.parent.create(recursive: true);
+    final stagedFile = File('${attemptsFile.path}.tmp');
+    await stagedFile.writeAsString(
+      jsonEncode(<String, int?>{
+        'failures': failures,
+        'lockedUntilMs': lockedUntil?.millisecondsSinceEpoch,
+      }),
+      flush: true,
+    );
+    await stagedFile.rename(attemptsFile.path);
+  }
+
+  Future<_PinAttempts> _readAttempts() async {
+    final attemptsFile = await _resolveAttemptsFile();
+    if (!attemptsFile.existsSync()) return const _PinAttempts(failures: 0);
+    try {
+      final decoded = jsonDecode(await attemptsFile.readAsString());
+      if (decoded is Map<String, dynamic> && decoded['failures'] is int) {
+        final lockedUntilMs = decoded['lockedUntilMs'];
+        return _PinAttempts(
+          failures: decoded['failures'] as int,
+          lockedUntil: lockedUntilMs is int
+              ? DateTime.fromMillisecondsSinceEpoch(lockedUntilMs)
+              : null,
+        );
+      }
+    } on FormatException {
+      return _corruptAttempts(attemptsFile);
+    } on FileSystemException catch (error, stack) {
+      developer.log(
+        'pin attempts read failed',
+        error: error,
+        stackTrace: stack,
+      );
+      return _PinAttempts(
+        failures: _freeAttempts,
+        lockedUntil: _now().add(_firstLockout),
+      );
+    }
+    return _corruptAttempts(attemptsFile);
+  }
+
+  _PinAttempts _corruptAttempts(File attemptsFile) {
+    DateTime lockStart;
+    try {
+      lockStart = attemptsFile.lastModifiedSync();
+    } on FileSystemException {
+      lockStart = _now();
+    }
+    return _PinAttempts(
+      failures: _freeAttempts,
+      lockedUntil: lockStart.add(_firstLockout),
+    );
+  }
+
+  Future<File> _resolveAttemptsFile() async {
+    final directory = await _directoryProvider();
+    return File(path.join(directory.path, _attemptsFileName));
   }
 
   Future<File> _resolveFile() async {
@@ -207,22 +352,70 @@ final class StorePinService {
 
   Uint8List _sha256(List<int> inputBytes) {
     const roundConstants = <int>[
-      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
-      0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
-      0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
-      0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-      0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
-      0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
-      0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
-      0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-      0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+      0x428a2f98,
+      0x71374491,
+      0xb5c0fbcf,
+      0xe9b5dba5,
+      0x3956c25b,
+      0x59f111f1,
+      0x923f82a4,
+      0xab1c5ed5,
+      0xd807aa98,
+      0x12835b01,
+      0x243185be,
+      0x550c7dc3,
+      0x72be5d74,
+      0x80deb1fe,
+      0x9bdc06a7,
+      0xc19bf174,
+      0xe49b69c1,
+      0xefbe4786,
+      0x0fc19dc6,
+      0x240ca1cc,
+      0x2de92c6f,
+      0x4a7484aa,
+      0x5cb0a9dc,
+      0x76f988da,
+      0x983e5152,
+      0xa831c66d,
+      0xb00327c8,
+      0xbf597fc7,
+      0xc6e00bf3,
+      0xd5a79147,
+      0x06ca6351,
+      0x14292967,
+      0x27b70a85,
+      0x2e1b2138,
+      0x4d2c6dfc,
+      0x53380d13,
+      0x650a7354,
+      0x766a0abb,
+      0x81c2c92e,
+      0x92722c85,
+      0xa2bfe8a1,
+      0xa81a664b,
+      0xc24b8b70,
+      0xc76c51a3,
+      0xd192e819,
+      0xd6990624,
+      0xf40e3585,
+      0x106aa070,
+      0x19a4c116,
+      0x1e376c08,
+      0x2748774c,
+      0x34b0bcb5,
+      0x391c0cb3,
+      0x4ed8aa4a,
+      0x5b9cca4f,
+      0x682e6ff3,
+      0x748f82ee,
+      0x78a5636f,
+      0x84c87814,
+      0x8cc70208,
+      0x90befffa,
+      0xa4506ceb,
+      0xbef9a3f7,
+      0xc67178f2,
     ];
 
     var hash0 = 0x6a09e667;
@@ -284,7 +477,11 @@ final class StorePinService {
             _rotateRight(wordE, 25);
         final choice = (wordE & wordF) ^ ((~wordE) & wordG);
         final temp1 =
-            (wordH + upperSigma1 + choice + roundConstants[round] + schedule[round]) &
+            (wordH +
+                upperSigma1 +
+                choice +
+                roundConstants[round] +
+                schedule[round]) &
             0xffffffff;
         final upperSigma0 =
             _rotateRight(wordA, 2) ^
@@ -342,4 +539,11 @@ final class _PinRecord {
   final String hashHex;
   final String? recoverySaltHex;
   final String? recoveryHashHex;
+}
+
+final class _PinAttempts {
+  const _PinAttempts({required this.failures, this.lockedUntil});
+
+  final int failures;
+  final DateTime? lockedUntil;
 }

@@ -1,3 +1,4 @@
+import 'package:tinda360/core/catalog/expiry_status.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -7,43 +8,36 @@ import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/repositories/product_repository.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 
-/// Describes a single skipped row during CSV product import.
 final class CsvRowError {
-  /// Creates a row error.
   const CsvRowError({required this.rowNumber, required this.reason});
 
-  /// 1-based row number in the CSV file (header is row 1).
   final int rowNumber;
 
-  /// Human-readable reason the row was skipped.
   final String reason;
 }
 
-/// Summary returned after importing products from a CSV string.
 final class CsvImportReport {
-  /// Creates an import report.
   const CsvImportReport({
     required this.importedCount,
     required this.skippedCount,
     required this.errors,
+    this.priceZeroRows = 0,
   });
 
-  /// Number of products created in the repository.
+  final int priceZeroRows;
+
   final int importedCount;
 
-  /// Number of non-empty data rows that failed validation or creation.
   final int skippedCount;
 
-  /// Details for each skipped row.
   final List<CsvRowError> errors;
 }
 
-/// Parses product CSV files and imports valid rows into [ProductRepository].
+final RegExp _formulaGuardPattern = RegExp(r"^'[=+\-@\t\r]");
+
 final class ProductCsvImporter {
-  /// Creates a CSV product importer.
   const ProductCsvImporter();
 
-  /// Sample CSV template with expected headers and example sari-sari items.
   static const String sampleCsv =
       'name,price,cost,stock,unit,barcode,low_stock\n'
       'Lucky Me Pancit Canton,15.00,12.00,24,piece,4800016644801,5\n'
@@ -77,6 +71,13 @@ final class ProductCsvImporter {
     'low_stock_at': 'low_stock',
     'min_stock': 'low_stock',
     'paalala': 'low_stock',
+    'utang_price': 'utang_price',
+    'presyong_utang': 'utang_price',
+    'expiry': 'expiry',
+    'expiry_date': 'expiry',
+    'expiration': 'expiry',
+    'petsa_ng_expire': 'expiry',
+    'tracks_stock': 'tracks_stock',
   };
 
   static const Map<String, ProductUnit> _unitAliases = <String, ProductUnit>{
@@ -102,7 +103,6 @@ final class ProductCsvImporter {
     'l': ProductUnit.liter,
   };
 
-  /// Parses [csvContent] and inserts valid products into [repository].
   Future<CsvImportReport> importCsv({
     required String csvContent,
     required ProductRepository repository,
@@ -118,7 +118,8 @@ final class ProductCsvImporter {
     }
 
     final columnMap = _resolveColumns(rows.first);
-    final hasHeader = columnMap.containsKey('name') && columnMap.containsKey('price');
+    final hasHeader =
+        columnMap.containsKey('name') && columnMap.containsKey('price');
     final effectiveColumns = hasHeader
         ? columnMap
         : const <String, int>{
@@ -129,11 +130,19 @@ final class ProductCsvImporter {
             'unit': 4,
             'barcode': 5,
             'low_stock': 6,
+            'utang_price': 7,
+            'expiry': 8,
+            'tracks_stock': 9,
           };
     final startIndex = hasHeader ? 1 : 0;
 
     var importedCount = 0;
+    var priceZeroRows = 0;
     final errors = <CsvRowError>[];
+    final knownNames = <String>{
+      for (final stocked in await repository.watchActive().first)
+        _nameKey(stocked.product.name),
+    };
 
     for (var rowIndex = startIndex; rowIndex < rows.length; rowIndex++) {
       final row = rows[rowIndex];
@@ -146,13 +155,24 @@ final class ProductCsvImporter {
         continue;
       }
 
+      if (!knownNames.add(_nameKey(draft.name))) {
+        errors.add(
+          CsvRowError(rowNumber: rowNumber, reason: 'duplicate_name'),
+        );
+        continue;
+      }
+
       final result = await repository.create(draft);
       switch (result) {
         case Ok():
           importedCount++;
+          if (draft.price.minorUnits == 0) priceZeroRows++;
         case Err(:final failure):
           errors.add(
-            CsvRowError(rowNumber: rowNumber, reason: failure.runtimeType.toString()),
+            CsvRowError(
+              rowNumber: rowNumber,
+              reason: failure.runtimeType.toString(),
+            ),
           );
       }
     }
@@ -161,10 +181,12 @@ final class ProductCsvImporter {
       importedCount: importedCount,
       skippedCount: errors.length,
       errors: errors,
+      priceZeroRows: priceZeroRows,
     );
   }
 
-  /// Parses RFC 4180 CSV text into rows of cell strings.
+  String _nameKey(String name) => name.trim().toLowerCase();
+
   List<List<String>> parseCsvRows(String input) {
     final normalized = input.startsWith('\uFEFF') ? input.substring(1) : input;
     final rows = <List<String>>[];
@@ -230,7 +252,8 @@ final class ProductCsvImporter {
     return mapping;
   }
 
-  bool _isRowBlank(List<String> row) => row.every((cell) => cell.trim().isEmpty);
+  bool _isRowBlank(List<String> row) =>
+      row.every((cell) => cell.trim().isEmpty);
 
   ProductDraft? _buildDraftFromRow(
     List<String> row,
@@ -251,9 +274,8 @@ final class ProductCsvImporter {
     if (cost == null) return null;
 
     final unitText = _cell(row, columns['unit']).toLowerCase();
-    final unit = unitText.isEmpty
-        ? ProductUnit.piece
-        : (_unitAliases[unitText] ?? ProductUnit.piece);
+    final unit = unitText.isEmpty ? ProductUnit.piece : _unitAliases[unitText];
+    if (unit == null) return null;
 
     final stockText = _cell(row, columns['stock']);
     final initialStock = stockText.isEmpty
@@ -262,11 +284,32 @@ final class ProductCsvImporter {
     if (initialStock == null) return null;
 
     final lowStockText = _cell(row, columns['low_stock']);
-    final lowStockAt = lowStockText.isEmpty ? null : _parseQuantity(lowStockText);
+    final lowStockAt = lowStockText.isEmpty
+        ? null
+        : _parseQuantity(lowStockText);
     if (lowStockText.isNotEmpty && lowStockAt == null) return null;
+
+    final utangPriceText = _cell(row, columns['utang_price']);
+    final utangPrice = utangPriceText.isEmpty
+        ? null
+        : parseMoneyInput(utangPriceText, currency);
+    if (utangPriceText.isNotEmpty && utangPrice == null) return null;
+
+    final expiryText = _cell(row, columns['expiry']);
+    final expiryDay = expiryText.isEmpty
+        ? null
+        : ExpiryRules.parseIso(expiryText);
+    if (expiryText.isNotEmpty && expiryDay == null) return null;
+
+    final tracksStockText = _cell(row, columns['tracks_stock']).toLowerCase();
+    final tracksStock = !const {'0', 'false', 'no', 'hindi'}.contains(
+      tracksStockText,
+    );
 
     final barcodeText = _cell(row, columns['barcode']);
     return ProductDraft(
+      tracksStock: tracksStock,
+      utangPrice: utangPrice,
       name: name,
       unit: unit,
       price: price,
@@ -274,13 +317,17 @@ final class ProductCsvImporter {
       barcode: barcodeText.isEmpty ? null : barcodeText,
       lowStockAt: lowStockAt,
       initialStock: initialStock,
+      expiryDay: expiryDay,
     );
   }
 
   String _cell(List<String> row, int? index) {
     if (index == null || index < 0 || index >= row.length) return '';
-    return row[index].trim();
+    return _stripFormulaGuard(row[index].trim());
   }
+
+  String _stripFormulaGuard(String value) =>
+      _formulaGuardPattern.hasMatch(value) ? value.substring(1) : value;
 
   Quantity? _parseQuantity(String rawInput) {
     final parsed = double.tryParse(rawInput.trim());

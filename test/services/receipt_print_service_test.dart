@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
+import 'package:tinda360/l10n/app_localizations_en.dart';
 import 'package:tinda360/services/receipt_print_service.dart';
 
 void main() {
@@ -18,6 +19,7 @@ void main() {
       change: const Money(4900, Currency.php),
       paymentLabel: 'Cash',
       timestamp: DateTime(2026, 11, 17, 14, 30),
+      localizations: AppLocalizationsEn(),
     );
 
     expect(pdfBytes, isNotEmpty);
@@ -33,6 +35,7 @@ void main() {
       change: const Money.zero(Currency.php),
       paymentLabel: 'GCash',
       timestamp: DateTime(2026, 11, 17, 9, 5),
+      localizations: AppLocalizationsEn(),
     );
 
     expect(pdfBytes, isNotEmpty);

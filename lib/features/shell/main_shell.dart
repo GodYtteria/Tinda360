@@ -2,45 +2,59 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
+import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
 import 'package:tinda360/features/pos/presentation/pos_screen.dart';
 import 'package:tinda360/features/ulat/presentation/ulat_screen.dart';
 import 'package:tinda360/features/utang/presentation/utang_screen.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-/// Root 4-tab shell: Benta (POS), Imbentaryo, Utang, and Ulat.
-class MainShell extends StatefulWidget {
-  /// Creates the main tab shell.
+class MainShell extends ConsumerStatefulWidget {
   const MainShell({
     required this.onOpenSettings,
     super.key,
     this.initialIndex = 0,
   });
 
-  /// Opens the Settings screen.
   final VoidCallback onOpenSettings;
 
-  /// Initial tab index.
   final int initialIndex;
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   late int _currentIndex = widget.initialIndex;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _publishYumiScreen();
+    });
+  }
+
+  void _publishYumiScreen() {
+    ref
+        .read(yumiScreenProvider.notifier)
+        .setScreen(yumiScreenForTab(_currentIndex));
+  }
+
+  void _selectTab(int index) {
+    setState(() => _currentIndex = index);
+    _publishYumiScreen();
+  }
+
   void _openChat() {
-    unawaited(
-      ChatSheet.show(
-        context,
-        onOpenTab: (index) => setState(() => _currentIndex = index),
-      ),
-    );
+    unawaited(ChatSheet.show(context, onOpenTab: _selectTab));
   }
 
   @override
@@ -68,7 +82,7 @@ class _MainShellState extends State<MainShell> {
       UlatScreen(
         onOpenSettings: widget.onOpenSettings,
         onOpenAiChat: _openChat,
-        onOpenTab: (index) => setState(() => _currentIndex = index),
+        onOpenTab: _selectTab,
       ),
     ];
 
@@ -100,25 +114,25 @@ class _MainShellState extends State<MainShell> {
                   svgAsset: 'assets/icons/nav_benta.svg',
                   label: localizations.navSales,
                   selected: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
+                  onTap: () => _selectTab(0),
                 ),
                 _NavTabItem(
                   svgAsset: 'assets/icons/nav_imbentaryo.svg',
                   label: localizations.navInventory,
                   selected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
+                  onTap: () => _selectTab(1),
                 ),
                 _NavTabItem(
                   svgAsset: 'assets/icons/nav_utang.svg',
                   label: localizations.navUtang,
                   selected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
+                  onTap: () => _selectTab(2),
                 ),
                 _NavTabItem(
                   svgAsset: 'assets/icons/nav_ulat.svg',
                   label: localizations.navReports,
                   selected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  onTap: () => _selectTab(3),
                 ),
               ],
             ),
@@ -188,14 +202,16 @@ class _NavTabItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              AnimatedDefaultTextStyle(
-                duration: Duration(milliseconds: reduceMotion ? 0 : 180),
-                curve: Curves.easeOut,
-                style: AppTypography.navLabel(color, active: selected),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              AdaptiveTextScale(
+                maxScale: AdaptiveLayout.maxChromeTextScale,
+                child: AnimatedDefaultTextStyle(
+                  duration: Duration(milliseconds: reduceMotion ? 0 : 180),
+                  curve: Curves.easeOut,
+                  style: AppTypography.navLabel(color, active: selected),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(label, maxLines: 1, softWrap: false),
+                  ),
                 ),
               ),
             ],
