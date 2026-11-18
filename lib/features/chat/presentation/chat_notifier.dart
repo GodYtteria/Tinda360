@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/calendar/day_range.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
+import 'package:tinda360/core/catalog/expiry_status.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
@@ -12,6 +13,8 @@ import 'package:tinda360/core/customers/unpaid_utang.dart';
 import 'package:tinda360/core/expenses/expense_entry.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
+import 'package:tinda360/core/sales/payment_method.dart';
+import 'package:tinda360/core/sales/sale_record.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
@@ -186,8 +189,8 @@ class ChatNotifier extends Notifier<ChatState> {
     if (matched.intent == ChatIntent.help) {
       return _AssistantReply(
         text: isFilipino
-            ? 'Pwede mong itanong: "Magkano benta ngayon?", "Ano pinakamabenta?", "Ano mababa ang stock?", "Sino may utang?", "Magkano gastos ko?", "Ilan produkto ko?", o pangalan ng produkto/suki.'
-            : 'You can ask: "How are sales today?", "Top products?", "What is low on stock?", "Who has utang?", "How much did I spend?", "How many products do I have?", or a product/suki name.',
+            ? 'Pwede mong itanong: "Magkano benta ngayon?", "Ano pinakamabenta?", "Ano mababa ang stock?", "Sino may utang?", "Ano malapit mag-expire?", "Ano pinakamalaking tubo?", "Tumataas ba benta ko?", "Anong oras pinakamabenta?", "Sino laging bumibili?", "Ilan cash vs utang?", "Kailan mauubos ang X?", o pangalan ng produkto/suki.'
+            : 'You can ask: "How are sales today?", "Top products?", "What is low on stock?", "Who has utang?", "What is expiring soon?", "Highest margin products?", "Are sales trending up?", "Busiest hours?", "Most loyal customers?", "Cash vs utang breakdown?", "When will X run out?", or a product/suki name.',
         source: localizations.chatSourceSummary,
         mood: TindaAvatarMood.talking,
       );
@@ -314,6 +317,91 @@ class ChatNotifier extends Notifier<ChatState> {
           periodLabel: _timeframeLabel(matched.timeframe, isFilipino),
           isFilipino: isFilipino,
         ),
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.expiryAlert) {
+      return _buildExpiryAlertReply(products, today, isFilipino, localizations);
+    }
+
+    if (matched.intent == ChatIntent.profitMargin) {
+      return _buildProfitMarginReply(products, isFilipino, localizations);
+    }
+
+    if (matched.intent == ChatIntent.salesTrend) {
+      final todaySummary = await ref
+          .read(saleRepositoryProvider)
+          .watchSummary(DayRange.single(today))
+          .first;
+      final yesterdaySummary = await ref
+          .read(saleRepositoryProvider)
+          .watchSummary(DayRange.single(today.plusDays(-1)))
+          .first;
+      final twoDaysAgoSummary = await ref
+          .read(saleRepositoryProvider)
+          .watchSummary(DayRange.single(today.plusDays(-2)))
+          .first;
+      return _buildSalesTrendReply(
+        todaySummary,
+        yesterdaySummary,
+        twoDaysAgoSummary,
+        isFilipino,
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.busiestHours) {
+      final recentSales = await ref
+          .read(saleRepositoryProvider)
+          .watchRecentSales(range, limit: null)
+          .first;
+      return _buildBusiestHoursReply(
+        recentSales,
+        isFilipino,
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.sukiLoyalty) {
+      final recentSales = await ref
+          .read(saleRepositoryProvider)
+          .watchRecentSales(range, limit: null)
+          .first;
+      return _buildSukiLoyaltyReply(
+        recentSales,
+        isFilipino,
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.paymentBreakdown) {
+      final recentSales = await ref
+          .read(saleRepositoryProvider)
+          .watchRecentSales(range, limit: null)
+          .first;
+      return _buildPaymentBreakdownReply(
+        recentSales,
+        currency,
+        isFilipino,
+        localizations,
+      );
+    }
+
+    if (matched.intent == ChatIntent.stockForecast) {
+      final mentionedProduct = _findMentionedProduct(
+        matched.normalizedText,
+        products,
+      );
+      final twoWeeksRange = DayRange(today.plusDays(-13), today);
+      final soldQuantities = await ref
+          .read(saleRepositoryProvider)
+          .soldProductQuantitiesInRange(twoWeeksRange);
+      return _buildStockForecastReply(
+        mentionedProduct,
+        products,
+        soldQuantities,
+        isFilipino,
         localizations,
       );
     }
@@ -722,6 +810,302 @@ class ChatNotifier extends Notifier<ChatState> {
           : 'Estimated restock budget: $budgetText for $itemCount low-stock items.',
       source: localizations.chatSourceInventory,
       mood: TindaAvatarMood.talking,
+    );
+  }
+
+  _AssistantReply _buildExpiryAlertReply(
+    List<StockedProduct> products,
+    LocalDay today,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    final alerts = <String>[];
+    for (final item in products) {
+      final status = ExpiryRules.statusFor(item.product.expiryDay, today);
+      if (status == null) continue;
+      switch (status) {
+        case ExpiryExpired():
+          alerts.add(isFilipino
+              ? '${item.product.name} (EXPIRED na)'
+              : '${item.product.name} (EXPIRED)');
+        case ExpiryNear(:final daysLeft):
+          alerts.add(isFilipino
+              ? '${item.product.name} ($daysLeft araw na lang)'
+              : '${item.product.name} ($daysLeft days left)');
+      }
+    }
+    if (alerts.isEmpty) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Walang produkto na malapit mag-expire o expired na.'
+            : 'No products are expiring soon or already expired.',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.happy,
+      );
+    }
+    return _AssistantReply(
+      text: isFilipino
+          ? 'Mga produkto na mag-e-expire o expired na: ${alerts.join(', ')}.'
+          : 'Products expiring or expired: ${alerts.join(', ')}.',
+      source: localizations.chatSourceInventory,
+      mood: TindaAvatarMood.talking,
+    );
+  }
+
+  _AssistantReply _buildProfitMarginReply(
+    List<StockedProduct> products,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    final withMargin = products
+        .where((item) => item.product.price.minorUnits > 0)
+        .toList()
+      ..sort(
+        (first, second) =>
+            (second.product.price.minorUnits - second.product.cost.minorUnits)
+                .compareTo(
+              first.product.price.minorUnits - first.product.cost.minorUnits,
+            ),
+      );
+    if (withMargin.isEmpty) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Walang produkto na may presyo pa.'
+            : 'No products with pricing found.',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final top = withMargin.take(3).map((item) {
+      final margin = Money(
+        item.product.price.minorUnits - item.product.cost.minorUnits,
+        item.product.price.currency,
+      );
+      return '${item.product.name} (${formatMoney(margin)})';
+    }).join(', ');
+    return _AssistantReply(
+      text: isFilipino
+          ? 'Pinakamalaking tubo bawat benta: $top.'
+          : 'Highest profit margin per sale: $top.',
+      source: localizations.chatSourceInventory,
+      mood: TindaAvatarMood.happy,
+    );
+  }
+
+  _AssistantReply _buildSalesTrendReply(
+    SalesSummary todaySummary,
+    SalesSummary yesterdaySummary,
+    SalesSummary twoDaysAgoSummary,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    final todayRev = todaySummary.revenue.minorUnits;
+    final yesterdayRev = yesterdaySummary.revenue.minorUnits;
+    final twoDaysAgoRev = twoDaysAgoSummary.revenue.minorUnits;
+
+    final String trendWord;
+    if (todayRev > yesterdayRev && yesterdayRev > twoDaysAgoRev) {
+      trendWord = isFilipino ? 'Pataas' : 'Up';
+    } else if (todayRev < yesterdayRev && yesterdayRev < twoDaysAgoRev) {
+      trendWord = isFilipino ? 'Pababa' : 'Down';
+    } else {
+      trendWord = isFilipino ? 'Paiba-iba' : 'Flat';
+    }
+
+    final todayText = formatMoney(todaySummary.revenue);
+    final yesterdayText = formatMoney(yesterdaySummary.revenue);
+    final twoDaysAgoText = formatMoney(twoDaysAgoSummary.revenue);
+    return _AssistantReply(
+      text: isFilipino
+          ? '$trendWord ang trend. 2 araw na nakalipas: $twoDaysAgoText → kahapon: $yesterdayText → ngayon: $todayText.'
+          : '$trendWord trend. 2 days ago: $twoDaysAgoText → yesterday: $yesterdayText → today: $todayText.',
+      source: localizations.chatSourceSales,
+      mood: trendWord == (isFilipino ? 'Pataas' : 'Up')
+          ? TindaAvatarMood.happy
+          : TindaAvatarMood.talking,
+    );
+  }
+
+  _AssistantReply _buildBusiestHoursReply(
+    List<SaleRecord> sales,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    if (sales.isEmpty) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Walang benta pa sa panahong ito.'
+            : 'No sales in this period yet.',
+        source: localizations.chatSourceSales,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final hourCounts = <int, int>{};
+    for (final sale in sales) {
+      final hour = DateTime.fromMillisecondsSinceEpoch(
+        sale.createdAtMs,
+        isUtc: true,
+      ).toLocal().hour;
+      hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+    }
+    final sorted = hourCounts.entries.toList()
+      ..sort((first, second) => second.value.compareTo(first.value));
+    final top = sorted.take(3).map((entry) {
+      final hour = entry.key;
+      final label = hour == 0
+          ? '12 AM'
+          : hour < 12
+              ? '$hour AM'
+              : hour == 12
+                  ? '12 PM'
+                  : '${hour - 12} PM';
+      return isFilipino
+          ? '$label (${entry.value} benta)'
+          : '$label (${entry.value} sales)';
+    }).join(', ');
+    return _AssistantReply(
+      text: isFilipino
+          ? 'Pinakamabentang oras: $top.'
+          : 'Busiest hours: $top.',
+      source: localizations.chatSourceSales,
+      mood: TindaAvatarMood.happy,
+    );
+  }
+
+  _AssistantReply _buildSukiLoyaltyReply(
+    List<SaleRecord> sales,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    final customerCounts = <String, int>{};
+    for (final sale in sales) {
+      final name = sale.customerName;
+      if (name == null) continue;
+      customerCounts[name] = (customerCounts[name] ?? 0) + 1;
+    }
+    if (customerCounts.isEmpty) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Walang may pangalang suki sa mga benta sa panahong ito.'
+            : 'No named customers in sales for this period.',
+        source: localizations.chatSourceSales,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final sorted = customerCounts.entries.toList()
+      ..sort((first, second) => second.value.compareTo(first.value));
+    final top = sorted.take(3).map((entry) {
+      return isFilipino
+          ? '${entry.key} (${entry.value} benta)'
+          : '${entry.key} (${entry.value} sales)';
+    }).join(', ');
+    return _AssistantReply(
+      text: isFilipino
+          ? 'Pinaka-loyal na suki: $top.'
+          : 'Most frequent buyers: $top.',
+      source: localizations.chatSourceSales,
+      mood: TindaAvatarMood.happy,
+    );
+  }
+
+  _AssistantReply _buildPaymentBreakdownReply(
+    List<SaleRecord> sales,
+    Currency currency,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    if (sales.isEmpty) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Walang benta pa sa panahong ito.'
+            : 'No sales in this period yet.',
+        source: localizations.chatSourceSales,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final counts = <PaymentMethod, int>{};
+    final totals = <PaymentMethod, Money>{};
+    for (final sale in sales) {
+      counts[sale.method] = (counts[sale.method] ?? 0) + 1;
+      totals[sale.method] =
+          (totals[sale.method] ?? Money.zero(currency)) + sale.total;
+    }
+    final parts = <String>[];
+    for (final method in PaymentMethod.values) {
+      final count = counts[method] ?? 0;
+      if (count == 0) continue;
+      final total = formatMoney(totals[method]!);
+      final label = switch (method) {
+        PaymentMethod.cash => 'cash',
+        PaymentMethod.ewallet => 'e-wallet',
+        PaymentMethod.utang => 'utang',
+      };
+      parts.add('$count $label ($total)');
+    }
+    return _AssistantReply(
+      text: isFilipino
+          ? 'Breakdown ng bayad: ${parts.join(', ')}.'
+          : 'Payment breakdown: ${parts.join(', ')}.',
+      source: localizations.chatSourceSales,
+      mood: TindaAvatarMood.happy,
+    );
+  }
+
+  _AssistantReply _buildStockForecastReply(
+    StockedProduct? mentionedProduct,
+    List<StockedProduct> products,
+    Map<String, int> soldQuantities,
+    bool isFilipino,
+    AppLocalizations localizations,
+  ) {
+    if (mentionedProduct == null) {
+      return _AssistantReply(
+        text: isFilipino
+            ? 'Pakilagay ang pangalan ng produkto (hal. "Kailan mauubos ang Bigas?").'
+            : 'Include the product name (e.g. "When will Rice run out?").',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final product = mentionedProduct.product;
+    if (!product.tracksStock) {
+      return _AssistantReply(
+        text: isFilipino
+            ? '${product.name} ay walang stock tracking.'
+            : '${product.name} does not track stock.',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final soldMilli = soldQuantities[product.id] ?? 0;
+    if (soldMilli == 0) {
+      final stock = formatQuantity(mentionedProduct.stock, product.unit);
+      final unit = localizedUnit(localizations, product.unit);
+      return _AssistantReply(
+        text: isFilipino
+            ? '${product.name} ay may $stock $unit na stock. Walang recent na benta sa nakaraang 14 araw.'
+            : '${product.name} has $stock $unit in stock. No recent sales in the last 14 days.',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final dailyMilliRate = soldMilli ~/ 14;
+    if (dailyMilliRate == 0) {
+      return _AssistantReply(
+        text: isFilipino
+            ? '${product.name} ay halos hindi nabebenta. Hindi kayang i-forecast.'
+            : '${product.name} barely sells. Cannot forecast.',
+        source: localizations.chatSourceInventory,
+        mood: TindaAvatarMood.talking,
+      );
+    }
+    final daysLeft = mentionedProduct.stock.milli ~/ dailyMilliRate;
+    return _AssistantReply(
+      text: isFilipino
+          ? '${product.name}: mga $daysLeft araw bago maubos sa kasalukuyang bilis ng benta.'
+          : '${product.name}: about $daysLeft days of stock left at current sales rate.',
+      source: localizations.chatSourceInventory,
+      mood: daysLeft <= 3 ? TindaAvatarMood.talking : TindaAvatarMood.happy,
     );
   }
 
