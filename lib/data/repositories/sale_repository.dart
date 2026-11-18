@@ -418,6 +418,30 @@ WHERE s.is_deleted = 0
     return <String>{for (final row in rows) row.read<String>('product_id')};
   }
 
+  Future<Map<String, int>> soldProductQuantitiesInRange(DayRange range) async {
+    final rows = await _db
+        .customSelect(
+          '''
+SELECT i.product_id, SUM(i.qty_milli) AS total_milli
+FROM sales s
+JOIN sale_items i ON i.sale_id = s.id AND i.is_deleted = 0
+WHERE s.is_deleted = 0
+  AND s.day_serial BETWEEN ? AND ?
+GROUP BY i.product_id
+''',
+          variables: [
+            Variable.withInt(range.first.serial),
+            Variable.withInt(range.last.serial),
+          ],
+          readsFrom: {_db.sales, _db.saleItems},
+        )
+        .get();
+    return <String, int>{
+      for (final row in rows)
+        row.read<String>('product_id'): row.read<int>('total_milli'),
+    };
+  }
+
   @useResult
   Future<Result<void, SaleFailure>> voidSale(String saleId) async {
     final nowMs = _clock.now().toUtc().millisecondsSinceEpoch;

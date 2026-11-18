@@ -34,6 +34,20 @@ enum ChatIntent {
 
   expenses,
 
+  expiryAlert,
+
+  profitMargin,
+
+  salesTrend,
+
+  busiestHours,
+
+  sukiLoyalty,
+
+  paymentBreakdown,
+
+  stockForecast,
+
   overview,
 }
 
@@ -301,6 +315,13 @@ final class IntentMatcher {
     'store_info' => ChatIntent.storeInfo,
     'product_count' => ChatIntent.productCount,
     'expenses' => ChatIntent.expenses,
+    'expiry_alert' => ChatIntent.expiryAlert,
+    'profit_margin' => ChatIntent.profitMargin,
+    'sales_trend' => ChatIntent.salesTrend,
+    'busiest_hours' => ChatIntent.busiestHours,
+    'suki_loyalty' => ChatIntent.sukiLoyalty,
+    'payment_breakdown' => ChatIntent.paymentBreakdown,
+    'stock_forecast' => ChatIntent.stockForecast,
     _ => null,
   };
 

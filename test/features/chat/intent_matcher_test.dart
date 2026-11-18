@@ -68,4 +68,105 @@ void main() {
       ChatIntent.restockBudget,
     );
   });
+
+  test('matches expiryAlert intent in Filipino and English', () {
+    expect(
+      matcher.match('ano malapit mag expire?').intent,
+      ChatIntent.expiryAlert,
+    );
+    expect(
+      matcher.match('what is expiring soon?').intent,
+      ChatIntent.expiryAlert,
+    );
+    expect(
+      matcher.match('expired na ba may produkto?').intent,
+      ChatIntent.expiryAlert,
+    );
+  });
+
+  test('matches profitMargin intent in Filipino and English', () {
+    expect(
+      matcher.match('ano pinakamalaking tubo?').intent,
+      ChatIntent.profitMargin,
+    );
+    expect(
+      matcher.match('which has highest margin?').intent,
+      ChatIntent.profitMargin,
+    );
+    expect(
+      matcher.match('most profitable product?').intent,
+      ChatIntent.profitMargin,
+    );
+  });
+
+  test('matches salesTrend intent in Filipino and English', () {
+    expect(
+      matcher.match('tumataas ba benta ko?').intent,
+      ChatIntent.salesTrend,
+    );
+    expect(
+      matcher.match('is my sales trend going up?').intent,
+      ChatIntent.salesTrend,
+    );
+  });
+
+  test('matches busiestHours intent in Filipino and English', () {
+    expect(
+      matcher.match('anong oras pinakamabenta?').intent,
+      ChatIntent.busiestHours,
+    );
+    expect(
+      matcher.match('what are my busiest hours?').intent,
+      ChatIntent.busiestHours,
+    );
+    expect(
+      matcher.match('peak hours ng benta?').intent,
+      ChatIntent.busiestHours,
+    );
+  });
+
+  test('matches sukiLoyalty intent in Filipino and English', () {
+    expect(
+      matcher.match('sino laging bumibili?').intent,
+      ChatIntent.sukiLoyalty,
+    );
+    expect(
+      matcher.match('who are my most frequent buyers?').intent,
+      ChatIntent.sukiLoyalty,
+    );
+    expect(
+      matcher.match('top suki ko?').intent,
+      ChatIntent.sukiLoyalty,
+    );
+  });
+
+  test('matches paymentBreakdown intent in Filipino and English', () {
+    expect(
+      matcher.match('ilan cash vs utang?').intent,
+      ChatIntent.paymentBreakdown,
+    );
+    expect(
+      matcher.match('payment breakdown ng benta?').intent,
+      ChatIntent.paymentBreakdown,
+    );
+    expect(
+      matcher.match('breakdown ng bayad?').intent,
+      ChatIntent.paymentBreakdown,
+    );
+  });
+
+  test('matches stockForecast intent in Filipino and English', () {
+    expect(
+      matcher.match('gaano katagal matatagal ang bigas?').intent,
+      ChatIntent.stockForecast,
+    );
+    expect(
+      matcher.match('how long will it last?').intent,
+      ChatIntent.stockForecast,
+    );
+    expect(
+      matcher.match('ilang araw bago maubos supply?').intent,
+      ChatIntent.stockForecast,
+    );
+  });
 }

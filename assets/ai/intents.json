@@ -565,6 +565,169 @@
         "cost price",
         "price list"
       ]
+    },
+    {
+      "id": "expiry_alert",
+      "keywords": [
+        "expire",
+        "expiry",
+        "expired",
+        "expiring",
+        "malapit mag expire",
+        "malapit na mag expire",
+        "paexpire",
+        "pa expire",
+        "nag expire",
+        "nag expire na",
+        "expired na",
+        "sira na",
+        "bulok",
+        "about to expire",
+        "going to expire",
+        "near expiry",
+        "shelf life",
+        "expiration",
+        "expiration date",
+        "best before",
+        "past due"
+      ]
+    },
+    {
+      "id": "profit_margin",
+      "keywords": [
+        "pinakamalaking tubo",
+        "pinakamataas tubo",
+        "malaking tubo",
+        "mataas ang tubo",
+        "mataas na margin",
+        "highest margin",
+        "highest profit",
+        "best margin",
+        "most profit",
+        "most profitable",
+        "profitable",
+        "margin",
+        "profit margin",
+        "tubo bawat",
+        "malaki tubo",
+        "pinakamalaki ang kita"
+      ]
+    },
+    {
+      "id": "sales_trend",
+      "keywords": [
+        "trend",
+        "trending",
+        "tumataas",
+        "tumataas ba",
+        "bumababa",
+        "bumababa ba",
+        "pataas",
+        "pababa",
+        "going up",
+        "going down",
+        "sales trend",
+        "benta trend",
+        "increasing",
+        "decreasing",
+        "improving",
+        "direction ng benta",
+        "papunta saan benta"
+      ]
+    },
+    {
+      "id": "busiest_hours",
+      "keywords": [
+        "busiest",
+        "busiest hour",
+        "busiest time",
+        "peak hour",
+        "peak hours",
+        "peak time",
+        "anong oras",
+        "anong oras pinakamabenta",
+        "anong oras malakas",
+        "pinakamabenta oras",
+        "busy hours",
+        "rush hour",
+        "rush time",
+        "pinaka maraming benta",
+        "kailan maraming benta",
+        "matao",
+        "pinaka matao"
+      ]
+    },
+    {
+      "id": "suki_loyalty",
+      "keywords": [
+        "loyal",
+        "loyalty",
+        "loyal customer",
+        "loyal na suki",
+        "suki loyalty",
+        "laging bumibili",
+        "laging bumabalik",
+        "frequent",
+        "frequent buyer",
+        "frequent customer",
+        "sino lagi",
+        "sino palaging",
+        "madalas bumili",
+        "madalas mamili",
+        "regular customer",
+        "regular na suki",
+        "top suki",
+        "top customer",
+        "top buyer"
+      ]
+    },
+    {
+      "id": "payment_breakdown",
+      "keywords": [
+        "breakdown",
+        "payment breakdown",
+        "payment method",
+        "payment methods",
+        "cash vs utang",
+        "cash o utang",
+        "ilan cash",
+        "ilan utang",
+        "ilan ewallet",
+        "ilang cash",
+        "ilang utang",
+        "gaano karaming cash",
+        "gaano karaming utang",
+        "pano nagbayad",
+        "paano nagbayad",
+        "mode of payment",
+        "cash count",
+        "breakdown ng bayad",
+        "breakdown ng benta"
+      ]
+    },
+    {
+      "id": "stock_forecast",
+      "keywords": [
+        "forecast",
+        "kailan mauubos",
+        "kailan ubos",
+        "kelan mauubos",
+        "kelan ubos",
+        "ilang araw",
+        "ilang araw bago maubos",
+        "how many days",
+        "how long will it last",
+        "stock forecast",
+        "run out",
+        "last until",
+        "matatagal pa ba",
+        "magtatagal pa ba",
+        "matatapos kailan",
+        "days left",
+        "stock days",
+        "supply forecast",
+        "gaano katagal"
+      ]
     }
   ]
 }
