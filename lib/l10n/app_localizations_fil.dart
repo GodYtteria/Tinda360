@@ -141,7 +141,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get posScanBarcode => 'I-scan ang barcode';
 
   @override
-  String get posOpenSettings => 'Settings';
+  String get posOpenSettings => 'Mga Setting';
 
   @override
   String get posGreeting =>
@@ -1055,10 +1055,10 @@ class AppLocalizationsFil extends AppLocalizations {
   String get productStockDecrement => 'Bawasan ang simulang stock';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => 'Mga Setting';
 
   @override
-  String get settingsSectionBackup => 'BACKUP';
+  String get settingsSectionBackup => 'BACKUP NG DATA';
 
   @override
   String get settingsSectionAi => 'MATALINONG KATULONG SA TINDAHAN';
@@ -1067,13 +1067,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String get settingsSectionStore => 'TINDAHAN';
 
   @override
-  String get settingsSectionPrivacy => 'PRIVACY';
+  String get settingsSectionPrivacy => 'PRIVACY AT SEGURIDAD';
 
   @override
   String get settingsSectionAbout => 'TUNGKOL SA APP';
 
   @override
-  String get settingsSectionStorage => 'STORAGE AT DATA';
+  String get settingsSectionStorage => 'IMBAKAN AT DATA';
 
   @override
   String get settingsStorageSizeLabel => 'Laki ng database';
@@ -1522,7 +1522,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get bantayFieldHint => 'Pangalan (optional)';
 
   @override
-  String get settingsAddressLabel => 'Address';
+  String get settingsAddressLabel => 'Tirahan';
 
   @override
   String get settingsPhoneLabel => 'Telepono';
