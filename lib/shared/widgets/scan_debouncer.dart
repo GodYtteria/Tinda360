@@ -1,7 +1,7 @@
 const Duration defaultScanDebounceWindow = Duration(milliseconds: 1500);
 
 class ScanDebouncer {
-  ScanDebouncer({
+  new({
     this.window = defaultScanDebounceWindow,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;

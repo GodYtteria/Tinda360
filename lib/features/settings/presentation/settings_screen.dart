@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
@@ -32,7 +32,7 @@ import 'package:tinda360/theme/app_tokens.dart';
 part 'settings_store_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -136,8 +136,9 @@ class SettingsScreen extends ConsumerWidget {
                           },
                           selected: ref.watch(localeProvider).languageCode,
                           onChanged: (code) {
-                            if (code == ref.read(localeProvider).languageCode)
+                            if (code == ref.read(localeProvider).languageCode) {
                               return;
+                            }
                             unawaited(HapticFeedback.selectionClick());
                             ref
                                 .read(localeProvider.notifier)
@@ -178,7 +179,7 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+  const new({required this.title});
 
   final String title;
 
@@ -190,7 +191,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _BackupSection extends ConsumerWidget {
-  const _BackupSection({required this.state});
+  const new({required this.state});
 
   final SettingsState state;
 
@@ -521,7 +522,7 @@ class _PrivacySection extends StatelessWidget {
 }
 
 class _StorageSection extends ConsumerStatefulWidget {
-  const _StorageSection({required this.isBackupConnected});
+  const new({required this.isBackupConnected});
 
   final bool isBackupConnected;
 
@@ -740,7 +741,7 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
     );
     if (!pinVerified) return;
 
-    final pickedFiles = await FilePicker.pickFiles(type: FileType.any);
+    final pickedFiles = await FilePicker.pickFiles();
     final pickedPath = pickedFiles.firstOrNull?.path;
     if (pickedPath == null) return;
 
@@ -779,7 +780,7 @@ class _StorageSectionState extends ConsumerState<_StorageSection> {
 }
 
 class _PinLockSection extends ConsumerStatefulWidget {
-  const _PinLockSection();
+  const new();
 
   @override
   ConsumerState<_PinLockSection> createState() => _PinLockSectionState();

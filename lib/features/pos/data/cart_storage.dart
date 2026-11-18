@@ -21,11 +21,10 @@ final activeCartStoreIdProvider = Provider<String?>(
 );
 
 final class CartStorage {
-  CartStorage({required Future<Directory> Function() directoryProvider})
-    : _directoryProvider = directoryProvider;
+  new({required this._directoryProvider});
 
   static const String _linesKey = 'lines';
-  static final RegExp _unsafeCharacters = RegExp(r'[^A-Za-z0-9_-]');
+  static final RegExp _unsafeCharacters = RegExp('[^A-Za-z0-9_-]');
 
   final Future<Directory> Function() _directoryProvider;
   Future<void> _lastWrite = Future<void>.value();

@@ -26,20 +26,21 @@ String _receipt(
 void main() {
   for (final localizations in [AppLocalizationsEn(), AppLocalizationsFil()]) {
     final language = localizations.localeName;
+    final label = language == 'en' ? 'On duty' : 'Bantay';
 
     test('$language: bantay line printed only when set', () {
       final withBantay = _receipt(
         localizations,
         details: const ReceiptDetails(cashierName: ' Ana '),
       );
-      expect(withBantay, contains('Bantay: Ana'));
-      expect(_receipt(localizations), isNot(contains('Bantay')));
+      expect(withBantay, contains('$label: Ana'));
+      expect(_receipt(localizations), isNot(contains(label)));
       expect(
         _receipt(
           localizations,
           details: const ReceiptDetails(cashierName: '  '),
         ),
-        isNot(contains('Bantay')),
+        isNot(contains(label)),
       );
     });
 

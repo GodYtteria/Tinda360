@@ -2,18 +2,18 @@ import 'package:tinda360/core/failure.dart';
 import 'package:tinda360/core/money/money.dart';
 
 sealed class CustomerFailure extends Failure {
-  const CustomerFailure();
+  const new();
 }
 
 final class CustomerNameRequired extends CustomerFailure {
-  const CustomerNameRequired();
+  const new();
 
   @override
   String get code => 'customer.name_required';
 }
 
 final class CustomerNotFound extends CustomerFailure {
-  const CustomerNotFound(this.customerId);
+  const new(this.customerId);
 
   final String customerId;
 
@@ -22,14 +22,14 @@ final class CustomerNotFound extends CustomerFailure {
 }
 
 final class CustomerAmountInvalid extends CustomerFailure {
-  const CustomerAmountInvalid();
+  const new();
 
   @override
   String get code => 'customer.amount_invalid';
 }
 
 final class PaymentExceedsBalance extends CustomerFailure {
-  const PaymentExceedsBalance(this.balance);
+  const new(this.balance);
 
   final Money balance;
 
@@ -38,28 +38,28 @@ final class PaymentExceedsBalance extends CustomerFailure {
 }
 
 final class CustomerStoreUnavailable extends CustomerFailure {
-  const CustomerStoreUnavailable();
+  const new();
 
   @override
   String get code => 'customer.store_unavailable';
 }
 
 final class InterestRateNotSet extends CustomerFailure {
-  const InterestRateNotSet();
+  const new();
 
   @override
   String get code => 'customer.interest_rate_not_set';
 }
 
 final class InterestNoBalance extends CustomerFailure {
-  const InterestNoBalance();
+  const new();
 
   @override
   String get code => 'customer.interest_no_balance';
 }
 
 final class InterestAmountChanged extends CustomerFailure {
-  const InterestAmountChanged(this.currentAmount);
+  const new(this.currentAmount);
 
   final Money currentAmount;
 
@@ -68,7 +68,7 @@ final class InterestAmountChanged extends CustomerFailure {
 }
 
 final class LedgerEntryNotFound extends CustomerFailure {
-  const LedgerEntryNotFound(this.entryId);
+  const new(this.entryId);
 
   final String entryId;
 
@@ -77,7 +77,7 @@ final class LedgerEntryNotFound extends CustomerFailure {
 }
 
 final class LedgerEntryAlreadyDeleted extends CustomerFailure {
-  const LedgerEntryAlreadyDeleted(this.entryId);
+  const new(this.entryId);
 
   final String entryId;
 
@@ -86,7 +86,7 @@ final class LedgerEntryAlreadyDeleted extends CustomerFailure {
 }
 
 final class LedgerEntryNotDeletable extends CustomerFailure {
-  const LedgerEntryNotDeletable(this.entryId);
+  const new(this.entryId);
 
   final String entryId;
 
@@ -95,7 +95,7 @@ final class LedgerEntryNotDeletable extends CustomerFailure {
 }
 
 final class LedgerDeleteWouldGoNegative extends CustomerFailure {
-  const LedgerDeleteWouldGoNegative(this.balance);
+  const new(this.balance);
 
   final Money balance;
 
@@ -104,7 +104,7 @@ final class LedgerDeleteWouldGoNegative extends CustomerFailure {
 }
 
 final class CustomerHasBalance extends CustomerFailure {
-  const CustomerHasBalance(this.balance);
+  const new(this.balance);
 
   final Money balance;
 

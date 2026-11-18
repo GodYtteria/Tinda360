@@ -36,8 +36,9 @@ DayRange dayRangeForPeriod(
   ReportPeriod.custom => customRange ?? DayRange.single(today),
 };
 
+@immutable
 final class UlatState {
-  const UlatState({
+  const new({
     required this.period,
     required this.range,
     required this.summary,
@@ -79,7 +80,7 @@ final class UlatState {
   );
 }
 
-final ulatPeriodProvider =
+final NotifierProvider<UlatPeriodNotifier, ReportPeriod> ulatPeriodProvider =
     NotifierProvider.autoDispose<UlatPeriodNotifier, ReportPeriod>(
       UlatPeriodNotifier.new,
     );
@@ -93,7 +94,8 @@ class UlatPeriodNotifier extends Notifier<ReportPeriod> {
   }
 }
 
-final ulatCustomRangeProvider =
+final NotifierProvider<UlatCustomRangeNotifier, DayRange?>
+ulatCustomRangeProvider =
     NotifierProvider.autoDispose<UlatCustomRangeNotifier, DayRange?>(
       UlatCustomRangeNotifier.new,
     );
@@ -108,7 +110,9 @@ class UlatCustomRangeNotifier extends Notifier<DayRange?> {
   }
 }
 
-final ulatTodayProvider = Provider.autoDispose<LocalDay>((ref) {
+final Provider<LocalDay> ulatTodayProvider = Provider.autoDispose<LocalDay>((
+  ref,
+) {
   final now = ref.watch(clockProvider).now();
   final nextMidnight = DateTime(now.year, now.month, now.day + 1);
   final timer = Timer(nextMidnight.difference(now), ref.invalidateSelf);
@@ -116,14 +120,16 @@ final ulatTodayProvider = Provider.autoDispose<LocalDay>((ref) {
   return LocalDay.fromLocal(now);
 });
 
-final ulatRangeProvider = Provider.autoDispose<DayRange>((ref) {
+final Provider<DayRange> ulatRangeProvider = Provider.autoDispose<DayRange>((
+  ref,
+) {
   final period = ref.watch(ulatPeriodProvider);
   final today = ref.watch(ulatTodayProvider);
   final customRange = ref.watch(ulatCustomRangeProvider);
   return dayRangeForPeriod(period, today, customRange: customRange);
 });
 
-final ulatNotifierProvider =
+final StreamNotifierProvider<UlatNotifier, UlatState> ulatNotifierProvider =
     StreamNotifierProvider.autoDispose<UlatNotifier, UlatState>(
       UlatNotifier.new,
     );
@@ -228,16 +234,18 @@ Stream<UlatState> _combineStreams({
   return controller.stream;
 }
 
-final ulatRecentSalesProvider = StreamProvider.autoDispose<List<SaleRecord>>((
-  ref,
-) {
-  final range = ref.watch(ulatRangeProvider);
-  return ref.watch(saleRepositoryProvider).watchRecentSales(range);
-});
+final StreamProvider<List<SaleRecord>> ulatRecentSalesProvider =
+    StreamProvider.autoDispose<List<SaleRecord>>((
+      ref,
+    ) {
+      final range = ref.watch(ulatRangeProvider);
+      return ref.watch(saleRepositoryProvider).watchRecentSales(range);
+    });
 
-final ulatExpensesProvider = StreamProvider.autoDispose<List<ExpenseEntry>>((
-  ref,
-) {
-  final range = ref.watch(ulatRangeProvider);
-  return ref.watch(expenseRepositoryProvider).watchInRange(range);
-});
+final StreamProvider<List<ExpenseEntry>> ulatExpensesProvider =
+    StreamProvider.autoDispose<List<ExpenseEntry>>((
+      ref,
+    ) {
+      final range = ref.watch(ulatRangeProvider);
+      return ref.watch(expenseRepositoryProvider).watchInRange(range);
+    });

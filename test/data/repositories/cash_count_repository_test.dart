@@ -166,7 +166,10 @@ void main() {
         await repos.sales.record(
           SaleDraft(
             lines: [
-              SaleLineDraft(productId: productId, quantity: Quantity.whole(4)),
+              SaleLineDraft(
+                productId: productId,
+                quantity: const Quantity.whole(4),
+              ),
             ],
             method: PaymentMethod.utang,
             customerId: customerId,
@@ -178,7 +181,10 @@ void main() {
 
       _ok(
         await repos.saleReturns.returnItems(saleId, [
-          SaleReturnLine(productId: productId, quantity: Quantity.whole(4)),
+          SaleReturnLine(
+            productId: productId,
+            quantity: const Quantity.whole(4),
+          ),
         ]),
       );
 

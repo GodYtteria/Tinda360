@@ -11,7 +11,7 @@ final backupStatusStoreProvider = Provider<FileBackupStatusStore>(
 );
 
 final class FileBackupStatusStore {
-  FileBackupStatusStore({Future<Directory> Function()? directoryProvider})
+  new({Future<Directory> Function()? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   static const String _fileName = 'tinda360_backup_status.json';

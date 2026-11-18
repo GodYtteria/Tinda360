@@ -1,7 +1,7 @@
 import 'package:tinda360/core/money/money.dart';
 
 final class CustomerDraft {
-  const CustomerDraft({
+  const new({
     required this.name,
     this.phone,
     this.creditLimit,

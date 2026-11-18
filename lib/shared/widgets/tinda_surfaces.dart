@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class TindaCard extends StatelessWidget {
-  const TindaCard({
+  const new({
     required this.child,
     super.key,
     this.padding = const EdgeInsetsDirectional.all(AppSpacing.s16),
@@ -67,7 +67,7 @@ class TindaCard extends StatelessWidget {
 }
 
 class TindaListRow extends StatelessWidget {
-  const TindaListRow({
+  const new({
     required this.title,
     super.key,
     this.subtitle,
@@ -134,7 +134,7 @@ class TindaListRow extends StatelessWidget {
 }
 
 class TindaHeaderBar extends StatelessWidget {
-  const TindaHeaderBar({
+  const new({
     required this.title,
     super.key,
     this.leading,
@@ -229,7 +229,7 @@ class TindaHeaderBar extends StatelessWidget {
 }
 
 class TindaBadge extends StatelessWidget {
-  const TindaBadge({
+  const new({
     required this.label,
     super.key,
     this.isWarning = false,
@@ -277,7 +277,7 @@ class TindaBadge extends StatelessWidget {
 }
 
 class TindaEmptyState extends StatelessWidget {
-  const TindaEmptyState({
+  const new({
     required this.icon,
     required this.title,
     required this.body,
@@ -350,7 +350,7 @@ class TindaEmptyState extends StatelessWidget {
 }
 
 class TindaBanner extends StatelessWidget {
-  const TindaBanner({
+  const new({
     required this.icon,
     required this.title,
     required this.body,
@@ -401,7 +401,7 @@ class TindaBanner extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
@@ -409,7 +409,7 @@ class TindaBanner extends StatelessWidget {
 }
 
 class TindaCartBar extends StatelessWidget {
-  const TindaCartBar({
+  const new({
     required this.itemsLabel,
     required this.totalLabel,
     required this.payLabel,
@@ -487,7 +487,7 @@ class TindaCartBar extends StatelessWidget {
 }
 
 class TindaGroupedCard extends StatelessWidget {
-  const TindaGroupedCard({required this.children, super.key});
+  const new({required this.children, super.key});
 
   final List<Widget> children;
 
@@ -524,7 +524,7 @@ class TindaGroupedCard extends StatelessWidget {
 }
 
 class TindaBottomSheet extends StatelessWidget {
-  const TindaBottomSheet({
+  const new({
     required this.title,
     required this.closeTooltip,
     required this.child,
@@ -624,7 +624,7 @@ class TindaBottomSheet extends StatelessWidget {
 const double _sheetFooterMaxHeightFraction = 0.4;
 
 class TindaSkeleton extends StatefulWidget {
-  const TindaSkeleton({
+  const new({
     super.key,
     this.width,
     this.height = 16,
@@ -700,7 +700,7 @@ class _TindaSkeletonState extends State<TindaSkeleton>
 }
 
 class TindaListSkeleton extends StatelessWidget {
-  const TindaListSkeleton({super.key, this.rows = 5});
+  const new({super.key, this.rows = 5});
 
   final int rows;
 

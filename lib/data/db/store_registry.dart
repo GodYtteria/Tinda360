@@ -6,13 +6,13 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 final class StoreEntry {
-  const StoreEntry({
+  const new({
     required this.id,
     required this.name,
     required this.fileName,
   });
 
-  factory StoreEntry.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final id = json['id'] as String? ?? '';
     final name = json['name'] as String? ?? '';
     final rawFileName = json['fileName'] as String? ?? '';
@@ -46,12 +46,12 @@ final class StoreEntry {
 }
 
 final class StoreRegistry {
-  StoreRegistry({
+  new({
     required this.activeStoreId,
     required List<StoreEntry> stores,
   }) : stores = List<StoreEntry>.unmodifiable(stores);
 
-  factory StoreRegistry.defaultRegistry() => StoreRegistry(
+  factory defaultRegistry() => StoreRegistry(
     activeStoreId: defaultStoreId,
     stores: const [
       StoreEntry(
@@ -62,7 +62,7 @@ final class StoreRegistry {
     ],
   );
 
-  factory StoreRegistry.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final rawStores = json['stores'];
     final parsedStores = <StoreEntry>[];
     if (rawStores is List) {

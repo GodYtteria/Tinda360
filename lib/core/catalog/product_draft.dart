@@ -4,7 +4,7 @@ import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/money.dart';
 
 final class ProductDraft {
-  const ProductDraft({
+  const new({
     required this.name,
     required this.unit,
     required this.price,

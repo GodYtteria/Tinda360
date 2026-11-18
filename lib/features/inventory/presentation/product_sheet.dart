@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -12,14 +12,14 @@ import 'package:tinda360/core/failures/product_failure.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
-import 'package:tinda360/services/service_providers.dart';
-import 'package:tinda360/features/inventory/presentation/product_form_logic.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_rules.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
+import 'package:tinda360/features/inventory/presentation/product_form_logic.dart';
 import 'package:tinda360/features/inventory/presentation/product_sheet_extras.dart';
 import 'package:tinda360/features/inventory/presentation/stock_history_sheet.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -29,7 +29,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class ProductSheet extends ConsumerStatefulWidget {
-  const ProductSheet({
+  const new({
     super.key,
     this.existing,
     this.initialBarcode,
@@ -537,7 +537,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
 }
 
 class _PriceCostRow extends StatelessWidget {
-  const _PriceCostRow({
+  const new({
     required this.priceController,
     required this.costController,
     required this.onChanged,
@@ -577,7 +577,7 @@ class _PriceCostRow extends StatelessWidget {
 }
 
 class _UnitSelector extends StatelessWidget {
-  const _UnitSelector({
+  const new({
     required this.selectedUnit,
     required this.onSelected,
   });
@@ -622,7 +622,7 @@ class _UnitSelector extends StatelessWidget {
 }
 
 class _InitialStockSection extends StatelessWidget {
-  const _InitialStockSection({
+  const new({
     required this.stockCount,
     required this.unit,
     required this.onDecrement,
@@ -673,7 +673,7 @@ class _InitialStockSection extends StatelessWidget {
 }
 
 class _AdjustStockSection extends StatelessWidget {
-  const _AdjustStockSection({
+  const new({
     required this.currentStock,
     required this.delta,
     required this.unit,
@@ -740,7 +740,7 @@ class _AdjustStockSection extends StatelessWidget {
 }
 
 class _StockTargetDialog extends StatefulWidget {
-  const _StockTargetDialog({
+  const new({
     required this.startingQuantity,
     required this.allowsFraction,
     required this.maxStock,

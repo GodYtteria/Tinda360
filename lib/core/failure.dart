@@ -1,5 +1,5 @@
 abstract class Failure {
-  const Failure();
+  const new();
 
   String get code;
 }

@@ -2,12 +2,13 @@ part of 'ulat_screen.dart';
 
 const int _cashCountHistoryDays = 7;
 
-final _cashExpectedProvider = StreamProvider.autoDispose<Money>((ref) {
-  final today = ref.watch(ulatTodayProvider);
-  return ref.watch(cashCountRepositoryProvider).watchExpectedCash(today);
-});
+final StreamProvider<Money> _cashExpectedProvider =
+    StreamProvider.autoDispose<Money>((ref) {
+      final today = ref.watch(ulatTodayProvider);
+      return ref.watch(cashCountRepositoryProvider).watchExpectedCash(today);
+    });
 
-final _cashCountHistoryProvider =
+final StreamProvider<List<CashCountEntry>> _cashCountHistoryProvider =
     StreamProvider.autoDispose<List<CashCountEntry>>((ref) {
       final today = ref.watch(ulatTodayProvider);
       final range = DayRange(today.plusDays(1 - _cashCountHistoryDays), today);
@@ -33,7 +34,7 @@ Color _differenceColor(AppPalette palette, Money difference) {
 }
 
 class _CashCountSection extends ConsumerStatefulWidget {
-  const _CashCountSection();
+  const new();
 
   @override
   ConsumerState<_CashCountSection> createState() => _CashCountSectionState();
@@ -197,7 +198,7 @@ class _CashCountSectionState extends ConsumerState<_CashCountSection> {
 }
 
 class _CashCountList extends StatelessWidget {
-  const _CashCountList({
+  const new({
     required this.heading,
     required this.entries,
     required this.showDay,

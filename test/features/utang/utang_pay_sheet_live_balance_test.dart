@@ -1,14 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/customer.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
+import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/theme/app_theme.dart';
 
@@ -30,7 +31,7 @@ Future<void> _pumpSheet(
       child: MaterialApp(
         theme: AppTheme.light(),
         locale: const Locale('en'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: UtangPaySheet.pay(balance: openedWith)),
       ),

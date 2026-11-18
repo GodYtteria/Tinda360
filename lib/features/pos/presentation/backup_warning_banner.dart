@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/pos/data/backup_warning.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/backup_status.dart';
@@ -9,7 +9,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class BackupWarningBanner extends ConsumerWidget {
-  const BackupWarningBanner({required this.onOpenSettings, super.key});
+  const new({required this.onOpenSettings, super.key});
 
   final VoidCallback onOpenSettings;
 

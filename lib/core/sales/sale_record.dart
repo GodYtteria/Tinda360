@@ -4,7 +4,7 @@ import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/sales/payment_method.dart';
 
 final class SaleRecordLine {
-  const SaleRecordLine({
+  const new({
     required this.productId,
     required this.productName,
     required this.unit,
@@ -32,7 +32,7 @@ final class SaleRecordLine {
 }
 
 final class SaleRecord {
-  const SaleRecord({
+  const new({
     required this.id,
     required this.createdAtMs,
     required this.method,

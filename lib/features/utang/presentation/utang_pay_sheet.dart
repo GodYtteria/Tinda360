@@ -1,22 +1,22 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/customers/customer_draft.dart';
 import 'package:tinda360/core/failures/customer_failure.dart';
 import 'package:tinda360/core/money/money.dart';
-import 'package:tinda360/data/repositories/customer_repository.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/data/repositories/customer_repository.dart';
+import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
-import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
@@ -33,10 +33,9 @@ Money computeRemainingBalance(Money currentBalance, Money? payment) {
 }
 
 class UtangPaySheet extends ConsumerStatefulWidget {
-  const UtangPaySheet.pay({required CustomerBalance balance, super.key})
-    : _balance = balance;
+  const new pay({required CustomerBalance this._balance, super.key});
 
-  const UtangPaySheet.newSuki({super.key}) : _balance = null;
+  const new newSuki({super.key}) : _balance = null;
 
   final CustomerBalance? _balance;
 
@@ -411,7 +410,7 @@ class _UtangPaySheetState extends ConsumerState<UtangPaySheet> {
 }
 
 class _CurrentBalanceCard extends StatelessWidget {
-  const _CurrentBalanceCard({required this.balance});
+  const new({required this.balance});
 
   final CustomerBalance balance;
 
@@ -456,7 +455,7 @@ class _CurrentBalanceCard extends StatelessWidget {
 }
 
 class _NewBalancePreview extends StatelessWidget {
-  const _NewBalancePreview({required this.label, required this.amount});
+  const new({required this.label, required this.amount});
 
   final String label;
   final Money amount;

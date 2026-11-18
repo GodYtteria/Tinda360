@@ -94,13 +94,13 @@ void main() {
         InventoryRules.buyAmount(_item(stock: 1, lowStockAt: 5)),
         9,
       );
-      expect(InventoryRules.buyAmount(_item(stock: 0)), 1);
+      expect(InventoryRules.buyAmount(_item()), 1);
       expect(
         InventoryRules.buyAmount(_item(stock: 5, lowStockAt: 5)),
         5,
       );
       expect(
-        InventoryRules.buyAmount(_item(stock: 0, lowStockAt: 0)),
+        InventoryRules.buyAmount(_item(lowStockAt: 0)),
         1,
       );
     });
@@ -113,7 +113,7 @@ void main() {
           _item(id: 'a', name: 'Kape', stock: 1, lowStockAt: 5),
           _item(id: 'b', name: 'Load', tracksStock: false, lowStockAt: 5),
           _item(id: 'c', name: 'Asin', stock: 50, lowStockAt: 5),
-          _item(id: 'd', name: 'Sabon', stock: 0),
+          _item(id: 'd', name: 'Sabon'),
         ],
       );
       final lines = text.split('\n');
@@ -128,7 +128,7 @@ void main() {
       final text = InventoryRules.buildShoppingListText(
         localizations: filipino,
         storeName: 'Tindahan',
-        products: [_item(name: 'Kape', stock: 0, lowStockAt: 2)],
+        products: [_item(name: 'Kape', lowStockAt: 2)],
       );
       expect(text, contains(filipino.shoppingListHeader));
       expect(text, contains('Kape'));

@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/expiry_status.dart';
@@ -13,13 +13,13 @@ import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/inventory/data/product_csv_exporter.dart';
 import 'package:tinda360/features/inventory/data/product_csv_importer.dart';
-import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_rules.dart';
 import 'package:tinda360/features/inventory/presentation/product_sheet.dart';
 import 'package:tinda360/features/pos/presentation/pos_screen.dart';
-import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
+import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -28,7 +28,7 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-final inventoryProductsProvider =
+final StreamProvider<List<StockedProduct>> inventoryProductsProvider =
     StreamProvider.autoDispose<List<StockedProduct>>(
       (ref) => ref.watch(productRepositoryProvider).watchActive(),
     );
@@ -36,7 +36,7 @@ final inventoryProductsProvider =
 enum InventoryFilter { all, lowStock, expiring }
 
 class InventoryScreen extends ConsumerStatefulWidget {
-  const InventoryScreen({
+  const new({
     required this.onOpenSettings,
     required this.onOpenAiChat,
     super.key,
@@ -100,48 +100,46 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   void _openCsvImportSheet() {
     final localizations = AppLocalizations.of(context);
     final palette = AppPalette.of(context);
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        barrierColor: palette.scrim,
-        builder: (sheetContext) => TindaBottomSheet(
-          title: localizations.inventoryImportCsvTitle,
-          closeTooltip: localizations.commonClose,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                localizations.inventoryImportCsvSubtitle,
-                style: AppTypography.body(palette.textMuted),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              TindaPrimaryButton(
-                label: localizations.inventoryImportCsvPickButton,
-                onPressed: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(_pickAndImportCsv());
-                },
-              ),
-              const SizedBox(height: AppSpacing.s10),
-              TindaSecondaryButton(
-                label: localizations.inventoryImportCsvTemplateButton,
-                onPressed: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(_saveCsvTemplate());
-                },
-              ),
-              const SizedBox(height: AppSpacing.s10),
-              TindaSecondaryButton(
-                label: localizations.inventoryExportCsvButton,
-                onPressed: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(_exportProductsCsv());
-                },
-              ),
-            ],
-          ),
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: palette.scrim,
+      builder: (sheetContext) => TindaBottomSheet(
+        title: localizations.inventoryImportCsvTitle,
+        closeTooltip: localizations.commonClose,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              localizations.inventoryImportCsvSubtitle,
+              style: AppTypography.body(palette.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.s16),
+            TindaPrimaryButton(
+              label: localizations.inventoryImportCsvPickButton,
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                unawaited(_pickAndImportCsv());
+              },
+            ),
+            const SizedBox(height: AppSpacing.s10),
+            TindaSecondaryButton(
+              label: localizations.inventoryImportCsvTemplateButton,
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                unawaited(_saveCsvTemplate());
+              },
+            ),
+            const SizedBox(height: AppSpacing.s10),
+            TindaSecondaryButton(
+              label: localizations.inventoryExportCsvButton,
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                unawaited(_exportProductsCsv());
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -317,7 +315,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 }
 
 class _InventoryBody extends StatelessWidget {
-  const _InventoryBody({
+  const new({
     required this.productsAsync,
     required this.filteredProducts,
     required this.filter,
@@ -441,7 +439,7 @@ class _InventoryBody extends StatelessWidget {
 }
 
 class _AnimatedInventoryRow extends StatelessWidget {
-  const _AnimatedInventoryRow({
+  const new({
     required this.index,
     required this.child,
     super.key,
@@ -471,7 +469,7 @@ class _AnimatedInventoryRow extends StatelessWidget {
 }
 
 class _InventoryProductRow extends StatelessWidget {
-  const _InventoryProductRow({
+  const new({
     required this.item,
     required this.today,
     required this.onTap,
@@ -554,7 +552,7 @@ class _InventoryProductRow extends StatelessWidget {
 }
 
 class _AddProductPill extends StatelessWidget {
-  const _AddProductPill({
+  const new({
     required this.label,
     required this.onPressed,
   });

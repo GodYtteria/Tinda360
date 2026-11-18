@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class TindaTextInput extends StatelessWidget {
-  const TindaTextInput({
+  const new({
     required this.label,
     super.key,
     this.controller,
@@ -97,7 +97,7 @@ class TindaTextInput extends StatelessWidget {
 }
 
 class TindaSearchField extends StatelessWidget {
-  const TindaSearchField({
+  const new({
     required this.hintText,
     required this.onChanged,
     super.key,
@@ -147,7 +147,7 @@ class TindaSearchField extends StatelessWidget {
 }
 
 class TindaFilterChip extends StatelessWidget {
-  const TindaFilterChip({
+  const new({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -209,7 +209,7 @@ class TindaFilterChip extends StatelessWidget {
 }
 
 class TindaSegmentedControl<T> extends StatelessWidget {
-  const TindaSegmentedControl({
+  const new({
     required this.segments,
     required this.selected,
     required this.onChanged,
@@ -254,7 +254,7 @@ class TindaSegmentedControl<T> extends StatelessWidget {
 }
 
 class _SegmentButton extends StatelessWidget {
-  const _SegmentButton({
+  const new({
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -307,12 +307,12 @@ class _SegmentButton extends StatelessWidget {
 }
 
 class TindaStepper extends StatelessWidget {
-  const TindaStepper({
+  const new({
     required this.valueLabel,
     required this.onDecrement,
     required this.decrementTooltip,
-    this.onIncrement,
     required this.incrementTooltip,
+    this.onIncrement,
     super.key,
     this.onValueTap,
   });
@@ -396,7 +396,7 @@ class TindaStepper extends StatelessWidget {
 }
 
 class TindaToggleSwitch extends StatelessWidget {
-  const TindaToggleSwitch({
+  const new({
     required this.value,
     required this.onChanged,
     super.key,

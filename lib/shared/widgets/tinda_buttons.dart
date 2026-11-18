@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class TindaPrimaryButton extends StatelessWidget {
-  const TindaPrimaryButton({
+  const new({
     required this.label,
     required this.onPressed,
     super.key,
@@ -63,7 +63,7 @@ class TindaPrimaryButton extends StatelessWidget {
 }
 
 class TindaSecondaryButton extends StatelessWidget {
-  const TindaSecondaryButton({
+  const new({
     required this.label,
     required this.onPressed,
     super.key,
@@ -125,7 +125,7 @@ class TindaSecondaryButton extends StatelessWidget {
 }
 
 class TindaAccentButton extends StatelessWidget {
-  const TindaAccentButton({
+  const new({
     required this.label,
     required this.onPressed,
     super.key,
@@ -163,7 +163,7 @@ class TindaAccentButton extends StatelessWidget {
 }
 
 class TindaTextLinkButton extends StatelessWidget {
-  const TindaTextLinkButton({
+  const new({
     required this.label,
     required this.onPressed,
     super.key,
@@ -207,7 +207,7 @@ class TindaTextLinkButton extends StatelessWidget {
 }
 
 class TindaGoogleButton extends StatelessWidget {
-  const TindaGoogleButton({
+  const new({
     required this.label,
     required this.onPressed,
     super.key,
@@ -270,7 +270,7 @@ class TindaGoogleButton extends StatelessWidget {
 }
 
 class TindaIconButton extends StatelessWidget {
-  const TindaIconButton({
+  const new({
     required this.tooltip,
     required this.onPressed,
     super.key,

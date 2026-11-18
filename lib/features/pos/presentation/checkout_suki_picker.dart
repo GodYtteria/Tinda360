@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/money/money.dart';
-import 'package:tinda360/features/pos/presentation/checkout_shortfall.dart';
 import 'package:tinda360/features/pos/presentation/checkout_sheet.dart';
+import 'package:tinda360/features/pos/presentation/checkout_shortfall.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -17,7 +17,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class CheckoutSukiPicker extends ConsumerStatefulWidget {
-  const CheckoutSukiPicker({
+  const new({
     required this.selectedCustomerId,
     required this.onSelectCustomer,
     this.additionalUtang,

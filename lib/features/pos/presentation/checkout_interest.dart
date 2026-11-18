@@ -9,7 +9,7 @@ enum InterestInputMode { percent, peso }
 enum InterestInputError { invalidPercent, invalidAmount, exceedsUtang }
 
 final class InterestResolution {
-  const InterestResolution({this.interest, this.error});
+  const new({this.interest, this.error});
 
   final Money? interest;
 
@@ -74,7 +74,7 @@ Money? interestBaseAmount({
 }
 
 final class InterestPreviewAmounts {
-  const InterestPreviewAmounts({
+  const new({
     required this.utang,
     required this.interest,
     required this.total,

@@ -3,7 +3,7 @@ import 'package:tinda360/core/money/money.dart';
 
 @immutable
 final class LedgerRecord {
-  const LedgerRecord({
+  const new({
     required this.id,
     required this.createdAtMs,
     required this.kind,

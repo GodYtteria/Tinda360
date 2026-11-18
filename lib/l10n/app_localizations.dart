@@ -1187,7 +1187,7 @@ abstract class AppLocalizations {
   /// No description provided for @ledgerReminderTuboMessage.
   ///
   /// In en, this message translates to:
-  /// **'Hi {customerName}! Friendly reminder from {storeName}: Utang {utang} + interest {tubo} = {total}. Salamat po!'**
+  /// **'Hi {customerName}! Friendly reminder from {storeName}: Utang {utang} + interest {tubo} = {total}. Thank you!'**
   String ledgerReminderTuboMessage(
     String customerName,
     String storeName,
@@ -1331,7 +1331,7 @@ abstract class AppLocalizations {
   /// No description provided for @ledgerReminderMessage.
   ///
   /// In en, this message translates to:
-  /// **'Hi {customerName}! Friendly reminder from {storeName}: your utang balance is {balance}. Salamat po!'**
+  /// **'Hi {customerName}! Friendly reminder from {storeName}: your utang balance is {balance}. Thank you!'**
   String ledgerReminderMessage(
     String customerName,
     String storeName,
@@ -1485,7 +1485,7 @@ abstract class AppLocalizations {
   /// No description provided for @utangAgeDays.
   ///
   /// In en, this message translates to:
-  /// **'{count} days'**
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
   String utangAgeDays(int count);
 
   /// No description provided for @utangExportCsv.
@@ -2658,19 +2658,19 @@ abstract class AppLocalizations {
   /// No description provided for @receiptBantayLabel.
   ///
   /// In en, this message translates to:
-  /// **'Bantay'**
+  /// **'On duty'**
   String get receiptBantayLabel;
 
   /// No description provided for @bantayChipEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Set Bantay'**
+  /// **'Set on duty'**
   String get bantayChipEmpty;
 
   /// No description provided for @bantayChipLabel.
   ///
   /// In en, this message translates to:
-  /// **'Bantay: {name}'**
+  /// **'On duty: {name}'**
   String bantayChipLabel(String name);
 
   /// No description provided for @bantayDialogTitle.

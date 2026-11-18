@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -25,7 +25,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({
+  const new({
     required this.onCompleted,
     super.key,
   });
@@ -319,7 +319,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 
 class _OnboardingTopBar extends StatelessWidget {
-  const _OnboardingTopBar({
+  const new({
     required this.stepIndex,
     required this.backTooltip,
     required this.onBack,
@@ -359,7 +359,7 @@ class _OnboardingTopBar extends StatelessWidget {
 }
 
 class _StepDots extends StatelessWidget {
-  const _StepDots({required this.currentStep});
+  const new({required this.currentStep});
 
   final int currentStep;
 
@@ -389,7 +389,7 @@ class _StepDots extends StatelessWidget {
 }
 
 class _StepOneName extends StatelessWidget {
-  const _StepOneName({
+  const new({
     required this.controller,
     required this.errorMessage,
     required this.onChanged,
@@ -440,7 +440,7 @@ class _StepOneName extends StatelessWidget {
 }
 
 class _StepTwoBackup extends StatelessWidget {
-  const _StepTwoBackup({
+  const new({
     required this.isSaving,
     required this.showRestoreUnavailable,
     required this.addSampleItems,

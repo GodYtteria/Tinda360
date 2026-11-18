@@ -14,7 +14,7 @@ abstract interface class BantayNameStore {
 }
 
 final class FileBantayNameStore implements BantayNameStore {
-  FileBantayNameStore({Future<Directory> Function()? directoryProvider})
+  new({Future<Directory> Function()? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   static const String _fileName = 'tinda360_bantay_names.json';

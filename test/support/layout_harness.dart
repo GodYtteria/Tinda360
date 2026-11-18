@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/day_range.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
@@ -13,9 +13,9 @@ import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/customers/customer_draft.dart';
+import 'package:tinda360/core/failure.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
-import 'package:tinda360/core/failure.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/core/sales/payment_method.dart';
 import 'package:tinda360/core/sales/sale_draft.dart';
@@ -26,6 +26,7 @@ import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/id_generator.dart';
 import 'package:tinda360/data/repositories/expense_repository.dart';
 import 'package:tinda360/features/pos/data/cart_storage.dart';
+import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/google_drive_backup_service.dart';
 import 'package:tinda360/services/service_providers.dart';
@@ -44,7 +45,7 @@ const String longSukiName =
     'Maria Concepcion Dela Cruz-Villanueva ng Purok Sampaguita Barangay Uno';
 
 final class LayoutScenario {
-  const LayoutScenario({
+  const new({
     required this.width,
     required this.height,
     required this.pixelRatio,
@@ -92,7 +93,7 @@ final class _IdleDriveBackupService implements DriveBackupService {
 }
 
 final class SeededStore {
-  SeededStore(this.repos);
+  new(this.repos);
 
   final TestRepositories repos;
 
@@ -326,7 +327,7 @@ Future<SeededStore> seedStore() async {
 }
 
 final class _ExpenseIds implements IdGenerator {
-  _ExpenseIds(this._inner);
+  new(this._inner);
 
   final SequentialIds _inner;
 
@@ -355,7 +356,7 @@ Widget buildLayoutApp(
     darkTheme: AppTheme.dark(),
     themeMode: scenario.darkMode ? ThemeMode.dark : ThemeMode.light,
     locale: Locale(scenario.localeCode),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     builder: (context, innerChild) => MediaQuery(
       data: MediaQuery.of(
@@ -499,7 +500,7 @@ Future<void> scrollThroughAll(WidgetTester tester, String context) async {
 typedef SheetOpener = Future<void> Function(BuildContext context);
 
 final class SheetLauncher extends StatefulWidget {
-  const SheetLauncher({required this.open, super.key});
+  const new({required this.open, super.key});
 
   final SheetOpener open;
 

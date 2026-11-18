@@ -1,7 +1,10 @@
-final class LocalDay implements Comparable<LocalDay> {
-  const LocalDay(this.serial);
+import 'package:meta/meta.dart';
 
-  factory LocalDay.fromLocal(DateTime local) => LocalDay(
+@immutable
+final class LocalDay implements Comparable<LocalDay> {
+  const new(this.serial);
+
+  factory fromLocal(DateTime local) => LocalDay(
     DateTime.utc(local.year, local.month, local.day).millisecondsSinceEpoch ~/
         Duration.millisecondsPerDay,
   );

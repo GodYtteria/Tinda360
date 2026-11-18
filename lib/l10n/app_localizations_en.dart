@@ -662,7 +662,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String tubo,
     String total,
   ) {
-    return 'Hi $customerName! Friendly reminder from $storeName: Utang $utang + interest $tubo = $total. Salamat po!';
+    return 'Hi $customerName! Friendly reminder from $storeName: Utang $utang + interest $tubo = $total. Thank you!';
   }
 
   @override
@@ -744,7 +744,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String storeName,
     String balance,
   ) {
-    return 'Hi $customerName! Friendly reminder from $storeName: your utang balance is $balance. Salamat po!';
+    return 'Hi $customerName! Friendly reminder from $storeName: your utang balance is $balance. Thank you!';
   }
 
   @override
@@ -836,7 +836,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String utangAgeDays(int count) {
-    return '$count days';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1510,14 +1516,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ulatVoidSaleButton => 'Void / Delete Sale';
 
   @override
-  String get receiptBantayLabel => 'Bantay';
+  String get receiptBantayLabel => 'On duty';
 
   @override
-  String get bantayChipEmpty => 'Set Bantay';
+  String get bantayChipEmpty => 'Set on duty';
 
   @override
   String bantayChipLabel(String name) {
-    return 'Bantay: $name';
+    return 'On duty: $name';
   }
 
   @override

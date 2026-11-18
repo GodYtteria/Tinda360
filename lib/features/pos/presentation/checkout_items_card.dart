@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/money/money.dart';
@@ -14,7 +14,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class CheckoutLine {
-  const CheckoutLine({
+  const new({
     required this.stocked,
     required this.quantity,
     required this.subtotal,
@@ -40,7 +40,7 @@ class CheckoutLine {
 const double _priceColumnWidthFraction = 0.3;
 
 class CheckoutItemsCard extends StatelessWidget {
-  const CheckoutItemsCard({
+  const new({
     required this.lines,
     required this.total,
     required this.onDecrement,
@@ -201,7 +201,7 @@ class CheckoutItemsCard extends StatelessWidget {
 }
 
 class _LineQuantityButton extends StatelessWidget {
-  const _LineQuantityButton({
+  const new({
     required this.icon,
     required this.tooltip,
     required this.onPressed,

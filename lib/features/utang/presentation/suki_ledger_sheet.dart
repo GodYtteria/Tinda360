@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show StreamProviderFamily;
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
 import 'package:tinda360/core/customers/interest_rate.dart';
@@ -13,24 +14,25 @@ import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/features/utang/presentation/ledger_entry_delete.dart';
 import 'package:tinda360/features/utang/presentation/suki_edit_sheet.dart';
+import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
-import 'package:tinda360/features/utang/presentation/utang_balances_provider.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
-final sukiLedgerProvider = StreamProvider.autoDispose
-    .family<List<LedgerRecord>, String>(
+final StreamProviderFamily<List<LedgerRecord>, String> sukiLedgerProvider =
+    StreamProvider.autoDispose.family<List<LedgerRecord>, String>(
       (ref, customerId) =>
           ref.watch(customerRepositoryProvider).watchLedger(customerId),
     );
 
-final _ledgerStoreProfileProvider = StreamProvider.autoDispose<StoreProfile>(
-  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
-);
+final StreamProvider<StoreProfile> _ledgerStoreProfileProvider =
+    StreamProvider.autoDispose<StoreProfile>(
+      (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+    );
 
 String buildUtangReminderMessage({
   required AppLocalizations localizations,
@@ -60,7 +62,7 @@ String buildUtangReminderMessage({
 }
 
 class SukiLedgerSheet extends ConsumerWidget {
-  const SukiLedgerSheet({
+  const new({
     required this.balance,
     required this.onPay,
     super.key,
@@ -435,7 +437,7 @@ class SukiLedgerSheet extends ConsumerWidget {
 }
 
 class _LedgerBalanceSummary extends StatelessWidget {
-  const _LedgerBalanceSummary({required this.balance});
+  const new({required this.balance});
 
   final CustomerBalance balance;
 
@@ -474,7 +476,7 @@ class _LedgerBalanceSummary extends StatelessWidget {
 }
 
 class _LedgerRecordRow extends StatelessWidget {
-  const _LedgerRecordRow({required this.record, required this.onTap});
+  const new({required this.record, required this.onTap});
 
   final LedgerRecord record;
 

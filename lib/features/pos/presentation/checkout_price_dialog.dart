@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -29,7 +29,7 @@ Future<LinePriceChoice?> showLinePriceDialog(
 }
 
 class _LinePriceDialog extends StatefulWidget {
-  const _LinePriceDialog({
+  const new({
     required this.productName,
     required this.normalPrice,
     required this.currentOverride,

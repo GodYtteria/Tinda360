@@ -90,7 +90,7 @@ void main() {
     expect(range, DayRange(_day(2026, 11, 1), today));
     expect(
       customRangeFromPicker(
-        start: DateTime(2026, 11, 1),
+        start: DateTime(2026, 11),
         end: DateTime(2026, 11, 19),
         today: today,
       ),

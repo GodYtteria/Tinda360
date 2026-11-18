@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
@@ -20,7 +20,6 @@ import 'package:tinda360/features/ulat/presentation/sale_return_sheet.dart';
 import 'package:tinda360/features/utang/presentation/suki_ledger_sheet.dart';
 import 'package:tinda360/features/utang/presentation/utang_pay_sheet.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
-import 'package:tinda360/services/receipt_print_service.dart';
 import 'package:tinda360/shared/widgets/csv_preview_sheet.dart';
 
 import '../support/layout_harness.dart';
@@ -51,7 +50,7 @@ const List<LayoutScenario> _reducedScenarios = [
     width: 320,
     height: 568,
     pixelRatio: 3.5,
-    textScale: 2.0,
+    textScale: 2,
     darkMode: true,
     localeCode: 'fil',
   ),
@@ -59,7 +58,7 @@ const List<LayoutScenario> _reducedScenarios = [
     width: 360,
     height: 800,
     pixelRatio: 1.5,
-    textScale: 1.0,
+    textScale: 1,
     darkMode: false,
     localeCode: 'fil',
   ),
@@ -67,7 +66,7 @@ const List<LayoutScenario> _reducedScenarios = [
     width: 600,
     height: 960,
     pixelRatio: 2.625,
-    textScale: 1.0,
+    textScale: 1,
     darkMode: true,
     localeCode: 'en',
   ),
@@ -346,8 +345,8 @@ void main() {
             open: (context) => showLinePriceDialog(
               context,
               productName: longProductName,
-              normalPrice: Money(1400, Currency.php),
-              currentOverride: Money(1200, Currency.php),
+              normalPrice: const Money(1400, Currency.php),
+              currentOverride: const Money(1200, Currency.php),
             ),
             interact: null,
           ),
@@ -368,7 +367,7 @@ void main() {
             },
           ),
           'product sheet create': (
-            open: (context) => ProductSheet.show(context),
+            open: ProductSheet.show,
             interact: null,
           ),
           'product sheet edit expiring': (
@@ -410,7 +409,7 @@ void main() {
             interact: null,
           ),
           'new suki sheet': (
-            open: (context) => UtangPaySheet.showNewSuki(context),
+            open: UtangPaySheet.showNewSuki,
             interact: null,
           ),
           'return sheet': (
@@ -426,9 +425,9 @@ void main() {
                 '3 x $longProductName = P42.00',
                 '2.5 kilo Bigas Premium = P145.00',
               ],
-              total: Money(18700, Currency.php),
-              paid: Money(20000, Currency.php),
-              change: Money(1300, Currency.php),
+              total: const Money(18700, Currency.php),
+              paid: const Money(20000, Currency.php),
+              change: const Money(1300, Currency.php),
               paymentLabel: 'Cash',
               timestamp: DateTime(2026, 11, 17, 10),
               details: const ReceiptDetails(
@@ -444,10 +443,10 @@ void main() {
               context: context,
               isScrollControlled: true,
               builder: (_) => SaleDoneSheet(
-                total: Money(18700, Currency.php),
-                paid: Money(20000, Currency.php),
-                change: Money(1300, Currency.php),
-                receiptLines: ['3 x $longProductName = P42.00'],
+                total: const Money(18700, Currency.php),
+                paid: const Money(20000, Currency.php),
+                change: const Money(1300, Currency.php),
+                receiptLines: const ['3 x $longProductName = P42.00'],
                 paymentMethod: PaymentMethod.cash,
                 storeName: 'Tindahan ni Aling Nena at Mga Anak Sari-Sari Store',
                 timestamp: DateTime(2026, 11, 17, 10),

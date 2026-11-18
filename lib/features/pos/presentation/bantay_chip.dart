@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/settings/presentation/optional_text_dialog.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/bantay_name_store.dart';
@@ -27,9 +27,10 @@ Future<void> editBantayName(
 }
 
 class BantayChip extends ConsumerWidget {
-  const BantayChip({super.key});
+  const new({super.key});
 
-  static const double _maxChipWidth = 120;
+  static const double _maxChipWidth = 140;
+  static const double _chipHeight = 32;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,14 +52,38 @@ class BantayChip extends ConsumerWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: _maxChipWidth,
-            minHeight: 48,
+            minHeight: AppSizes.touchTargetMin,
           ),
-          child: Center(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.meta(palette.onHeader),
+          child: Align(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: _chipHeight),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: palette.onHeader.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(AppRadii.smallButton),
+                  border: Border.all(
+                    color: palette.onHeader.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s10,
+                    vertical: AppSpacing.s4,
+                  ),
+                  child: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.meta(palette.onHeader),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

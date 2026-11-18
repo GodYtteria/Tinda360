@@ -38,11 +38,11 @@ String backupFileNameFor(String storeName, DateTime now) {
       .join();
   final safeLabel = plainName
       .replaceAll(RegExp('[^A-Za-z0-9]+'), '-')
-      .replaceAll(RegExp('^-+|-+\$'), '');
+      .replaceAll(RegExp(r'^-+|-+$'), '');
   final limitedLabel = safeLabel.length > _maxStoreLabelLength
       ? safeLabel
             .substring(0, _maxStoreLabelLength)
-            .replaceAll(RegExp('-+\$'), '')
+            .replaceAll(RegExp(r'-+$'), '')
       : safeLabel;
   final label = limitedLabel.isEmpty ? _fallbackStoreLabel : limitedLabel;
   final localDay = now.toLocal();

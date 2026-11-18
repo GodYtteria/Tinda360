@@ -20,7 +20,7 @@ import 'package:tinda360/data/repositories/sale_repository.dart';
 import '../../support/test_repositories.dart';
 
 final class _PrefixedIds implements IdGenerator {
-  _PrefixedIds(this._prefix);
+  new(this._prefix);
 
   final String _prefix;
   var _next = 0;

@@ -29,7 +29,7 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase(super.executor);
+  new(super.executor);
 
   static const String storeProfileId = 'store';
 

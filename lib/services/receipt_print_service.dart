@@ -8,7 +8,7 @@ import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 
 final class ReceiptDetails {
-  const ReceiptDetails({
+  const new({
     this.receiptNumber,
     this.customerName,
     this.ewalletReference,
@@ -215,7 +215,7 @@ abstract final class ReceiptPrintService {
       pw.Text(
         storeName.toUpperCase(),
         textAlign: pw.TextAlign.center,
-        style: pw.TextStyle(
+        style: const pw.TextStyle(
           fontSize: 12,
           fontWeight: pw.FontWeight.bold,
           letterSpacing: 0.5,

@@ -46,7 +46,7 @@ enum QueryTimeframe {
 }
 
 final class MatchedQuery {
-  const MatchedQuery({
+  const new({
     required this.intent,
     required this.timeframe,
     required this.normalizedText,
@@ -60,30 +60,7 @@ final class MatchedQuery {
 }
 
 final class IntentMatcher {
-  const IntentMatcher({
-    required this.shortcuts,
-    required this.timeframes,
-    required this.intents,
-  });
-
-  final Map<String, String> shortcuts;
-
-  final Map<String, List<String>> timeframes;
-
-  final Map<ChatIntent, List<String>> intents;
-
-  static const String _defaultAssetPath = 'assets/ai/intents.json';
-
-  static Future<IntentMatcher> loadFromAsset() async {
-    try {
-      final rawJson = await rootBundle.loadString(_defaultAssetPath);
-      return IntentMatcher.fromJsonString(rawJson);
-    } on Exception {
-      return IntentMatcher.fallback();
-    }
-  }
-
-  factory IntentMatcher.fromJsonString(String rawJson) {
+  factory fromJsonString(String rawJson) {
     final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
     final rawShortcuts =
         decoded['shortcuts'] as Map<String, dynamic>? ?? const {};
@@ -120,7 +97,7 @@ final class IntentMatcher {
     );
   }
 
-  factory IntentMatcher.fallback() => const IntentMatcher(
+  factory fallback() => const IntentMatcher(
     shortcuts: {
       'mgkano': 'magkano',
       'cno': 'sino',
@@ -208,6 +185,29 @@ final class IntentMatcher {
       ChatIntent.expenses: ['gastos', 'expenses', 'net income', 'spend'],
     },
   );
+
+  const new({
+    required this.shortcuts,
+    required this.timeframes,
+    required this.intents,
+  });
+
+  final Map<String, String> shortcuts;
+
+  final Map<String, List<String>> timeframes;
+
+  final Map<ChatIntent, List<String>> intents;
+
+  static const String _defaultAssetPath = 'assets/ai/intents.json';
+
+  static Future<IntentMatcher> loadFromAsset() async {
+    try {
+      final rawJson = await rootBundle.loadString(_defaultAssetPath);
+      return IntentMatcher.fromJsonString(rawJson);
+    } on Exception {
+      return IntentMatcher.fallback();
+    }
+  }
 
   MatchedQuery match(String rawInput) {
     final normalized = _normalize(rawInput);

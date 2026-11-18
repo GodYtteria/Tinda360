@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
 import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
 import 'package:tinda360/features/shell/main_shell.dart';
+import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/l10n/app_localizations_en.dart';
 import 'package:tinda360/l10n/app_localizations_fil.dart';
@@ -151,7 +152,7 @@ void main() {
         child: MaterialApp(
           theme: AppTheme.light(),
           locale: const Locale('en'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: MainShell(onOpenSettings: () {}, initialIndex: 2),
         ),

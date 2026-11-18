@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/customers/ledger_record.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
@@ -43,12 +43,10 @@ void handleLedgerRecordTap(
 ) {
   switch (ledgerTapActionFor(record)) {
     case LedgerTapAction.confirmDelete:
-      unawaited(
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => LedgerEntryDeleteDialog(record: record, ref: ref),
-        ),
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => LedgerEntryDeleteDialog(record: record, ref: ref),
       );
     case LedgerTapAction.showSaleHint:
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +60,7 @@ void handleLedgerRecordTap(
 }
 
 class LedgerEntryDeleteDialog extends StatefulWidget {
-  const LedgerEntryDeleteDialog({
+  const new({
     required this.record,
     required this.ref,
     super.key,

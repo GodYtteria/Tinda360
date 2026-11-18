@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/home/presentation/home_notifier.dart';
 import 'package:tinda360/features/home/presentation/widgets/home_error_view.dart';
 import 'package:tinda360/features/home/presentation/widgets/home_ready_view.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

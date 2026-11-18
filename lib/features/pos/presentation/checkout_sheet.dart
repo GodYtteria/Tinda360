@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 import 'package:tinda360/core/catalog/stocked_product.dart';
 import 'package:tinda360/core/customers/customer_balance.dart';
@@ -16,8 +16,8 @@ import 'package:tinda360/core/sales/sale_line_draft.dart';
 import 'package:tinda360/core/sales/sale_math.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/pos/presentation/cart_price_override_provider.dart';
-import 'package:tinda360/features/pos/presentation/cash_quick_amounts_row.dart';
 import 'package:tinda360/features/pos/presentation/cart_quantity_dialog.dart';
+import 'package:tinda360/features/pos/presentation/cash_quick_amounts_row.dart';
 import 'package:tinda360/features/pos/presentation/checkout_credit_limit.dart';
 import 'package:tinda360/features/pos/presentation/checkout_interest.dart';
 import 'package:tinda360/features/pos/presentation/checkout_interest_field.dart';
@@ -28,8 +28,8 @@ import 'package:tinda360/features/pos/presentation/checkout_suki_picker.dart';
 import 'package:tinda360/features/pos/presentation/checkout_utang_pricing.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 import 'package:tinda360/features/pos/presentation/pos_screen.dart';
-import 'package:tinda360/features/pos/presentation/sale_done_sheet.dart';
 import 'package:tinda360/features/pos/presentation/receipt_preview_sheet.dart';
+import 'package:tinda360/features/pos/presentation/sale_done_sheet.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/bantay_name_store.dart';
@@ -63,13 +63,13 @@ bool addToCartOrWarn(
   return false;
 }
 
-final checkoutCustomersProvider =
+final StreamProvider<List<CustomerBalance>> checkoutCustomersProvider =
     StreamProvider.autoDispose<List<CustomerBalance>>(
       (ref) => ref.watch(customerRepositoryProvider).watchBalances(),
     );
 
 class CheckoutSheet extends ConsumerStatefulWidget {
-  const CheckoutSheet({
+  const new({
     required this.products,
     required this.cart,
     super.key,
@@ -370,22 +370,20 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     final navigator = Navigator.of(context);
     final scrimColor = AppPalette.of(context).scrim;
     navigator.pop();
-    unawaited(
-      showModalBottomSheet<void>(
-        context: navigator.context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: scrimColor,
-        builder: (_) => SaleDoneSheet(
-          total: total,
-          paid: paid,
-          change: change,
-          receiptLines: receiptLines,
-          paymentMethod: method,
-          storeName: storeName,
-          timestamp: timestamp,
-          details: details,
-        ),
+    showModalBottomSheet<void>(
+      context: navigator.context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: scrimColor,
+      builder: (_) => SaleDoneSheet(
+        total: total,
+        paid: paid,
+        change: change,
+        receiptLines: receiptLines,
+        paymentMethod: method,
+        storeName: storeName,
+        timestamp: timestamp,
+        details: details,
       ),
     );
   }
@@ -645,7 +643,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 }
 
 class _CashSection extends StatelessWidget {
-  const _CashSection({
+  const new({
     required this.controller,
     required this.total,
     required this.change,
@@ -735,7 +733,7 @@ class _CashSection extends StatelessWidget {
 }
 
 class _EwalletSection extends StatelessWidget {
-  const _EwalletSection({
+  const new({
     required this.controller,
     required this.errorText,
   });
@@ -787,7 +785,7 @@ class _EwalletSection extends StatelessWidget {
 }
 
 class _UtangSection extends StatelessWidget {
-  const _UtangSection({
+  const new({
     required this.selectedCustomerId,
     required this.errorText,
     required this.onSelectCustomer,
@@ -845,7 +843,7 @@ class _UtangSection extends StatelessWidget {
 }
 
 class _ShortfallSection extends StatelessWidget {
-  const _ShortfallSection({
+  const new({
     required this.shortfall,
     required this.selectedCustomerId,
     required this.onSelectCustomer,

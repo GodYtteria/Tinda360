@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
 import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
@@ -14,7 +14,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class ChatSheet extends ConsumerStatefulWidget {
-  const ChatSheet({
+  const new({
     super.key,
     this.contextHint,
     this.extraSuggestions = const [],
@@ -112,12 +112,10 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
         if (!_showScrollToBottom) setState(() => _showScrollToBottom = true);
         return;
       }
-      unawaited(
-        _scrollController.animateTo(
-          max,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-        ),
+      _scrollController.animateTo(
+        max,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
       );
       if (_showScrollToBottom) setState(() => _showScrollToBottom = false);
     });
@@ -213,8 +211,9 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                       if (!mounted) return;
                       setState(() {
                         _revealedIds.add(id);
-                        if (_revealingMessageId == id)
+                        if (_revealingMessageId == id) {
                           _revealingMessageId = null;
+                        }
                       });
                     },
                     onOpenTab: widget.onOpenTab == null
@@ -272,7 +271,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
 }
 
 class _ChatHeader extends StatelessWidget {
-  const _ChatHeader({
+  const new({
     required this.mood,
     required this.isThinking,
     required this.onClose,
@@ -341,7 +340,7 @@ class _ChatHeader extends StatelessWidget {
 }
 
 class _MessageList extends StatelessWidget {
-  const _MessageList({
+  const new({
     required this.messages,
     required this.yumiScreen,
     required this.isThinking,
@@ -407,7 +406,7 @@ class _MessageList extends StatelessWidget {
 }
 
 class _UserBubble extends StatelessWidget {
-  const _UserBubble({required this.text});
+  const new({required this.text});
 
   final String text;
 
@@ -442,7 +441,7 @@ class _UserBubble extends StatelessWidget {
 }
 
 class _AssistantBubble extends StatelessWidget {
-  const _AssistantBubble({
+  const new({
     required this.message,
     this.animate = false,
     this.onRevealComplete,
@@ -520,7 +519,7 @@ class _AssistantBubble extends StatelessWidget {
 }
 
 class _AssistantAction {
-  const _AssistantAction(this.label, this.tabIndex);
+  const new(this.label, this.tabIndex);
   final String label;
   final int tabIndex;
 }
@@ -557,7 +556,7 @@ List<_AssistantAction> _suggestedActions(
 }
 
 class _ProgressiveText extends StatefulWidget {
-  const _ProgressiveText({
+  const new({
     required this.text,
     required this.style,
     this.onDone,
@@ -619,7 +618,7 @@ class _ProgressiveTextState extends State<_ProgressiveText>
 }
 
 class _ThinkingBubble extends StatelessWidget {
-  const _ThinkingBubble({required this.label});
+  const new({required this.label});
 
   final String label;
 
@@ -660,7 +659,7 @@ class _ThinkingBubble extends StatelessWidget {
 }
 
 class _TypingDots extends StatefulWidget {
-  const _TypingDots();
+  const new();
 
   @override
   State<_TypingDots> createState() => _TypingDotsState();
@@ -735,7 +734,7 @@ class _TypingDotsState extends State<_TypingDots>
 }
 
 class _SuggestionBar extends StatelessWidget {
-  const _SuggestionBar({
+  const new({
     required this.suggestions,
     required this.onSelect,
     this.enabled = true,
@@ -772,7 +771,7 @@ class _SuggestionBar extends StatelessWidget {
 }
 
 class _ChatInputBar extends StatelessWidget {
-  const _ChatInputBar({
+  const new({
     required this.controller,
     required this.onSend,
     this.enabled = true,

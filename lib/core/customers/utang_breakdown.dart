@@ -5,7 +5,7 @@ import 'package:tinda360/core/money/money.dart';
 
 @immutable
 final class UtangBreakdown {
-  const UtangBreakdown({required this.utang, required this.interest});
+  const new({required this.utang, required this.interest});
 
   final Money utang;
 

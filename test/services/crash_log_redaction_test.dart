@@ -5,8 +5,8 @@ void main() {
   test('hides SQL bound values but keeps the error and statement', () {
     const message =
         'SqliteException(19): UNIQUE constraint failed\n'
-        '  Causing statement: INSERT INTO customers (name, phone) VALUES (?, ?)'
-        ', parameters: Maria Santos, 09171234567';
+        '  Causing statement: INSERT INTO customers (name, phone) VALUES (?, ?),'
+        ' parameters: Maria Santos, 09171234567';
 
     final redacted = redactBoundValues(message);
 
@@ -20,8 +20,8 @@ void main() {
   test('hides bound values that contain line breaks', () {
     const message =
         'SqliteException(19): failed\n'
-        '  Causing statement: INSERT INTO t (note) VALUES (?)'
-        ', parameters: unang linya\nikalawang linya 09171234567';
+        '  Causing statement: INSERT INTO t (note) VALUES (?),'
+        ' parameters: unang linya\nikalawang linya 09171234567';
 
     final redacted = redactBoundValues(message);
 

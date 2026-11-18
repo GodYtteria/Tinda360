@@ -33,6 +33,7 @@ analyzer:
     - "**/*.drift.dart"      # drift
     - "**/*.gen.dart"        # asset/other generators
     - "**/generated_plugin_registrant.dart"
+    - "lib/l10n/app_localizations*.dart"
     # Drift's exported schema snapshots are historical migration-test baselines.
     # A reformat or autofix here corrupts the baseline. Never edit old snapshots.
     - "test/drift/generated/**"
@@ -74,6 +75,13 @@ analyzer:
     #     external consumers may downgrade to `ignore` and document only the
     #     seams (repositories, services, migration steps) instead.
     public_member_api_docs: ignore
+    cascade_invocations: ignore
+    async_return_with_no_await: ignore
+    no_adjacent_strings_in_list: ignore
+    use_setters_to_change_properties: ignore
+    document_ignores: ignore
+    matching_super_parameters: ignore
+    sort_unnamed_constructors_first: ignore
     dangling_library_doc_comments: error
 
     # --- Deliberately NOT errors -------------------------------------------

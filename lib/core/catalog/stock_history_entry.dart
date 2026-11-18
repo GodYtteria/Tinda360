@@ -1,7 +1,9 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
 
+@immutable
 final class StockHistoryEntry {
-  const StockHistoryEntry({
+  const new({
     required this.id,
     required this.createdAtMs,
     required this.reason,

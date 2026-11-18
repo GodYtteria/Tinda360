@@ -90,7 +90,7 @@ final class _MemoryBackupPrefs implements BackupPreferencesStore {
 }
 
 final _uploadOnceProvider = FutureProvider<BackupSyncResult>(
-  (ref) => uploadStoreDatabase(ref),
+  uploadStoreDatabase,
 );
 
 void main() {
@@ -184,7 +184,7 @@ void main() {
         ..writeAsStringSync('sqlite');
 
       final repos = TestRepositories();
-      addTearDown(() => repos.db.close());
+      addTearDown(repos.db.close);
 
       final fakeDrive = _FakeDriveBackupService();
       final memoryPrefs = _MemoryBackupPrefs();
@@ -231,7 +231,7 @@ void main() {
     addTearDown(() => tempDirectory.deleteSync(recursive: true));
     final dbFile = File('${tempDirectory.path}/restart.sqlite');
     final repos = TestRepositories();
-    addTearDown(() => repos.db.close());
+    addTearDown(repos.db.close);
     final fakeDrive = _FakeDriveBackupService();
     final savedPrefs = _MemoryBackupPrefs()
       ..connected = true
@@ -265,7 +265,7 @@ void main() {
     addTearDown(() => tempDirectory.deleteSync(recursive: true));
     final dbFile = File('${tempDirectory.path}/status.sqlite');
     final repos = TestRepositories();
-    addTearDown(() => repos.db.close());
+    addTearDown(repos.db.close);
     final fakeDrive = _FakeDriveBackupService();
     final container = ProviderContainer(
       overrides: [
@@ -298,7 +298,7 @@ void main() {
     addTearDown(() => tempDirectory.deleteSync(recursive: true));
     final dbFile = File('${tempDirectory.path}/queue.sqlite');
     final repos = TestRepositories();
-    addTearDown(() => repos.db.close());
+    addTearDown(repos.db.close);
     final fakeDrive = _FakeDriveBackupService();
     final container = ProviderContainer(
       overrides: [
@@ -337,7 +337,7 @@ void main() {
       addTearDown(() => tempDirectory.deleteSync(recursive: true));
       final dbFile = File('${tempDirectory.path}/missing_dir/store.sqlite');
       final repos = TestRepositories();
-      addTearDown(() => repos.db.close());
+      addTearDown(repos.db.close);
       final fakeDrive = _FakeDriveBackupService();
       final log = RecordingAppLog();
       final container = ProviderContainer(

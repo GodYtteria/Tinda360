@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
 import 'package:tinda360/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:tinda360/features/settings/presentation/settings_screen.dart';
 import 'package:tinda360/features/shell/main_shell.dart';
+import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/google_drive_backup_service.dart';
 import 'package:tinda360/services/service_providers.dart';
@@ -60,7 +61,7 @@ Widget _wrapApp(
     darkTheme: AppTheme.dark(),
     themeMode: themeMode,
     locale: const Locale('en'),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     builder: (context, innerChild) => MediaQuery(
       data: MediaQuery.of(context).copyWith(

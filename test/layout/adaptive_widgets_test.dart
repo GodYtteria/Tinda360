@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
@@ -29,7 +29,7 @@ void main() {
     testWidgets('keeps a huge amount on one line at a narrow width', (
       tester,
     ) async {
-      final hugeAmount = Money(123456789012, Currency.php);
+      const hugeAmount = Money(123456789012, Currency.php);
       await tester.pumpWidget(
         _host(
           width: 80,
@@ -69,7 +69,7 @@ void main() {
         _host(
           width: 400,
           child: MoneyText(
-            Money(54500, Currency.php),
+            const Money(54500, Currency.php),
             style: const TextStyle(fontSize: 20),
           ),
         ),

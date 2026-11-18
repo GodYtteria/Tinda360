@@ -1,9 +1,11 @@
+import 'package:meta/meta.dart';
 import 'package:tinda360/core/money/currency.dart';
 
+@immutable
 final class Money implements Comparable<Money> {
-  const Money(this.minorUnits, this.currency);
+  const new(this.minorUnits, this.currency);
 
-  const Money.zero(this.currency) : minorUnits = 0;
+  const new zero(this.currency) : minorUnits = 0;
 
   final int minorUnits;
 

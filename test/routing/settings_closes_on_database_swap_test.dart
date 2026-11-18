@@ -7,9 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tinda360/app.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/app_database.dart';
+import 'package:tinda360/features/onboarding/presentation/splash_screen.dart';
 import 'package:tinda360/features/pos/data/cart_storage.dart';
-import 'package:tinda360/features/shell/main_shell.dart';
 import 'package:tinda360/features/settings/presentation/settings_screen.dart';
+import 'package:tinda360/features/shell/main_shell.dart';
 import 'package:tinda360/routing/app_router.dart';
 import 'package:tinda360/services/service_providers.dart';
 
@@ -21,6 +22,17 @@ Future<void> _advance(WidgetTester tester) async {
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
     await tester.pump(const Duration(milliseconds: 300));
+  }
+}
+
+const int _maxPollSteps = 200;
+
+Future<void> _advanceUntil(WidgetTester tester, bool Function() done) async {
+  for (var step = 0; step < _maxPollSteps && !done(); step++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
   }
 }
 
@@ -46,7 +58,10 @@ void main() {
       UncontrolledProviderScope(container: container, child: const App()),
     );
     container.read(appRouterProvider).go(AppRoutes.main);
-    await _advance(tester);
+    await _advanceUntil(
+      tester,
+      () => find.byType(SplashScreen).evaluate().isEmpty,
+    );
     expect(find.byType(MainShell), findsOneWidget);
 
     unawaited(container.read(appRouterProvider).push(AppRoutes.settings));

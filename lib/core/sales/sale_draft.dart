@@ -3,7 +3,7 @@ import 'package:tinda360/core/sales/payment_method.dart';
 import 'package:tinda360/core/sales/sale_line_draft.dart';
 
 final class SaleDraft {
-  const SaleDraft({
+  const new({
     required this.method,
     required this.lines,
     this.cashTendered,

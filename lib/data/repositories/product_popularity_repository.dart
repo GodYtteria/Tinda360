@@ -3,12 +3,11 @@ import 'package:drift/drift.dart';
 import 'package:tinda360/data/db/app_database.dart';
 
 class ProductPopularityRepository {
-  ProductPopularityRepository({
-    required AppDatabase db,
-    required Clock clock,
+  new({
+    required this._db,
+    required this._clock,
     this.windowDays = defaultWindowDays,
-  }) : _db = db,
-       _clock = clock;
+  });
 
   static const int defaultWindowDays = 30;
 

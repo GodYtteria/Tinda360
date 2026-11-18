@@ -8,39 +8,39 @@ import 'package:http/http.dart' as http;
 import 'package:tinda360/core/app_log.dart';
 
 sealed class BackupAuthResult {
-  const BackupAuthResult();
+  const new();
 }
 
 final class BackupAuthSuccess extends BackupAuthResult {
-  const BackupAuthSuccess({required this.email});
+  const new({required this.email});
 
   final String email;
 }
 
 final class BackupAuthCancelled extends BackupAuthResult {
-  const BackupAuthCancelled();
+  const new();
 }
 
 final class BackupAuthFailed extends BackupAuthResult {
-  const BackupAuthFailed({required this.reason});
+  const new({required this.reason});
 
   final String reason;
 }
 
 sealed class BackupSyncResult {
-  const BackupSyncResult();
+  const new();
 }
 
 final class BackupSyncSuccess extends BackupSyncResult {
-  const BackupSyncSuccess();
+  const new();
 }
 
 final class BackupSyncNoBackup extends BackupSyncResult {
-  const BackupSyncNoBackup();
+  const new();
 }
 
 final class BackupSyncFailed extends BackupSyncResult {
-  const BackupSyncFailed({required this.reason});
+  const new({required this.reason});
 
   final String reason;
 }
@@ -66,7 +66,7 @@ abstract interface class DriveBackupService {
 }
 
 final class GoogleDriveBackupService implements DriveBackupService {
-  GoogleDriveBackupService({required AppLog log}) : _log = log;
+  new({required this._log});
 
   static const String _legacyBackupFileName = 'tinda360_backup.sqlite';
 
@@ -284,7 +284,7 @@ final class GoogleDriveBackupService implements DriveBackupService {
 }
 
 final class _GoogleAuthHttpClient extends http.BaseClient {
-  _GoogleAuthHttpClient(this._headers, this._inner);
+  new(this._headers, this._inner);
 
   final Map<String, String> _headers;
   final http.Client _inner;

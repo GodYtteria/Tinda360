@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/features/chat/presentation/chat_sheet.dart';
 import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
 import 'package:tinda360/features/inventory/presentation/inventory_screen.dart';
@@ -16,7 +16,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class MainShell extends ConsumerStatefulWidget {
-  const MainShell({
+  const new({
     required this.onOpenSettings,
     super.key,
     this.initialIndex = 0,
@@ -144,7 +144,7 @@ class _MainShellState extends ConsumerState<MainShell> {
 }
 
 class _NavTabItem extends StatelessWidget {
-  const _NavTabItem({
+  const new({
     required this.svgAsset,
     required this.label,
     required this.selected,

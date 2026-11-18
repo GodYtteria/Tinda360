@@ -7,7 +7,7 @@ import 'package:tinda360/data/db/app_database.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
 
 final class LocalBackupService {
-  const LocalBackupService();
+  const new();
 
   static const List<int> _sqliteMagicHeader = <int>[
     83,

@@ -17,7 +17,7 @@ enum ProductUnit {
 
   liter('liter', allowsFraction: true);
 
-  const ProductUnit(this.storageName, {required this.allowsFraction});
+  new(this.storageName, {required this.allowsFraction});
 
   final String storageName;
 

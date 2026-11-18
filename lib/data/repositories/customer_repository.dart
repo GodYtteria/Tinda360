@@ -37,17 +37,13 @@ LedgerRecord ledgerRecordFromRow(QueryRow row, Currency currency) =>
     );
 
 final class CustomerRepository {
-  CustomerRepository({
-    required AppDatabase db,
-    required Clock clock,
-    required IdGenerator ids,
-    required AppLog log,
-    required Currency currency,
-  }) : _db = db,
-       _clock = clock,
-       _ids = ids,
-       _log = log,
-       _currency = currency;
+  new({
+    required this._db,
+    required this._clock,
+    required this._ids,
+    required this._log,
+    required this._currency,
+  });
 
   final AppDatabase _db;
   final Clock _clock;
@@ -495,7 +491,7 @@ WHERE l.id = ?
 }
 
 final class _CustomerRejected implements Exception {
-  const _CustomerRejected(this.failure);
+  const new(this.failure);
 
   final CustomerFailure failure;
 }

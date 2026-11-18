@@ -106,7 +106,7 @@ void main() {
     expect(await ledgerKinds(), ['debt', 'interest']);
     final interestRows = await repos.db
         .customSelect(
-          "SELECT sale_id, amount_minor FROM ledger_entries "
+          'SELECT sale_id, amount_minor FROM ledger_entries '
           "WHERE kind = 'interest'",
         )
         .get();

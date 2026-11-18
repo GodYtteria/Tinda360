@@ -9,7 +9,7 @@ import 'package:tinda360/data/repositories/product_repository.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 
 final class CsvRowError {
-  const CsvRowError({required this.rowNumber, required this.reason});
+  const new({required this.rowNumber, required this.reason});
 
   final int rowNumber;
 
@@ -17,7 +17,7 @@ final class CsvRowError {
 }
 
 final class CsvImportReport {
-  const CsvImportReport({
+  const new({
     required this.importedCount,
     required this.skippedCount,
     required this.errors,
@@ -36,7 +36,7 @@ final class CsvImportReport {
 final RegExp _formulaGuardPattern = RegExp(r"^'[=+\-@\t\r]");
 
 final class ProductCsvImporter {
-  const ProductCsvImporter();
+  const new();
 
   static const String sampleCsv =
       'name,price,cost,stock,unit,barcode,low_stock\n'

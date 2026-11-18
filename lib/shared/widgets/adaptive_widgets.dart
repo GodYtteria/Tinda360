@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/theme/adaptive_layout.dart';
@@ -6,14 +6,14 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 class MoneyText extends StatelessWidget {
-  MoneyText(
+  new(
     Money money, {
     required this.style,
     super.key,
     this.alignment = AlignmentDirectional.centerStart,
   }) : text = formatMoney(money);
 
-  const MoneyText.text(
+  const new text(
     this.text, {
     required this.style,
     super.key,
@@ -42,7 +42,7 @@ class MoneyText extends StatelessWidget {
 }
 
 class AdaptiveBadges extends StatelessWidget {
-  const AdaptiveBadges({
+  const new({
     required this.content,
     required this.badges,
     super.key,
@@ -95,7 +95,7 @@ class AdaptiveBadges extends StatelessWidget {
 }
 
 class TindaScreenBody extends StatelessWidget {
-  const TindaScreenBody({required this.child, super.key});
+  const new({required this.child, super.key});
 
   final Widget child;
 
@@ -115,7 +115,7 @@ class TindaScreenBody extends StatelessWidget {
 }
 
 class ResponsiveSheetBody extends StatelessWidget {
-  const ResponsiveSheetBody({
+  const new({
     required this.child,
     super.key,
     this.padding = const EdgeInsetsDirectional.all(AppSpacing.s24),

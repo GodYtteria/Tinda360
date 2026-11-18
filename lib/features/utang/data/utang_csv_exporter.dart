@@ -23,7 +23,7 @@ String exportUtangCsv({
         _formatDecimalMoney(item.outstandingUtang),
         _formatDecimalMoney(item.outstandingInterest),
         _lastPaymentDate(entries),
-        oldestDebtDays == null ? '' : oldestDebtDays.toString(),
+        if (oldestDebtDays == null) '' else oldestDebtDays.toString(),
       ]),
     );
   }

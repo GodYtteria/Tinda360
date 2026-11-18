@@ -3,7 +3,7 @@ import 'package:tinda360/core/money/money.dart';
 
 @immutable
 final class ExpenseEntry {
-  const ExpenseEntry({
+  const new({
     required this.id,
     required this.createdAtMs,
     required this.daySerial,

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
@@ -25,7 +25,7 @@ enum BackupStatus {
 }
 
 final class SettingsState {
-  const SettingsState({
+  const new({
     required this.backupStatus,
     required this.autoBackupEnabled,
     this.accountEmail,
@@ -59,9 +59,10 @@ final class SettingsState {
   );
 }
 
-final storeProfileStreamProvider = StreamProvider.autoDispose<StoreProfile>(
-  (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
-);
+final StreamProvider<StoreProfile> storeProfileStreamProvider =
+    StreamProvider.autoDispose<StoreProfile>(
+      (ref) => ref.watch(storeProfileRepositoryProvider).watch(),
+    );
 
 void _savePreferenceInBackground(Ref ref, Future<void> pendingWrite) {
   final appLog = ref.read(appLogProvider);
@@ -77,11 +78,12 @@ final settingsNotifierProvider =
       SettingsNotifier.new,
     );
 
-final databaseSizeBytesProvider = FutureProvider.autoDispose<int>((ref) async {
-  ref.watch(appDatabaseProvider);
-  final file = await ref.watch(databaseFileProvider)();
-  return measureDatabaseBytes(file);
-});
+final FutureProvider<int> databaseSizeBytesProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+      ref.watch(appDatabaseProvider);
+      final file = await ref.watch(databaseFileProvider)();
+      return measureDatabaseBytes(file);
+    });
 
 Future<int> compactStoreDatabase(Ref ref) async {
   final database = ref.read(appDatabaseProvider);

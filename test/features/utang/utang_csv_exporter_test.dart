@@ -53,7 +53,7 @@ void main() {
       balances: [_balance('Ana', 11050, phone: '0917', interestMinor: 1050)],
       ledgerByCustomer: {
         'Ana': [
-          _entry('a', 'debt', 20000, DateTime.utc(2026, 5, 1)),
+          _entry('a', 'debt', 20000, DateTime.utc(2026, 5)),
           _entry('b', 'payment', 5000, DateTime.utc(2026, 5, 10)),
           _entry('c', 'payment', 4000, DateTime(2026, 6, 1, 23)),
           _entry(

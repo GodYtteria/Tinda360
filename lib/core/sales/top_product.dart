@@ -5,7 +5,7 @@ import 'package:tinda360/core/money/money.dart';
 
 @immutable
 final class TopProduct {
-  const TopProduct({
+  const new({
     required this.productId,
     required this.productName,
     required this.unit,

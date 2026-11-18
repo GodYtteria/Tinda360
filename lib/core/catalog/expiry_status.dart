@@ -1,15 +1,15 @@
 import 'package:tinda360/core/calendar/local_day.dart';
 
 sealed class ExpiryStatus {
-  const ExpiryStatus();
+  const new();
 }
 
 final class ExpiryExpired extends ExpiryStatus {
-  const ExpiryExpired();
+  const new();
 }
 
 final class ExpiryNear extends ExpiryStatus {
-  const ExpiryNear(this.daysLeft);
+  const new(this.daysLeft);
 
   final int daysLeft;
 }
