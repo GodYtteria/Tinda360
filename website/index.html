@@ -4,7 +4,110 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tinda 360 — Smart Offline POS para sa Sari-Sari Store</title>
-  <meta name="description" content="100% libreng open-source Android POS, imbentaryo, listahan ng utang, at on-device Smart Store Assistant assistant para sa Philippine sari-sari stores. Gumagana kahit walang internet.">
+  <meta name="description" content="Free offline Android POS app built by Bukluran, a community NGO, for Philippine sari-sari stores. AI assistant, inventory, utang ledger, reports — 1,000+ store owners already use it. No internet needed.">
+  <meta name="keywords" content="sari-sari store, POS, point of sale, offline POS, free POS, Android POS, inventory, utang, ledger, Philippines, Bukluran, NGO, community, AI assistant, small business">
+  <meta name="author" content="Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://tinda360.bukluran.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tinda360.bukluran.com/">
+  <meta property="og:title" content="Tinda 360 — Free Smart Offline POS for Sari-Sari Stores">
+  <meta property="og:description" content="Built by a community NGO for underserved store owners. AI-powered, offline-first, 100% free. 1,000+ early users.">
+  <meta property="og:image" content="https://tinda360.bukluran.com/app_icon_full.png">
+  <meta property="og:locale" content="en_PH">
+  <meta property="og:locale:alternate" content="fil_PH">
+  <meta property="og:site_name" content="Tinda 360">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tinda 360 — Free Smart Offline POS for Sari-Sari Stores">
+  <meta name="twitter:description" content="Built by a community NGO for underserved store owners. AI-powered, offline-first, 100% free.">
+  <meta name="twitter:image" content="https://tinda360.bukluran.com/app_icon_full.png">
+
+  <!-- JSON-LD: Organization (GEO/AEO — AI engines extract this) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc.",
+    "alternateName": "Bukluran",
+    "url": "https://tinda360.bukluran.com",
+    "logo": "https://tinda360.bukluran.com/app_icon_full.png",
+    "description": "A registered non-profit community organization in the Philippines building free technology tools for underserved communities."
+  }
+  </script>
+
+  <!-- JSON-LD: SoftwareApplication (SEO/AEO — rich results + AI answers) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tinda 360",
+    "operatingSystem": "Android",
+    "applicationCategory": "BusinessApplication",
+    "description": "Free offline Android POS with AI assistant, inventory tracking, utang ledger, and reports for Philippine sari-sari stores. Built by Bukluran, a community NGO.",
+    "url": "https://tinda360.bukluran.com",
+    "downloadUrl": "https://drive.google.com/drive/folders/10Lv-tauU7ghE85R6Xku0Mu3jLZVBIYMS",
+    "screenshot": "https://tinda360.bukluran.com/screenshots/pos.png",
+    "author": {
+      "@type": "Organization",
+      "name": "Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc."
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "PHP"
+    },
+    "featureList": "Offline POS, AI Store Assistant, Inventory Tracking, Utang Ledger, Barcode Scanner, Multi-Store, Google Drive Backup, Sales Reports, Expiry Alerts, Profit Margins, Sales Trends",
+    "inLanguage": ["en", "fil"],
+    "isAccessibleForFree": true
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage (AEO — AI engines use this for direct answers) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Tinda 360?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tinda 360 is a free, offline-first Android POS app built by Bukluran, a community NGO in the Philippines, for sari-sari store owners. It includes an AI store assistant, inventory tracking, utang ledger, barcode scanner, and sales reports — all running on-device without internet."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Tinda 360 free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Tinda 360 is 100% free with no subscriptions, no ads, and no hidden fees. It is open source and built by a registered non-profit organization."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Tinda 360 work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Tinda 360 works completely offline. All data is stored locally on your phone. Internet is only needed if you choose to enable Google Drive backup."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install Tinda 360?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Download the APK from the Tinda 360 website, allow installation from unknown sources when prompted, then open the app and name your store to start selling."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="icon" type="image/png" href="app_icon_full.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +134,7 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      overflow-x: hidden;
     }
     h1, h2, h3, .brand, .phone-header strong {
       font-family: 'Plus Jakarta Sans', 'Roboto', system-ui, sans-serif;
@@ -38,9 +142,44 @@
     a { color: var(--primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
+    /* --- Scroll reveal --- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* --- Noise texture overlay --- */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
     .topbar {
       background: var(--primary);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+    }
+    .topbar.scrolled {
+      background: rgba(15, 92, 74, 0.82);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
     }
     .topbar-inner {
       max-width: 1080px;
@@ -84,7 +223,22 @@
       color: rgba(255, 255, 255, 0.9);
       font-size: 14px;
       font-weight: 500;
+      position: relative;
+      transition: color 0.2s;
     }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-links a:hover { text-decoration: none; color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
     .lang-picker {
       display: inline-flex;
       background: rgba(255, 255, 255, 0.12);
@@ -103,18 +257,60 @@
       padding: 6px 12px;
       border-radius: 999px;
       cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
     }
+    .lang-btn:hover { transform: scale(1.05); }
     .lang-btn.active {
       background: var(--accent);
       color: #14201C;
+      box-shadow: 0 2px 8px rgba(242,162,58,0.3);
     }
 
     .hero {
       background: linear-gradient(165deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #FFFFFF;
       padding: 52px 20px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Animated gradient orbs */
+    .hero::before, .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: orb-float 12s ease-in-out infinite alternate;
+    }
+    .hero::before {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(242,162,58,0.22) 0%, transparent 70%);
+      top: -120px; right: -80px;
+    }
+    .hero::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(15,92,74,0.35) 0%, transparent 70%);
+      bottom: -100px; left: -60px;
+      animation-delay: -6s;
+    }
+    @keyframes orb-float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -30px) scale(1.15); }
+    }
+    /* Cursor glow in hero */
+    .hero-glow {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(242,162,58,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: left 0.3s ease-out, top 0.3s ease-out;
+      z-index: 0;
     }
     .hero-inner {
+      position: relative;
+      z-index: 1;
       max-width: 1080px;
       margin: 0 auto;
       display: grid;
@@ -134,16 +330,35 @@
       font-size: 13px;
       font-weight: 500;
       margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
     }
     .pill-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: var(--accent);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(242,162,58,0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(242,162,58,0); }
     }
     h1 {
       margin: 0 0 14px;
-      font-size: clamp(30px, 4.4vw, 44px);
+      font-size: clamp(30px, 4.4vw, 48px);
       font-weight: 800;
       line-height: 1.15;
       letter-spacing: -0.025em;
@@ -168,14 +383,29 @@
       border-radius: 14px;
       font-size: 15px;
       font-weight: 700;
-      transition: transform 0.15s ease;
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+      position: relative;
     }
-    .btn:hover { text-decoration: none; transform: translateY(-1px); }
-    .btn-accent { background: var(--accent); color: #14201C; }
+    .btn:hover { text-decoration: none; transform: translateY(-2px); }
+    .btn:active { transform: translateY(0) scale(0.98); }
+    .btn-accent {
+      background: var(--accent);
+      color: #14201C;
+      box-shadow: 0 4px 16px rgba(242,162,58,0.25);
+    }
+    .btn-accent:hover {
+      box-shadow: 0 8px 32px rgba(242,162,58,0.4);
+    }
     .btn-outline {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.08);
       color: #FFFFFF;
-      border: 1.5px solid rgba(255, 255, 255, 0.34);
+      border: 1.5px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .phone-frame {
@@ -183,11 +413,24 @@
       border-radius: 32px;
       border: 6px solid rgba(255, 255, 255, 0.2);
       overflow: hidden;
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.36);
+      box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.36),
+        0 0 80px rgba(242, 162, 58, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.1);
       max-width: 300px;
       margin: 0 auto;
       width: 100%;
       aspect-ratio: 9 / 19.5;
+      animation: phone-float 6s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+    .phone-frame:hover {
+      transform: scale(1.02);
+      animation-play-state: paused;
+    }
+    @keyframes phone-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
     .phone-frame video {
       width: 100%;
@@ -206,6 +449,12 @@
       border-radius: 20px;
       padding: 12px;
       text-align: center;
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
+    }
+    .screen-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
     .screen-card img {
       width: 100%;
@@ -214,6 +463,10 @@
       display: block;
       margin-bottom: 10px;
       border: 1px solid var(--border);
+      transition: transform 0.35s ease;
+    }
+    .screen-card:hover img {
+      transform: scale(1.03);
     }
     .screen-card span {
       font-size: 13px;
@@ -237,6 +490,16 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
       margin-bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-kicker::before {
+      content: '';
+      width: 20px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
     }
     .section h2 {
       margin: 0 0 8px;
@@ -260,6 +523,12 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 22px;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.35s ease;
+      will-change: transform;
+    }
+    .card:hover {
+      box-shadow: 0 16px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(15,92,74,0.08);
+      border-color: rgba(15,92,74,0.18);
     }
     .card-badge {
       display: inline-block;
@@ -306,11 +575,170 @@
       color: var(--muted);
       font-size: 14px;
     }
-    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
 
+    .download-band {
+      background: linear-gradient(165deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #FFFFFF;
+    }
+    .download-band .section-kicker { color: var(--accent); }
+    .download-band h2 { color: #FFFFFF; }
+    .download-band .section-sub { color: rgba(255,255,255,0.82); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .step {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 22px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s, border-color 0.3s;
+    }
+    .step:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.28);
+      transform: translateY(-4px);
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #14201C;
+      font-weight: 800;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .step h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .step p {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.78);
+    }
+    .btn-download {
+      background: var(--accent);
+      color: #14201C;
+      font-size: 17px;
+      min-height: 54px;
+      padding: 0 32px;
+      gap: 10px;
+      box-shadow: 0 6px 24px rgba(242,162,58,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-download::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .btn-download:hover::before {
+      transform: translateX(100%);
+    }
+    .btn-download:hover {
+      box-shadow: 0 10px 40px rgba(242,162,58,0.5);
+    }
+    .btn-download svg { flex-shrink: 0; }
+
+    /* --- Large desktop (1200+) --- */
+    @media (min-width: 1200px) {
+      .hero { padding: 72px 20px 80px; }
+      .section { padding: 72px 20px; }
+    }
+
+    /* --- Tablet / medium (821–1024) --- */
+    @media (max-width: 1024px) {
+      .hero-inner { gap: 28px; grid-template-columns: 1.1fr 0.9fr; }
+      .phone-frame { max-width: 260px; }
+      .nav-links { gap: 12px; }
+      .nav-links a { font-size: 13px; }
+    }
+
+    /* --- Small tablet / large phone (max 820) --- */
     @media (max-width: 820px) {
       .hero-inner { grid-template-columns: 1fr; text-align: left; }
-      .phone-mock { max-width: 360px; }
+      .phone-frame { max-width: 240px; margin: 0 auto; }
+      .hero-glow { display: none; }
+      .hero { padding: 40px 16px 48px; }
+      .hero::before { width: 300px; height: 300px; }
+      .hero::after { width: 250px; height: 250px; }
+      .section { padding: 40px 16px; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .screens-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+      .steps { grid-template-columns: 1fr; }
+      .nav-links a[href="/privacy"],
+      .nav-links a[href="/terms"] { display: none; }
+      footer { flex-direction: column; text-align: center; gap: 12px; }
+    }
+
+    /* --- Phone (max 480) --- */
+    @media (max-width: 480px) {
+      .topbar-inner { padding: 10px 14px; gap: 10px; }
+      .brand { font-size: 17px; gap: 8px; }
+      .brand img { width: 30px; height: 30px; }
+      .nav-right { gap: 10px; width: 100%; justify-content: space-between; }
+      .nav-links { gap: 8px; }
+      .nav-links a { font-size: 12px; }
+      .lang-btn { font-size: 11px; padding: 5px 10px; }
+      .hero { padding: 32px 14px 40px; }
+      h1 { font-size: 26px; }
+      .hero-copy { font-size: 15px; }
+      .pill { font-size: 11px; padding: 5px 10px; }
+      .btn { min-height: 44px; padding: 0 16px; font-size: 14px; border-radius: 12px; }
+      .cta-row { gap: 8px; }
+      .phone-frame { max-width: 200px; border-width: 4px; border-radius: 24px; }
+      .section { padding: 32px 14px; }
+      .section h2 { font-size: 22px; }
+      .section-kicker { font-size: 11px; }
+      .section-sub { font-size: 14px; }
+      .card { padding: 16px; border-radius: 14px; }
+      .card h3 { font-size: 16px; }
+      .card p { font-size: 13.5px; }
+      .card-badge { font-size: 11px; padding: 3px 8px; }
+      .screen-card { padding: 8px; border-radius: 14px; }
+      .screen-card img { border-radius: 10px; }
+      .screen-card span { font-size: 11px; }
+      .screens-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+      .step { padding: 16px; border-radius: 14px; }
+      .step-num { width: 28px; height: 28px; font-size: 13px; }
+      .step h3 { font-size: 14px; }
+      .step p { font-size: 13px; }
+      .btn-download { font-size: 15px; min-height: 48px; padding: 0 20px; }
+      .trust-item strong { font-size: 15px; }
+      footer { padding: 20px 14px 32px; font-size: 13px; }
+      .footer-links { gap: 14px; }
+    }
+
+    /* --- Very small phone (max 360) --- */
+    @media (max-width: 360px) {
+      .nav-links { display: none; }
+      h1 { font-size: 22px; }
+      .hero-copy { font-size: 14px; }
+      .phone-frame { max-width: 180px; }
+      .screens-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .phone-frame { animation: none; }
+      .pill::after { animation: none; }
+      .pill-dot { animation: none; }
+      .hero::before, .hero::after { animation: none; }
     }
   </style>
 </head>
@@ -323,6 +751,7 @@
       </a>
       <div class="nav-right">
         <nav class="nav-links" aria-label="Main navigation">
+          <a href="#download" data-i18n="navDownload">Download</a>
           <a href="#story" data-i18n="navStory">Kwento</a>
           <a href="#features" data-i18n="navFeatures">Mga Features</a>
           <a href="#trust" data-i18n="navTrust">Privacy &amp; Open Source</a>
@@ -338,19 +767,20 @@
   </header>
 
   <section class="hero">
+    <div class="hero-glow" id="heroGlow"></div>
     <div class="hero-inner">
       <div>
         <div class="pill">
           <span class="pill-dot" aria-hidden="true"></span>
-          <span data-i18n="heroBadge">100% Free &amp; Open Source · Offline-First Android POS</span>
+          <span data-i18n="heroBadge">Built by a Community NGO · 100% Free · Offline-First</span>
         </div>
-        <h1 data-i18n="heroTitle">Smart POS na may AI, kahit walang internet.</h1>
+        <h1 data-i18n="heroTitle">Libreng Smart POS mula sa komunidad, kahit walang internet.</h1>
         <p class="hero-copy" data-i18n="heroCopy">
-          Gawa para sa Philippine sari-sari stores. Magbenta nang mabilis, mag-track ng imbentaryo at utang, at magtanong sa on-device Smart Store Assistant — lahat nasa phone mo lang.
+          Ginawa ng Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc. para sa mga sari-sari store owner na walang access sa mahal na POS system. Mahigit 1,000 na ang gumagamit. Magbenta, mag-track ng imbentaryo at utang, at magtanong sa on-device AI assistant — lahat nasa phone mo lang, walang bayad.
         </p>
         <div class="cta-row">
-          <a class="btn btn-accent" href="#features" data-i18n="ctaPrimary">Tingnan ang Features</a>
-          <a class="btn btn-outline" href="/privacy" data-i18n="ctaSecondary">Privacy &amp; Data Safety</a>
+          <a class="btn btn-accent" href="#download" data-i18n="ctaDownload">I-download ang APK</a>
+          <a class="btn btn-outline" href="#features" data-i18n="ctaPrimary">Tingnan ang Features</a>
         </div>
       </div>
 
@@ -361,34 +791,34 @@
   </section>
 
   <section id="story" class="section">
-    <div class="section-head">
-      <div class="section-kicker" data-i18n="storyKicker">Bakit Ginawa Ang Tinda 360</div>
+    <div class="section-head reveal">
+      <div class="section-kicker" data-i18n="storyKicker">A Community Project by Bukluran</div>
       <h2 data-i18n="storyTitle">Para sa tindahang minsan ay iba ang nagbabantay.</h2>
-      <p class="section-sub" data-i18n="storySub">Ginawa ng Bukluran para sa mga komunidad sa buong Pilipinas.</p>
+      <p class="section-sub" data-i18n="storySub">Tinda 360 ay proyekto ng Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc., isang registered non-profit na tumutulong sa mga komunidad sa buong Pilipinas.</p>
     </div>
     <div class="grid-3">
-      <div class="card">
+      <div class="card reveal reveal-delay-1">
         <h3 data-i18n="storyProblemTitle">Ang problema</h3>
         <p data-i18n="storyProblemBody">Madalas wala ang may-ari ng sari-sari store, kaya kapamilya o kapitbahay ang nagbabantay. Mahirap magbilang ng stock, sa notebook nakasulat ang utang, at hindi alam ng may-ari kung tama ang kita at kung kulang ang kaha.</p>
       </div>
-      <div class="card">
+      <div class="card reveal reveal-delay-2">
         <h3 data-i18n="storySolutionTitle">Ang solusyon</h3>
         <p data-i18n="storySolutionBody">Simpleng app sa phone na gumagana kahit walang internet. Pipindot lang ang bantay para magbenta, hindi mabebenta ang wala nang stock, at awtomatikong naitatala ang utang ng bawat suki. May PIN ang may-ari para sa mga sensitibong gawain, at may bilang ng kaha sa dulo ng araw.</p>
       </div>
-      <div class="card">
-        <h3 data-i18n="storyImpactTitle">Para sa komunidad</h3>
-        <p data-i18n="storyImpactBody">Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas malinaw ang tiwala ng may-ari sa bantay. Mahigit 1,000 na ang gumagamit.</p>
+      <div class="card reveal reveal-delay-3">
+        <h3 data-i18n="storyImpactTitle">1,000+ store owners na ang gumagamit</h3>
+        <p data-i18n="storyImpactBody">Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas matibay ang tiwala ng may-ari sa bantay. Sumali sa lumalaking komunidad ng mga tindero't tindera na gumagamit ng Tinda 360.</p>
       </div>
     </div>
   </section>
 
   <section id="screenshots" class="section" style="padding-bottom: 12px;">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="section-kicker" data-i18n="screensKicker">Actual Mobile Screens</div>
       <h2 data-i18n="screensTitle">Silipin ang loob ng app.</h2>
       <p class="section-sub" data-i18n="screensSub">Kuha direkta mula sa totoong Android build — Dark Mode at Malaking Text ready.</p>
     </div>
-    <div class="screens-grid">
+    <div class="screens-grid reveal">
       <figure class="screen-card" style="margin:0;">
         <img src="screenshots/pos.png" alt="Tinda 360 POS screen" loading="lazy">
         <span data-i18n="s1Label">1 · POS (Benta)</span>
@@ -413,44 +843,44 @@
   </section>
 
   <section id="features" class="section">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="section-kicker" data-i18n="featuresKicker">Lahat ng kailangan sa tindahan</div>
       <h2 data-i18n="featuresTitle">Simple gamitin, mabilis sa counter.</h2>
       <p class="section-sub" data-i18n="featuresSub">Taglish at English UI na madaling basahin, may Dark Mode at Malaking Text support.</p>
     </div>
 
     <div class="grid-3">
-      <article class="card">
+      <article class="card reveal reveal-delay-1">
         <span class="card-badge" data-i18n="f1Badge">POS · Benta</span>
         <h3 data-i18n="f1Title">Cash, E-wallet &amp; Utang</h3>
         <p data-i18n="f1Body">May quick peso buttons (₱20–₱1000), automatic sukli, optional e-wallet ref, at direct suki utang recording.</p>
       </article>
 
-      <article class="card">
+      <article class="card reveal reveal-delay-2">
         <span class="card-badge" data-i18n="f2Badge">Imbentaryo</span>
         <h3 data-i18n="f2Title">Stock &amp; Barcode Scanner</h3>
         <p data-i18n="f2Body">Live stock movement ledger, low-stock warning badges, quick restock stepper, at camera/manual barcode lookup.</p>
       </article>
 
-      <article class="card">
+      <article class="card reveal reveal-delay-3">
         <span class="card-badge" data-i18n="f3Badge">Utang Ledger</span>
         <h3 data-i18n="f3Title">Suki Balances &amp; Limits</h3>
         <p data-i18n="f3Body">I-track ang kabuuang utang, credit limit warnings, at mag-record ng buong bayad o bahagi lang.</p>
       </article>
 
-      <article class="card">
+      <article class="card reveal reveal-delay-1">
         <span class="card-badge">Smart Store Assistant</span>
         <h3 data-i18n="f4Title">100% On-Device Assistant</h3>
-        <p data-i18n="f4Body">Itanong ang benta ngayon, tubo, mababa ang stock, o mga may utang nang direkta mula sa local SQLite DB.</p>
+        <p data-i18n="f4Body">Itanong ang benta, tubo, profit margins, sales trends, busiest hours, loyal customers, payment breakdown, expiry alerts, at stock forecast — lahat galing sa local SQLite DB.</p>
       </article>
 
-      <article class="card">
+      <article class="card reveal reveal-delay-2">
         <span class="card-badge" data-i18n="f5Badge">Ulat</span>
         <h3 data-i18n="f5Title">Ngayon, Linggo &amp; Buwan</h3>
         <p data-i18n="f5Body">Kita, tubo, transactions, trend chart, at Top 3 na pinakamabentang produkto sa isang tingin.</p>
       </article>
 
-      <article class="card">
+      <article class="card reveal reveal-delay-3">
         <span class="card-badge" data-i18n="f6Badge">Multi-Store &amp; Backup</span>
         <h3 data-i18n="f6Title">Store Switcher + Google Drive</h3>
         <p data-i18n="f6Body">Magdagdag o lumipat ng tindahan, paliitin ang storage via SQLite compaction, at mag-backup sa sariling Google Drive appDataFolder.</p>
@@ -460,22 +890,22 @@
 
   <section id="trust" class="trust-band">
     <div class="section">
-      <div class="section-head">
+      <div class="section-head reveal">
         <div class="section-kicker" data-i18n="trustKicker">Open Source &amp; Privacy-First</div>
         <h2 data-i18n="trustTitle">Data mo, kontrol mo.</h2>
         <p class="section-sub" data-i18n="trustSub">Walang subscription, walang ads, walang tracking servers.</p>
       </div>
 
       <div class="grid-3">
-        <div class="card trust-item">
+        <div class="card trust-item reveal reveal-delay-1">
           <strong data-i18n="t1Title">Zero Ads, Zero Trackers</strong>
           <p data-i18n="t1Body">Walang analytics o third-party telemetry. Ang mga benta at utang mo ay hindi lumalabas ng phone maliban kung ikaw ang mag-backup.</p>
         </div>
-        <div class="card trust-item">
+        <div class="card trust-item reveal reveal-delay-2">
           <strong data-i18n="t2Title">Centavo-Exact Math</strong>
           <p data-i18n="t2Body">Integer minor units at half-up rounding sa bawat item — walang floating-point rounding bugs sa sukli o tubo.</p>
         </div>
-        <div class="card trust-item">
+        <div class="card trust-item reveal reveal-delay-3">
           <strong data-i18n="t3Title">Private Google Drive App Folder</strong>
           <p data-i18n="t3Body">Kung i-on mo ang Google backup, drive.appdata lang ang scope — hindi nakakabasa ng iba mong Drive files.</p>
         </div>
@@ -483,8 +913,39 @@
     </div>
   </section>
 
+  <section id="download" class="download-band">
+    <div class="section">
+      <div class="section-head reveal">
+        <div class="section-kicker" data-i18n="dlKicker">I-download Ngayon</div>
+        <h2 data-i18n="dlTitle">Simulan sa 3 hakbang lang.</h2>
+        <p class="section-sub" data-i18n="dlSub">Walang Play Store account needed — direktang APK install.</p>
+      </div>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3 data-i18n="dlStep1Title">I-download ang APK</h3>
+          <p data-i18n="dlStep1Body">Pindutin ang Download button sa baba. Mga 25 MB lang ang file.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3 data-i18n="dlStep2Title">Payagan ang install</h3>
+          <p data-i18n="dlStep2Body">Kapag tinanong ng phone, i-tap ang "Allow from this source" sa Settings.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3 data-i18n="dlStep3Title">Buksan at simulan</h3>
+          <p data-i18n="dlStep3Body">I-open ang Tinda 360, lagyan ng pangalan ang tindahan, at magsimula nang magbenta.</p>
+        </div>
+      </div>
+      <a class="btn btn-download" href="https://drive.google.com/drive/folders/10Lv-tauU7ghE85R6Xku0Mu3jLZVBIYMS" target="_blank" rel="noopener">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-i18n="dlButton">I-download ang Tinda 360 APK</span>
+      </a>
+    </div>
+  </section>
+
   <footer>
-    <span>&copy; Tinda 360 · Open-Source Sari-Sari Store POS</span>
+    <span data-i18n="footerCopy">&copy; Tinda 360 · A Bukluran community project · Open Source</span>
     <nav class="footer-links" aria-label="Footer links">
       <a href="/privacy" data-i18n="navPrivacy">Privacy Policy</a>
       <a href="/terms" data-i18n="navTerms">Terms of Service</a>
@@ -496,16 +957,17 @@
     (function () {
       const translations = {
         fil: {
+          navDownload: 'Download',
           navStory: 'Kwento',
           navFeatures: 'Mga Features',
           navTrust: 'Privacy & Open Source',
           navPrivacy: 'Privacy Policy',
           navTerms: 'Terms',
-          heroBadge: '100% Free & Open Source · Offline-First Android POS',
-          heroTitle: 'Smart POS na may AI, kahit walang internet.',
-          heroCopy: 'Gawa para sa Philippine sari-sari stores. Magbenta nang mabilis, mag-track ng imbentaryo at utang, at magtanong sa on-device Smart Store Assistant — lahat nasa phone mo lang.',
+          heroBadge: 'Gawa ng Community NGO · 100% Libre · Offline-First',
+          heroTitle: 'Libreng Smart POS mula sa komunidad, kahit walang internet.',
+          heroCopy: 'Ginawa ng Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc. para sa mga sari-sari store owner na walang access sa mahal na POS system. Mahigit 1,000 na ang gumagamit. Magbenta, mag-track ng imbentaryo at utang, at magtanong sa on-device AI assistant — lahat nasa phone mo lang, walang bayad.',
+          ctaDownload: 'I-download ang APK',
           ctaPrimary: 'Tingnan ang Features',
-          ctaSecondary: 'Privacy & Data Safety',
           screensKicker: 'Actual Mobile Screens',
           screensTitle: 'Silipin ang loob ng app.',
           screensSub: 'Kuha direkta mula sa totoong Android build — Dark Mode at Malaking Text ready.',
@@ -527,7 +989,7 @@
           f3Title: 'Suki Balances & Limits',
           f3Body: 'I-track ang kabuuang utang, credit limit warnings, at mag-record ng buong bayad o bahagi lang.',
           f4Title: '100% On-Device Assistant',
-          f4Body: 'Itanong ang benta ngayon, tubo, mababa ang stock, o mga may utang nang direkta mula sa local SQLite DB.',
+          f4Body: 'Itanong ang benta, tubo, profit margins, sales trends, busiest hours, loyal customers, payment breakdown, expiry alerts, at stock forecast — lahat galing sa local SQLite DB.',
           f5Badge: 'Ulat',
           f5Title: 'Ngayon, Linggo & Buwan',
           f5Body: 'Kita, tubo, transactions, trend chart, at Top 3 na pinakamabentang produkto sa isang tingin.',
@@ -543,27 +1005,39 @@
           t2Body: 'Integer minor units at half-up rounding sa bawat item — walang floating-point rounding bugs sa sukli o tubo.',
           t3Title: 'Private Google Drive App Folder',
           t3Body: 'Kung i-on mo ang Google backup, drive.appdata lang ang scope — hindi nakakabasa ng iba mong Drive files.',
-          storyKicker: 'Bakit Ginawa Ang Tinda 360',
+          footerCopy: '© Tinda 360 · Proyekto ng Bukluran · Open Source',
+          storyKicker: 'Proyekto ng Bukluran',
           storyTitle: 'Para sa tindahang minsan ay iba ang nagbabantay.',
-          storySub: 'Ginawa ng Bukluran para sa mga komunidad sa buong Pilipinas.',
+          storySub: 'Tinda 360 ay proyekto ng Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc., isang registered non-profit na tumutulong sa mga komunidad sa buong Pilipinas.',
           storyProblemTitle: 'Ang problema',
           storyProblemBody: 'Madalas wala ang may-ari ng sari-sari store, kaya kapamilya o kapitbahay ang nagbabantay. Mahirap magbilang ng stock, sa notebook nakasulat ang utang, at hindi alam ng may-ari kung tama ang kita at kung kulang ang kaha.',
           storySolutionTitle: 'Ang solusyon',
           storySolutionBody: 'Simpleng app sa phone na gumagana kahit walang internet. Pipindot lang ang bantay para magbenta, hindi mabebenta ang wala nang stock, at awtomatikong naitatala ang utang ng bawat suki. May PIN ang may-ari para sa mga sensitibong gawain, at may bilang ng kaha sa dulo ng araw.',
-          storyImpactTitle: 'Para sa komunidad',
-          storyImpactBody: 'Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas malinaw ang tiwala ng may-ari sa bantay. Mahigit 1,000 na ang gumagamit.',
+          storyImpactTitle: '1,000+ store owners na ang gumagamit',
+          storyImpactBody: 'Libre at open source, walang buwanang bayad, at hindi kailangan ng mamahaling gamit. Mas malinaw ang utang, mas kaunti ang nawawalang pera, at mas matibay ang tiwala ng may-ari sa bantay. Sumali sa lumalaking komunidad ng mga tindero\'t tindera na gumagamit ng Tinda 360.',
+          dlKicker: 'I-download Ngayon',
+          dlTitle: 'Simulan sa 3 hakbang lang.',
+          dlSub: 'Walang Play Store account needed — direktang APK install.',
+          dlStep1Title: 'I-download ang APK',
+          dlStep1Body: 'Pindutin ang Download button sa baba. Mga 25 MB lang ang file.',
+          dlStep2Title: 'Payagan ang install',
+          dlStep2Body: 'Kapag tinanong ng phone, i-tap ang "Allow from this source" sa Settings.',
+          dlStep3Title: 'Buksan at simulan',
+          dlStep3Body: 'I-open ang Tinda 360, lagyan ng pangalan ang tindahan, at magsimula nang magbenta.',
+          dlButton: 'I-download ang Tinda 360 APK',
         },
         en: {
+          navDownload: 'Download',
           navStory: 'Our Story',
           navFeatures: 'Features',
           navTrust: 'Privacy & Open Source',
           navPrivacy: 'Privacy Policy',
           navTerms: 'Terms',
-          heroBadge: '100% Free & Open Source · Offline-First Android POS',
-          heroTitle: 'Smart POS with AI, even completely offline.',
-          heroCopy: 'Built for Philippine sari-sari stores. Sell fast at the counter, track inventory and customer utang, and ask on-device Smart Store Assistant — all stored on your phone.',
+          heroBadge: 'Built by a Community NGO · 100% Free · Offline-First',
+          heroTitle: 'Free Smart POS from a community NGO, even completely offline.',
+          heroCopy: 'Built by Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc. for sari-sari store owners who lack access to expensive POS systems. Over 1,000 early users already. Sell, track inventory and utang, and ask the on-device AI assistant — all on your phone, completely free.',
+          ctaDownload: 'Download the APK',
           ctaPrimary: 'Explore Features',
-          ctaSecondary: 'Privacy & Data Safety',
           screensKicker: 'Actual Mobile Screens',
           screensTitle: 'See inside the app.',
           screensSub: 'Captured directly from the Android build — Dark Mode & Large Text ready.',
@@ -585,7 +1059,7 @@
           f3Title: 'Suki Balances & Limits',
           f3Body: 'Track total receivables, credit limit warnings, and record full or partial suki payments.',
           f4Title: '100% On-Device Assistant',
-          f4Body: 'Ask about today’s sales, profit, low-stock items, or who owes utang directly from your local SQLite database.',
+          f4Body: 'Ask about sales, profit, profit margins, sales trends, busiest hours, loyal customers, payment breakdown, expiry alerts, and stock forecasts — all from your local SQLite database.',
           f5Badge: 'Reports',
           f5Title: 'Today, Week & Month',
           f5Body: 'Revenue, profit, transaction counts, trend chart, and your Top 3 best-selling products at a glance.',
@@ -601,15 +1075,26 @@
           t2Body: 'Integer minor-unit accounting and half-up rounding per line — zero floating-point errors on change or profit.',
           t3Title: 'Private Google Drive App Folder',
           t3Body: 'When you enable Google backup, only the drive.appdata scope is requested — Tinda 360 cannot read your other Drive files.',
-          storyKicker: 'Why Tinda 360 Exists',
+          footerCopy: '© Tinda 360 · A Bukluran community project · Open Source',
+          storyKicker: 'A Community Project by Bukluran',
           storyTitle: 'For the store that someone else sometimes tends.',
-          storySub: 'Built by Bukluran for communities across the Philippines.',
+          storySub: 'Tinda 360 is a project of Bukluran ng Kalinga ng Mamamayang Distrito Singko Inc., a registered non-profit serving communities across the Philippines.',
           storyProblemTitle: 'The problem',
           storyProblemBody: 'The owner of a sari-sari store is often away, so a relative or neighbor tends it. Counting stock is hard, utang is written in a notebook, and the owner cannot tell if the earnings are right or the cash drawer is short.',
           storySolutionTitle: 'The solution',
           storySolutionBody: 'A simple phone app that works without internet. The helper just taps to sell, items with no stock cannot be sold, and each suki\'s utang is recorded automatically. The owner has a PIN for sensitive actions and an end-of-day cash count.',
-          storyImpactTitle: 'For the community',
-          storyImpactBody: 'Free and open source, no monthly fee, and no expensive equipment needed. Utang is clearer, less money goes missing, and the owner can trust the store more. Over 1,000 people already use it.',
+          storyImpactTitle: '1,000+ store owners on early version',
+          storyImpactBody: 'Free and open source, no monthly fee, and no expensive equipment needed. Utang is clearer, less money goes missing, and owners trust their helpers more. Join the growing community of tinderos and tinderas using Tinda 360.',
+          dlKicker: 'Download Now',
+          dlTitle: 'Get started in 3 easy steps.',
+          dlSub: 'No Play Store account needed — direct APK install.',
+          dlStep1Title: 'Download the APK',
+          dlStep1Body: 'Tap the Download button below. The file is only about 25 MB.',
+          dlStep2Title: 'Allow the install',
+          dlStep2Body: 'When your phone asks, tap "Allow from this source" in Settings.',
+          dlStep3Title: 'Open and start selling',
+          dlStep3Body: 'Open Tinda 360, name your store, and start selling right away.',
+          dlButton: 'Download Tinda 360 APK',
         }
       };
 
@@ -637,6 +1122,72 @@
       try { saved = localStorage.getItem('tinda360_lang') || 'en'; } catch (_) {}
       applyLanguage(saved);
     })();
+
+    /* --- Scroll reveal (IntersectionObserver) --- */
+    (function () {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    })();
+
+    /* --- Topbar glassmorphism on scroll --- */
+    (function () {
+      var topbar = document.querySelector('.topbar');
+      var scrolled = false;
+      window.addEventListener('scroll', function () {
+        var now = window.scrollY > 40;
+        if (now !== scrolled) {
+          scrolled = now;
+          topbar.classList.toggle('scrolled', now);
+        }
+      }, { passive: true });
+    })();
+
+    /* --- Hero cursor glow --- */
+    (function () {
+      var glow = document.getElementById('heroGlow');
+      var hero = document.querySelector('.hero');
+      if (!glow || !hero) return;
+      var raf = 0;
+      hero.addEventListener('mousemove', function (e) {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(function () {
+          var rect = hero.getBoundingClientRect();
+          glow.style.left = (e.clientX - rect.left) + 'px';
+          glow.style.top = (e.clientY - rect.top) + 'px';
+        });
+      });
+      hero.addEventListener('mouseleave', function () {
+        glow.style.left = '50%';
+        glow.style.top = '50%';
+      });
+    })();
+
+    /* --- 3D card tilt on hover --- */
+    (function () {
+      var isMobile = window.matchMedia('(hover: none)').matches;
+      if (isMobile) return;
+      document.querySelectorAll('.card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var rect = card.getBoundingClientRect();
+          var x = (e.clientX - rect.left) / rect.width;
+          var y = (e.clientY - rect.top) / rect.height;
+          var rotY = (x - 0.5) * 10;
+          var rotX = (0.5 - y) * 10;
+          card.style.transform = 'perspective(600px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.02)';
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.transform = '';
+        });
+      });
+    })();
+
   </script>
 </body>
 </html>
