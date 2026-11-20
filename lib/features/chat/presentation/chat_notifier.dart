@@ -273,13 +273,7 @@ class ChatNotifier extends Notifier<ChatState> {
     if (keywordClassification.matched.intent != ChatIntent.overview) {
       return keywordClassification;
     }
-    final modelClassification = await _classifyWithModel(
-      query,
-      classifier,
-      keywordClassification,
-    );
-    return modelClassification ??
-        _outOfScopeClassification(keywordClassification);
+    return _classifyWithModel(query, classifier, keywordClassification);
   }
 
   ChatClassification _outOfScopeClassification(ChatClassification keyword) =>
@@ -294,7 +288,7 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
-  Future<ChatClassification?> _classifyWithModel(
+  Future<ChatClassification> _classifyWithModel(
     String query,
     IntentClassifier? classifier,
     ChatClassification keywordClassification,
@@ -307,7 +301,8 @@ class ChatNotifier extends Notifier<ChatState> {
         ref.read(appLogProvider).error('chat.engine_init', error, stack);
       }
     }
-    if (!engine.isReady) return null;
+    if (!engine.isReady) return keywordClassification;
+    final outOfScope = _outOfScopeClassification(keywordClassification);
     try {
       final result = await engine.infer(
         query,
@@ -318,13 +313,15 @@ class ChatNotifier extends Notifier<ChatState> {
         _lastTokensPerSecondLabel =
             '${result.tokensPerSecond.toStringAsFixed(1)} tok/s';
       }
-      if (!result.hasToolCall) return null;
-      final toolName = result.toolName!;
-      final agreement = classifier?.probabilityFor(query, toolName) ?? 0.0;
-      if (agreement < _minimumModelAgreement) return null;
+      final toolName = result.toolName;
+      if (toolName == null) return outOfScope;
+      if (classifier != null &&
+          classifier.probabilityFor(query, toolName) < _minimumModelAgreement) {
+        return outOfScope;
+      }
       final classification = yumiResultToClassification(result, query);
       final toolResult = await _executeModelTool(classification);
-      if (toolResult?['error'] == 'unknown_tool') return null;
+      if (toolResult?['error'] == 'unknown_tool') return outOfScope;
       return ChatClassification(
         matched: classification.matched,
         toolName: classification.toolName,
@@ -333,7 +330,7 @@ class ChatNotifier extends Notifier<ChatState> {
       );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.engine_infer', error, stack);
-      return null;
+      return keywordClassification;
     }
   }
 
