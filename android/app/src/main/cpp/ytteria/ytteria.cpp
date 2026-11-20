@@ -10,6 +10,7 @@
 #include <cassert>
 #include <climits>
 #include <mutex>
+#include <exception>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -71,69 +72,127 @@ struct TensorInfo {
 
 struct GgufContext {
     FILE* fp = nullptr;
+    uint64_t file_size = 0;
     uint64_t data_offset = 0;
     int vocab_size = 0;
     std::unordered_map<std::string, TensorInfo> tensors;
     ~GgufContext() { if (fp) fclose(fp); }
 };
 
-static std::string read_string(FILE* fp) {
-    uint64_t len; fread(&len, 8, 1, fp);
-    if (len == 0) return "";
-    std::string s(len, '\0');
-    fread(&s[0], 1, len, fp);
-    return s;
+static const uint64_t GGUF_MAX_STRING_BYTES = 1u << 20;
+static const uint64_t GGUF_MAX_KV_PAIRS = 1u << 16;
+static const uint64_t GGUF_MAX_TENSORS = 4096;
+static const uint32_t GGUF_MAX_DIMENSIONS = 4;
+static const int GGUF_MAX_ARRAY_DEPTH = 2;
+static const uint32_t GGUF_MAX_VOCAB = 1u << 20;
+
+template <typename T>
+static bool read_value(FILE* fp, T& value) {
+    return fread(&value, sizeof(T), 1, fp) == 1;
 }
 
-static void skip_kv_value(FILE* fp, uint32_t type) {
+static uint64_t remaining_bytes(const GgufContext& ctx) {
+    const long position = ftell(ctx.fp);
+    if (position < 0 || (uint64_t)position > ctx.file_size) return 0;
+    return ctx.file_size - (uint64_t)position;
+}
+
+static bool read_string(GgufContext& ctx, std::string& out) {
+    uint64_t length = 0;
+    if (!read_value(ctx.fp, length)) return false;
+    if (length > GGUF_MAX_STRING_BYTES || length > remaining_bytes(ctx)) return false;
+    out.assign(length, '\0');
+    return length == 0 || fread(&out[0], 1, length, ctx.fp) == length;
+}
+
+static uint64_t scalar_size(uint32_t type) {
     switch (type) {
-        case GGUF_UINT8: case GGUF_INT8: case GGUF_BOOL: fseek(fp, 1, SEEK_CUR); break;
-        case GGUF_UINT16: case GGUF_INT16: fseek(fp, 2, SEEK_CUR); break;
-        case GGUF_UINT32: case GGUF_INT32: case GGUF_FLOAT32: fseek(fp, 4, SEEK_CUR); break;
-        case GGUF_UINT64: case GGUF_INT64: case GGUF_FLOAT64: fseek(fp, 8, SEEK_CUR); break;
-        case GGUF_STRING: { uint64_t l; fread(&l, 8, 1, fp); fseek(fp, (long)l, SEEK_CUR); } break;
-        case GGUF_ARRAY: {
-            uint32_t at; fread(&at, 4, 1, fp);
-            uint64_t ac; fread(&ac, 8, 1, fp);
-            for (uint64_t i = 0; i < ac; i++) skip_kv_value(fp, at);
-        } break;
-        default: break;
+        case GGUF_UINT8: case GGUF_INT8: case GGUF_BOOL: return 1;
+        case GGUF_UINT16: case GGUF_INT16: return 2;
+        case GGUF_UINT32: case GGUF_INT32: case GGUF_FLOAT32: return 4;
+        case GGUF_UINT64: case GGUF_INT64: case GGUF_FLOAT64: return 8;
+        default: return 0;
     }
+}
+
+static bool skip_bytes(GgufContext& ctx, uint64_t count) {
+    if (count > remaining_bytes(ctx)) return false;
+    return fseek(ctx.fp, (long)count, SEEK_CUR) == 0;
+}
+
+static bool skip_kv_value(GgufContext& ctx, uint32_t type, int depth) {
+    const uint64_t size = scalar_size(type);
+    if (size > 0) return skip_bytes(ctx, size);
+    if (type == GGUF_STRING) {
+        uint64_t length = 0;
+        return read_value(ctx.fp, length) && skip_bytes(ctx, length);
+    }
+    if (type != GGUF_ARRAY || depth >= GGUF_MAX_ARRAY_DEPTH) return false;
+    uint32_t element_type = 0;
+    uint64_t count = 0;
+    if (!read_value(ctx.fp, element_type) || !read_value(ctx.fp, count)) return false;
+    const uint64_t element_size = scalar_size(element_type);
+    if (element_size > 0) {
+        if (count > remaining_bytes(ctx) / element_size) return false;
+        return skip_bytes(ctx, count * element_size);
+    }
+    if (count > remaining_bytes(ctx)) return false;
+    for (uint64_t index = 0; index < count; index++) {
+        if (!skip_kv_value(ctx, element_type, depth + 1)) return false;
+    }
+    return true;
 }
 
 static bool gguf_open(GgufContext& ctx, const char* path) {
     ctx.fp = fopen(path, "rb");
     if (!ctx.fp) { YLOG("Cannot open: %s\n", path); return false; }
-    uint32_t magic, version;
-    fread(&magic, 4, 1, ctx.fp);
-    if (magic != 0x46554747u) { YLOG("Not a GGUF file: %s\n", path); return false; }
-    fread(&version, 4, 1, ctx.fp);
-    if (version < 2) { YLOG("GGUF version %u not supported\n", version); return false; }
-    uint64_t n_tensors, n_kv;
-    fread(&n_tensors, 8, 1, ctx.fp);
-    fread(&n_kv, 8, 1, ctx.fp);
+    if (fseek(ctx.fp, 0, SEEK_END) != 0) return false;
+    const long end = ftell(ctx.fp);
+    if (end <= 0 || fseek(ctx.fp, 0, SEEK_SET) != 0) return false;
+    ctx.file_size = (uint64_t)end;
+    uint32_t magic = 0, version = 0;
+    if (!read_value(ctx.fp, magic) || magic != 0x46554747u) { YLOG("Not a GGUF file: %s\n", path); return false; }
+    if (!read_value(ctx.fp, version) || version < 2) { YLOG("GGUF version %u not supported\n", version); return false; }
+    uint64_t n_tensors = 0, n_kv = 0;
+    if (!read_value(ctx.fp, n_tensors) || !read_value(ctx.fp, n_kv)) return false;
+    if (n_tensors > GGUF_MAX_TENSORS || n_kv > GGUF_MAX_KV_PAIRS) { YLOG("GGUF header counts out of range\n"); return false; }
     for (uint64_t i = 0; i < n_kv; i++) {
-        const std::string key = read_string(ctx.fp);
-        uint32_t vtype; fread(&vtype, 4, 1, ctx.fp);
-        if (key.size() >= 10 && key.substr(key.size() - 10) == "vocab_size" && vtype == GGUF_UINT32) {
-            uint32_t vsz; fread(&vsz, 4, 1, ctx.fp);
+        std::string key;
+        uint32_t vtype = 0;
+        if (!read_string(ctx, key) || !read_value(ctx.fp, vtype)) return false;
+        const bool is_vocab = key.size() >= 10 && key.compare(key.size() - 10, 10, "vocab_size") == 0;
+        if (is_vocab && vtype == GGUF_UINT32) {
+            uint32_t vsz = 0;
+            if (!read_value(ctx.fp, vsz) || vsz == 0 || vsz > GGUF_MAX_VOCAB) return false;
             ctx.vocab_size = static_cast<int>(vsz);
-        } else {
-            skip_kv_value(ctx.fp, vtype);
+        } else if (!skip_kv_value(ctx, vtype, 0)) {
+            YLOG("Malformed GGUF metadata\n");
+            return false;
         }
     }
     for (uint64_t i = 0; i < n_tensors; i++) {
         TensorInfo ti;
-        ti.name = read_string(ctx.fp);
-        uint32_t ndim; fread(&ndim, 4, 1, ctx.fp);
+        uint32_t ndim = 0;
+        if (!read_string(ctx, ti.name) || !read_value(ctx.fp, ndim) || ndim > GGUF_MAX_DIMENSIONS) return false;
         ti.shape.resize(ndim);
-        for (uint32_t d = 0; d < ndim; d++) { uint64_t dim; fread(&dim, 8, 1, ctx.fp); ti.shape[d] = dim; }
-        fread(&ti.dtype, 4, 1, ctx.fp);
-        fread(&ti.offset, 8, 1, ctx.fp);
+        for (uint32_t d = 0; d < ndim; d++) {
+            if (!read_value(ctx.fp, ti.shape[d])) return false;
+        }
+        if (!read_value(ctx.fp, ti.dtype) || !read_value(ctx.fp, ti.offset)) return false;
         ctx.tensors[ti.name] = ti;
     }
-    long pos = ftell(ctx.fp);
+    const long pos = ftell(ctx.fp);
+    if (pos < 0) return false;
     ctx.data_offset = (uint64_t)(((pos + 31) / 32) * 32);
+    return true;
+}
+
+static bool element_count(const TensorInfo& ti, uint64_t limit, uint64_t& count) {
+    count = 1;
+    for (const auto dimension : ti.shape) {
+        if (dimension == 0 || count > limit / dimension) return false;
+        count *= dimension;
+    }
     return true;
 }
 
@@ -141,8 +200,17 @@ static std::vector<float> gguf_load_tensor(GgufContext& ctx, const std::string& 
     auto it = ctx.tensors.find(name);
     if (it == ctx.tensors.end()) { YLOG("Tensor not found: %s\n", name.c_str()); return {}; }
     const TensorInfo& ti = it->second;
-    uint64_t n = 1;
-    for (auto s : ti.shape) n *= s;
+    const uint64_t bytes_per_element = ti.dtype == GGML_F32 ? 4 : ti.dtype == GGML_F16 ? 2 : 0;
+    if (bytes_per_element == 0 || ti.offset > ctx.file_size || ctx.data_offset > ctx.file_size - ti.offset) {
+        YLOG("Bad tensor header for %s\n", name.c_str());
+        return {};
+    }
+    const uint64_t available = ctx.file_size - ctx.data_offset - ti.offset;
+    uint64_t n = 0;
+    if (!element_count(ti, available / bytes_per_element, n)) {
+        YLOG("Tensor %s larger than the file\n", name.c_str());
+        return {};
+    }
     std::vector<float> out(n);
     long file_pos = (long)(ctx.data_offset + ti.offset);
     if (fseek(ctx.fp, file_pos, SEEK_SET) != 0) {
@@ -582,7 +650,7 @@ static bool forward_token(Model& m, InferenceState& state, int token, int pos, s
 
 extern "C" {
 
-int ytteria_load(const char* gguf_path) {
+static int ytteria_load_unchecked(const char* gguf_path) {
     YLOG("ytteria_load called: %s\n", gguf_path);
     std::lock_guard<std::mutex> lock(g_generate_mutex);
     clear_prefix_cache();
@@ -599,7 +667,7 @@ void ytteria_unload() {
 
 int ytteria_is_loaded() { return g_model ? 1 : 0; }
 
-int ytteria_generate(const int* input_ids, int n_input, int* output_ids, int max_new, int eos_id, int stop_id2, int prefix_len) {
+static int ytteria_generate_unchecked(const int* input_ids, int n_input, int* output_ids, int max_new, int eos_id, int stop_id2, int prefix_len) {
     std::lock_guard<std::mutex> lock(g_generate_mutex);
     if (!g_model || n_input <= 0 || max_new <= 0) return -1;
     if (n_input + max_new > ROPE_MAX) {
@@ -647,6 +715,24 @@ int ytteria_generate(const int* input_ids, int n_input, int* output_ids, int max
         pos++;
     }
     return n_gen;
+}
+
+int ytteria_load(const char* gguf_path) {
+    try {
+        return ytteria_load_unchecked(gguf_path);
+    } catch (const std::exception& error) {
+        YLOG("ytteria_load failed: %s\n", error.what());
+        return 0;
+    }
+}
+
+int ytteria_generate(const int* input_ids, int n_input, int* output_ids, int max_new, int eos_id, int stop_id2, int prefix_len) {
+    try {
+        return ytteria_generate_unchecked(input_ids, n_input, output_ids, max_new, eos_id, stop_id2, prefix_len);
+    } catch (const std::exception& error) {
+        YLOG("ytteria_generate failed: %s\n", error.what());
+        return -1;
+    }
 }
 
 }

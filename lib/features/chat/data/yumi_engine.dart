@@ -86,6 +86,7 @@ final class YumiEngine {
   static const String _toolsAsset = 'assets/ai/tools.json';
   static const int _maxNewTokens = 256;
   static const int _maxPromptTokens = 760;
+  static const int maximumQueryCharacters = 300;
 
   static const String _systemPrompt =
       'Ikaw si Yumi, AI assistant ng sari-sari store. '
@@ -251,11 +252,23 @@ final class YumiEngine {
     List<YumiTurn> recentTurns = const <YumiTurn>[],
   }) {
     final tokenizer = _tokenizer!;
-    String stripSpecialTokens(String text) => tokenizer.specialTokens.keys.fold(
-      text,
-      (cleaned, special) => cleaned.replaceAll(special, ''),
-    );
-    final safeQuery = stripSpecialTokens(userQuery);
+    String stripSpecialTokens(String text) {
+      var cleaned = text;
+      var previous = '';
+      while (cleaned != previous) {
+        previous = cleaned;
+        cleaned = tokenizer.specialTokens.keys.fold(
+          cleaned,
+          (current, special) => current.replaceAll(special, ''),
+        );
+      }
+      return cleaned;
+    }
+
+    final limitedQuery = userQuery.length > maximumQueryCharacters
+        ? userQuery.substring(0, maximumQueryCharacters)
+        : userQuery;
+    final safeQuery = stripSpecialTokens(limitedQuery);
     final baseParts = <String>[
       '<|im_start|>system\n$_systemPrompt<|im_end|>',
     ];

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
+import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/feedback_log.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
 import 'package:tinda360/features/chat/presentation/chat_thinking_bubble.dart';
@@ -838,6 +839,13 @@ class _ChatInputBar extends StatelessWidget {
               controller: controller,
               enabled: enabled,
               textInputAction: TextInputAction.send,
+              maxLength: YumiEngine.maximumQueryCharacters,
+              buildCounter: (
+                context, {
+                required currentLength,
+                required isFocused,
+                required maxLength,
+              }) => null,
               onSubmitted: (_) => onSend(),
               style: AppTypography.body(palette.text),
               decoration: InputDecoration(
