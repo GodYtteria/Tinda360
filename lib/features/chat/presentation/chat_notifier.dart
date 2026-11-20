@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/calendar/day_range.dart';
 import 'package:tinda360/core/calendar/local_day.dart';
@@ -9,13 +10,16 @@ import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/chat_history_storage.dart';
+import 'package:tinda360/features/chat/data/entity_resolver.dart';
 import 'package:tinda360/features/chat/data/feedback_consent.dart';
 import 'package:tinda360/features/chat/data/feedback_log.dart';
 import 'package:tinda360/features/chat/data/feedback_recorder.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
 import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
+import 'package:tinda360/features/chat/data/tool_call_validator.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
+import 'package:tinda360/features/chat/presentation/chat_message_codec.dart';
 import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
 import 'package:tinda360/features/chat/presentation/chat_store_replies.dart';
 import 'package:tinda360/features/chat/presentation/chat_tool_result_replies.dart';
@@ -111,6 +115,8 @@ class ChatNotifier extends Notifier<ChatState> {
   Timer? _compactTimer;
   IntentMatcher? _matcher;
   IntentClassifier? _intentClassifier;
+  ToolCallValidator? _toolCallValidator;
+  static const String _toolsAssetPath = 'assets/ai/tools.json';
   int _sequence = 0;
   String _modelContextSummary = '';
   int _compactedMessageCount = 0;
@@ -150,7 +156,7 @@ class ChatNotifier extends Notifier<ChatState> {
       _historyStoreId = storeId;
       if (state.messages.isNotEmpty || stored.isEmpty) return;
       final restored = <ChatMessage>[
-        for (final entry in stored) ?_messageFromJson(entry),
+        for (final entry in stored) ?chatMessageFromJson(entry),
       ];
       _sequence = _highestSequence(restored);
       state = state.copyWith(messages: restored);
@@ -179,58 +185,10 @@ class ChatNotifier extends Notifier<ChatState> {
     try {
       await ref
           .read(chatHistoryStorageProvider)
-          .write(storeId, state.messages.map(_messageToJson).toList());
+          .write(storeId, state.messages.map(chatMessageToJson).toList());
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.history_persist', error, stack);
     }
-  }
-
-  static Map<String, Object?> _messageToJson(ChatMessage message) =>
-      <String, Object?>{
-        'id': message.id,
-        'role': message.role.name,
-        'text': message.text,
-        'source': message.source,
-        'created_at_ms': message.createdAt.millisecondsSinceEpoch,
-        'clarified_query': ?message.clarifiedQuery,
-        if (message.options.isNotEmpty)
-          'options': <Map<String, String>>[
-            for (final option in message.options)
-              <String, String>{'tool': option.toolName, 'label': option.label},
-          ],
-      };
-
-  static List<ClarificationOption> _optionsFromJson(Object? rawOptions) {
-    if (rawOptions is! List) return const <ClarificationOption>[];
-    return <ClarificationOption>[
-      for (final rawOption in rawOptions)
-        if (rawOption case {
-          'tool': final String toolName,
-          'label': final String label,
-        })
-          ClarificationOption(toolName: toolName, label: label),
-    ];
-  }
-
-  static ChatMessage? _messageFromJson(Map<String, Object?> json) {
-    final id = json['id'];
-    final role = json['role'];
-    final text = json['text'];
-    final createdAtMs = json['created_at_ms'];
-    if (id is! String || text is! String || createdAtMs is! int) return null;
-    final parsedRole = ChatRole.values.where((value) => value.name == role);
-    if (parsedRole.isEmpty) return null;
-    final source = json['source'];
-    final clarifiedQuery = json['clarified_query'];
-    return ChatMessage(
-      id: id,
-      role: parsedRole.first,
-      text: text,
-      source: source is String ? source : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-      options: _optionsFromJson(json['options']),
-      clarifiedQuery: clarifiedQuery is String ? clarifiedQuery : null,
-    );
   }
 
   Future<void> sendMessage(String rawText, AppLocalizations localizations) =>
@@ -504,6 +462,17 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  Future<ToolCallValidator?> _loadToolCallValidator() async {
+    try {
+      return _toolCallValidator ??= ToolCallValidator.fromToolsJson(
+        await rootBundle.loadString(_toolsAssetPath),
+      );
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('chat.tool_validator', error, stack);
+      return null;
+    }
+  }
+
   Future<ChatClassification> _classifyWithModel(
     String query,
     IntentRouter router,
@@ -532,13 +501,36 @@ class ChatNotifier extends Notifier<ChatState> {
       final toolName = result.toolName;
       if (toolName == null) return outOfScope;
       if (!router.acceptsModelTool(query, toolName)) return outOfScope;
+      final validator = await _loadToolCallValidator();
+      final validation = validator?.validate(
+        toolName,
+        result.toolArgs,
+        question: query,
+      );
+      if (validation == null || !validation.isValid) {
+        ref
+            .read(appLogProvider)
+            .error(
+              'chat.model_tool_rejected',
+              StateError(
+                '${validation?.rejection} ${validation?.rejectedArgument}',
+              ),
+              StackTrace.current,
+            );
+        return outOfScope;
+      }
       final classification = yumiResultToClassification(result, query);
-      final toolResult = await _executeModelTool(classification);
+      final withTool = ChatClassification(
+        matched: classification.matched,
+        toolName: validation.toolName,
+        toolArgs: validation.arguments,
+      );
+      final toolResult = await _executeModelTool(withTool);
       if (toolResult?['error'] == 'unknown_tool') return outOfScope;
       return ChatClassification(
         matched: classification.matched,
-        toolName: classification.toolName,
-        toolArgs: classification.toolArgs,
+        toolName: validation.toolName,
+        toolArgs: validation.arguments,
         toolResult: toolResult,
       );
     } on Object catch (error, stack) {
@@ -648,6 +640,22 @@ class ChatNotifier extends Notifier<ChatState> {
     return isProductTool && toolResult['found'] != false;
   }
 
+  StockedProduct? _productWithId(List<StockedProduct> products, String? id) {
+    if (id == null) return null;
+    for (final stocked in products) {
+      if (stocked.product.id == id) return stocked;
+    }
+    return null;
+  }
+
+  CustomerBalance? _customerWithId(List<CustomerBalance> balances, String? id) {
+    if (id == null) return null;
+    for (final balance in balances) {
+      if (balance.customer.id == id) return balance;
+    }
+    return null;
+  }
+
   AssistantReply _fromStoreReply(
     StoreReplyText storeReply,
     AppLocalizations localizations,
@@ -711,14 +719,30 @@ class ChatNotifier extends Notifier<ChatState> {
     final topProducts = results[2] as List<TopProduct>;
     final balances = results[3] as List<CustomerBalance>;
 
-    final matchedProduct = findMentionedProduct(
+    const resolver = EntityResolver();
+    final productResolution = resolver.resolveProduct(
       matched.normalizedText,
       products,
     );
-    final matchedCustomer = findMentionedCustomer(
-      matched.normalizedText,
-      balances,
+    final matchedProduct = _productWithId(
+      products,
+      productResolution.single?.id,
     );
+    final matchedCustomer = _customerWithId(
+      balances,
+      resolver.resolveCustomer(matched.normalizedText, balances).single?.id,
+    );
+    final asksAboutOneProduct =
+        matched.intent == ChatIntent.productLookup ||
+        matched.intent == ChatIntent.stockForecast;
+    if (asksAboutOneProduct &&
+        productResolution.kind == ResolutionKind.ambiguous) {
+      return buildAmbiguousProductReply(
+        [for (final candidate in productResolution.candidates) candidate.name],
+        isFilipino,
+        localizations,
+      );
+    }
 
     final toolName = classification.toolName;
     final toolResult = classification.toolResult;
@@ -889,16 +913,12 @@ class ChatNotifier extends Notifier<ChatState> {
     }
 
     if (matched.intent == ChatIntent.stockForecast) {
-      final mentionedProduct = findMentionedProduct(
-        matched.normalizedText,
-        products,
-      );
       final twoWeeksRange = DayRange(today.plusDays(-13), today);
       final soldQuantities = await ref
           .read(saleRepositoryProvider)
           .soldProductQuantitiesInRange(twoWeeksRange);
       return buildStockForecastReply(
-        mentionedProduct,
+        matchedProduct,
         products,
         soldQuantities,
         isFilipino,

@@ -83,6 +83,18 @@ AssistantReply buildHelpReply(
   mood: TindaAvatarMood.talking,
 );
 
+AssistantReply buildAmbiguousProductReply(
+  List<String> productNames,
+  bool isFilipino,
+  AppLocalizations localizations,
+) => AssistantReply(
+  text: isFilipino
+      ? 'Alin po dito ang ibig ninyong sabihin: ${productNames.join(', ')}? Pakisulat ang buong pangalan.'
+      : 'Which one do you mean: ${productNames.join(', ')}? Please type the full name.',
+  source: localizations.chatSourceInventory,
+  mood: TindaAvatarMood.thinking,
+);
+
 AssistantReply buildOutOfScopeReply(
   bool isFilipino,
   AppLocalizations localizations,

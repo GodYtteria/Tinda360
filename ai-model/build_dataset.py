@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -72,22 +73,43 @@ def rows_for_file(path):
     return rows
 
 
+NOVEL_CASES_PATH = Path(__file__).parent / 'novel_eval.txt'
+
+
+def held_out_queries():
+    if not NOVEL_CASES_PATH.exists():
+        return set()
+    return {
+        line.split('|')[0].strip().lower()
+        for line in NOVEL_CASES_PATH.read_text(encoding='utf-8').splitlines()
+        if line.strip()
+    }
+
+
 def build():
     header = DATASET_PATH.read_text(encoding='utf-8').splitlines()[0]
     rows = []
     for path in sorted(QUERIES_DIRECTORY.glob('*.txt')):
         rows.extend(rows_for_file(path))
-    seen = set()
+    held_out = held_out_queries()
+    seen = {}
     unique = []
     for row in rows:
         key = row['messages'][0]['content'].strip().lower()
+        if key in held_out:
+            raise ValueError(f'held-out query is also in training data: {key!r}')
+        label = json.dumps(row['messages'][1].get('tool_calls'), sort_keys=True)
+        if key in seen and seen[key] != label:
+            raise ValueError(f'query has two different labels: {key!r}')
         if key not in seen:
-            seen.add(key)
+            seen[key] = label
             unique.append(row)
-    with DATASET_PATH.open('w', encoding='utf-8') as handle:
+    temporary_path = DATASET_PATH.with_suffix('.jsonl.tmp')
+    with temporary_path.open('w', encoding='utf-8') as handle:
         handle.write(header + '\n')
         for row in unique:
             handle.write(json.dumps(row, ensure_ascii=False) + '\n')
+    os.replace(temporary_path, DATASET_PATH)
     print(f'rows: {len(unique)} (dropped duplicates: {len(rows) - len(unique)})')
 
 

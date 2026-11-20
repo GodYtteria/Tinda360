@@ -28,6 +28,7 @@ Map<String, ChatIntent> _loadExpectedIntents() {
   for (final line in File(_novelCasesFile).readAsLinesSync()) {
     if (line.trim().isEmpty) continue;
     final parts = line.split('|');
+    if (parts[1] == _noToolFile) continue;
     expected[parts[0]] = toolNameToIntent(parts[1]);
   }
   return expected;

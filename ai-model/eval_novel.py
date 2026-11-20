@@ -7,13 +7,32 @@ from pathlib import Path
 HERE = Path(__file__).parent
 
 
+NO_TOOL = 'no_tool'
+FIELD_COUNT = 3
+
+
 def load_cases(path):
     cases = []
-    for line in path.read_text(encoding='utf-8').splitlines():
-        if line.strip():
-            query, tool, product = line.split('|')
-            cases.append((query, tool, product))
+    for line_number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), start=1):
+        if not line.strip():
+            continue
+        fields = line.split('|')
+        if len(fields) != FIELD_COUNT:
+            raise ValueError(f'{path}:{line_number}: expected query|tool|argument, got {line!r}')
+        query, tool, expected = (field.strip() for field in fields)
+        arguments = json.loads(expected) if expected.startswith('{') else (
+            {'product_name': expected} if expected else {}
+        )
+        cases.append((query, tool, arguments))
     return cases
+
+
+def arguments_match(expected, actual):
+    actual = actual or {}
+    return all(
+        str(actual.get(key, '')).strip().lower() == str(value).strip().lower()
+        for key, value in expected.items()
+    )
 
 
 def run_model(checkpoint, queries):
@@ -37,20 +56,22 @@ def main():
     cases = load_cases(Path(arguments.cases))
     outputs = run_model(arguments.checkpoint, [case[0] for case in cases])
     tool_hits = 0
-    product_total = 0
-    product_hits = 0
-    for (query, tool, product), output in zip(cases, outputs):
-        tool_ok = output.get('tool') == tool
+    argument_total = 0
+    argument_hits = 0
+    for (query, tool, expected), output in zip(cases, outputs):
+        predicted = output.get('tool') or NO_TOOL
+        tool_ok = predicted == tool
         tool_hits += tool_ok
-        extracted = ''
-        if product:
-            product_total += 1
-            extracted = (output.get('args') or {}).get('product_name', '')
-            product_hits += extracted.lower() == product.lower()
-        print('OK ' if tool_ok else 'BAD', query, '->', output.get('tool'), extracted)
+        arguments_ok = True
+        if expected:
+            argument_total += 1
+            arguments_ok = arguments_match(expected, output.get('args'))
+            argument_hits += arguments_ok
+        status = 'OK ' if tool_ok and arguments_ok else 'BAD'
+        print(status, query, '->', predicted, output.get('args') or {})
     print(f'tool accuracy: {tool_hits}/{len(cases)}')
-    if product_total:
-        print(f'product argument accuracy: {product_hits}/{product_total}')
+    if argument_total:
+        print(f'argument accuracy: {argument_hits}/{argument_total}')
 
 
 if __name__ == '__main__':
