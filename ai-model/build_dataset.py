@@ -85,7 +85,9 @@ def entity_missing_from_query(row):
         message['content'].lower() for message in row['messages'] if message['role'] == 'user'
     )
     return any(
-        str(call['arguments'][key]).lower() not in user_text
+        not isinstance(call['arguments'][key], str)
+        or not call['arguments'][key].strip()
+        or call['arguments'][key].lower() not in user_text
         for message in row['messages']
         for call in message.get('tool_calls') or []
         for key in ENTITY_ARGUMENTS
@@ -102,6 +104,10 @@ def resembles_held_out(query, held_out):
 
 def row_key(row):
     return row['messages'][0]['content'].strip().lower()
+
+
+def user_queries(row):
+    return [message['content'].strip().lower() for message in row['messages'] if message['role'] == 'user']
 
 
 def row_label(row):
@@ -130,7 +136,7 @@ def conversation_rows(held_out, curated_keys):
         if entity_missing_from_query(row):
             dropped_entity += 1
             continue
-        if resembles_held_out(key, held_out):
+        if any(resembles_held_out(query, held_out) for query in user_queries(row)):
             dropped_held_out += 1
             continue
         rows.append(row)
@@ -159,16 +165,20 @@ def build():
     held_out = held_out_queries()
     rows.extend(conversation_rows(held_out, {row_key(row) for row in rows}))
     seen = {}
+    seen_conversations = set()
     unique = []
     for row in rows:
         key = row_key(row)
-        if key in held_out:
-            raise ValueError(f'held-out query is also in training data: {key!r}')
+        leaked = held_out.intersection(user_queries(row))
+        if leaked:
+            raise ValueError(f'held-out query is also in training data: {sorted(leaked)[0]!r}')
         label = row_label(row)
         if key in seen and seen[key] != label:
             raise ValueError(f'query has two different labels: {key!r}')
-        if key not in seen:
-            seen[key] = label
+        seen[key] = label
+        conversation = json.dumps(row['messages'], sort_keys=True, ensure_ascii=False)
+        if conversation not in seen_conversations:
+            seen_conversations.add(conversation)
             unique.append(row)
     temporary_path = DATASET_PATH.with_suffix('.jsonl.tmp')
     with temporary_path.open('w', encoding='utf-8') as handle:
