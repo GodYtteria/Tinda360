@@ -27,6 +27,7 @@ final _inventory = [
 void main() {
   test('a wrong product name from the model is replaced by the one asked', () {
     final grounded = groundProductArgument(
+      'get_product_info',
       {'product_name': 'Datu Puti suka'},
       'ilan pa ang natitirang Bingo biscuit sa estante',
       _inventory,
@@ -36,6 +37,7 @@ void main() {
 
   test('the name comes from the question words, matched to inventory', () {
     final grounded = groundProductArgument(
+      'get_product_info',
       {'product_name': 'ice candy'},
       'ilang araw pa bago maubos ang pancit canton',
       _inventory,
@@ -46,6 +48,7 @@ void main() {
   test('a product that is not in inventory gives no arguments', () {
     expect(
       groundProductArgument(
+        'get_stock_forecast',
         {'product_name': 'Datu Puti suka'},
         'gaano pa katagal bago maubos ang uling ko',
         _inventory,
@@ -53,11 +56,17 @@ void main() {
       isNull,
     );
     expect(
-      groundProductArgument({'product_name': 'kape'}, '', _inventory),
+      groundProductArgument(
+        'get_product_info',
+        {'product_name': 'kape'},
+        '',
+        _inventory,
+      ),
       isNull,
     );
     expect(
       groundProductArgument(
+        'get_product_info',
         {'product_name': 'kape'},
         'magkano ang kape',
         const [],
@@ -69,20 +78,57 @@ void main() {
   test('other tools keep the model arguments untouched', () {
     final arguments = {'timeframe': 'week'};
     expect(
-      groundProductArgument(arguments, 'benta this week', _inventory),
+      groundProductArgument(
+        'get_sales_summary',
+        arguments,
+        'benta this week',
+        _inventory,
+      ),
       same(arguments),
     );
-    expect(groundProductArgument(const {}, 'kumusta', _inventory), isEmpty);
+    expect(
+      groundProductArgument('get_overview', const {}, 'kumusta', _inventory),
+      isEmpty,
+    );
   });
 
   test('other arguments survive grounding', () {
     expect(
       groundProductArgument(
+        'get_stock_forecast',
         {'product_name': 'x', 'days': 7},
         'kailan mauubos ang Bingo biscuit',
         _inventory,
       ),
       {'product_name': 'Bingo biscuit', 'days': 7},
+    );
+  });
+
+  test('a product tool without a name still gets the asked product', () {
+    expect(
+      groundProductArgument(
+        'get_product_info',
+        const {},
+        'magkano Bingo biscuit',
+        _inventory,
+      ),
+      {'product_name': 'Bingo biscuit'},
+    );
+  });
+
+  test('an ambiguous product gives no arguments so the user is asked', () {
+    final inventory = [
+      ..._inventory,
+      _product('p4', 'Payless Pancit Canton'),
+    ];
+    expect(
+      groundProductArgument(
+        'get_product_info',
+        {'product_name': 'Datu Puti suka'},
+        'magkano pancit canton',
+        inventory,
+      ),
+      isNull,
     );
   });
 }

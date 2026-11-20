@@ -175,13 +175,13 @@ final class EntityResolver {
   List<_Token> _tokenize(String text) => [
     for (final match in _wordPattern.allMatches(text))
       _Token(
-        word: _fold(match.group(0)!),
+        word: foldAccents(match.group(0)!),
         start: match.start,
         end: match.end,
       ),
   ];
 
-  String _fold(String word) {
+  static String foldAccents(String word) {
     final buffer = StringBuffer();
     for (final character in word.toLowerCase().split('')) {
       buffer.write(_foldedCharacters[character] ?? character);

@@ -3,14 +3,24 @@ import 'package:tinda360/features/chat/data/entity_resolver.dart';
 
 const String productArgumentName = 'product_name';
 
+const Set<String> productToolNames = <String>{
+  'get_product_info',
+  'get_stock_forecast',
+};
+
+bool needsProductGrounding(String toolName, Map<String, dynamic> arguments) =>
+    arguments.containsKey(productArgumentName) ||
+    productToolNames.contains(toolName);
+
 Map<String, dynamic>? groundProductArgument(
+  String toolName,
   Map<String, dynamic> modelArguments,
   String question,
   List<StockedProduct> products,
 ) {
-  if (!modelArguments.containsKey(productArgumentName)) return modelArguments;
+  if (!needsProductGrounding(toolName, modelArguments)) return modelArguments;
   final resolution = const EntityResolver().resolveProduct(question, products);
-  if (resolution.kind == ResolutionKind.none) return null;
+  if (resolution.kind != ResolutionKind.single) return null;
   return <String, dynamic>{
     ...modelArguments,
     productArgumentName: resolution.mention,

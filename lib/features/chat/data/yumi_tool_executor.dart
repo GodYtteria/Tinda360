@@ -18,6 +18,7 @@ import 'package:tinda360/data/repositories/product_repository.dart';
 import 'package:tinda360/data/repositories/sale_repository.dart';
 import 'package:tinda360/data/repositories/store_profile_repository.dart';
 import 'package:tinda360/data/repositories/utang_age_repository.dart';
+import 'package:tinda360/features/chat/data/entity_resolver.dart';
 
 final class YumiToolExecutor {
   new({
@@ -178,15 +179,17 @@ final class YumiToolExecutor {
     List<StockedProduct> products,
     String query,
   ) {
-    final needle = query.toLowerCase().trim();
+    final needle = EntityResolver.foldAccents(query).trim();
     if (needle.length < _minProductMatchLength) return null;
     for (final item in products) {
-      if (item.product.name.toLowerCase().trim() == needle) return item;
+      if (EntityResolver.foldAccents(item.product.name).trim() == needle) {
+        return item;
+      }
     }
     StockedProduct? best;
     var bestLength = 0;
     for (final item in products) {
-      final name = item.product.name.toLowerCase().trim();
+      final name = EntityResolver.foldAccents(item.product.name).trim();
       if (name.length < _minProductMatchLength) continue;
       final matches =
           _containsWord(name, needle) || _containsWord(needle, name);

@@ -483,15 +483,18 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<Map<String, dynamic>?> _groundProductArgument(
+    String toolName,
     Map<String, dynamic> modelArguments,
     String query,
   ) async {
-    if (!modelArguments.containsKey(productArgumentName)) return modelArguments;
+    if (!needsProductGrounding(toolName, modelArguments)) {
+      return modelArguments;
+    }
     final products = await ref
         .read(productRepositoryProvider)
         .watchActive()
         .first;
-    return groundProductArgument(modelArguments, query, products);
+    return groundProductArgument(toolName, modelArguments, query, products);
   }
 
   Future<ChatClassification> _classifyWithModel(
@@ -523,10 +526,19 @@ class ChatNotifier extends Notifier<ChatState> {
       if (toolName == null) return outOfScope;
       if (!router.acceptsModelTool(query, toolName)) return outOfScope;
       final groundedArguments = await _groundProductArgument(
+        toolName,
         result.toolArgs ?? const <String, dynamic>{},
         query,
       );
-      if (groundedArguments == null) return keywordClassification;
+      if (groundedArguments == null) {
+        return ChatClassification(
+          matched: MatchedQuery(
+            intent: toolNameToIntent(toolName),
+            timeframe: keywordClassification.matched.timeframe,
+            normalizedText: keywordClassification.matched.normalizedText,
+          ),
+        );
+      }
       final validator = await _loadToolCallValidator();
       final validation = validator?.validate(
         toolName,
@@ -545,7 +557,14 @@ class ChatNotifier extends Notifier<ChatState> {
             );
         return outOfScope;
       }
-      final classification = yumiResultToClassification(result, query);
+      final classification = yumiResultToClassification(
+        YumiInferResult(
+          rawText: result.rawText,
+          toolName: validation.toolName,
+          toolArgs: validation.arguments,
+        ),
+        query,
+      );
       final withTool = ChatClassification(
         matched: classification.matched,
         toolName: validation.toolName,

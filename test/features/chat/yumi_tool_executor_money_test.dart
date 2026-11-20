@@ -516,4 +516,20 @@ void main() {
     expect(result['utang_total_minor'], 2000);
     expect(result['low_stock_count'], 1);
   });
+
+  test('product lookup ignores accents in the asked name', () async {
+    await createProduct(
+      name: 'Piña Juice',
+      unit: ProductUnit.piece,
+      price: _candyPrice,
+      cost: _candyCost,
+      stockUnits: 4,
+    );
+    final info = await executor.execute('get_product_info', {
+      'product_name': 'pina juice',
+    });
+    expect(info['found'], isNot(false));
+    final product = info['product'] as Map<String, dynamic>;
+    expect(product['name'], 'Piña Juice');
+  });
 }
