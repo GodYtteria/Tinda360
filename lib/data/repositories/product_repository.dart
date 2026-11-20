@@ -107,6 +107,7 @@ ORDER BY created_at DESC, row_order DESC
     try {
       await _db.transaction(() async {
         await _requireBarcodeFree(draft.barcode, exceptId: null);
+        await _ensureCategory(draft.categoryId, nowMs);
         await _db
             .into(_db.products)
             .insert(
@@ -152,6 +153,7 @@ ORDER BY created_at DESC, row_order DESC
     try {
       final changed = await _db.transaction(() async {
         await _requireBarcodeFree(draft.barcode, exceptId: productId);
+        await _ensureCategory(draft.categoryId, _nowMs());
         final updatedRows = await _db.customUpdate(
           'UPDATE products SET name = ?, unit = ?, price_minor = ?, '
           'cost_minor = ?, category_id = ?, barcode = ?, '
@@ -363,6 +365,22 @@ ORDER BY created_at DESC, row_order DESC
             .getSingleOrNull();
     if (row == null) throw _ProductRejected(ProductNotFound(productId));
     return _parseUnit(row.unit);
+  }
+
+  Future<void> _ensureCategory(String? categoryName, int nowMs) async {
+    final name = categoryName?.trim();
+    if (name == null || name.isEmpty) return;
+    await _db
+        .into(_db.categories)
+        .insert(
+          CategoriesCompanion.insert(
+            id: name,
+            createdAt: nowMs,
+            updatedAt: nowMs,
+            name: name,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
   }
 
   Future<void> _requireBarcodeFree(

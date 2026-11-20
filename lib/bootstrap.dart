@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/app.dart';
+import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/services/crash_log.dart';
 import 'package:tinda360/services/service_providers.dart';
 
@@ -11,6 +14,10 @@ Future<void> bootstrap() async {
 
   final crashLog = await CrashLog.open();
   _installErrorHandlers(crashLog);
+
+  unawaited(YumiEngine.instance.init().catchError((Object error, StackTrace stack) {
+    debugPrint('[YumiEngine] init failed: $error\n$stack');
+  }));
 
   runApp(
     ProviderScope(

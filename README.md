@@ -42,13 +42,13 @@
 ## Screenshots
 
 <p align="center">
-  <img src="website/screenshots/pos.png" width="180" alt="POS Screen" />
+  <img src="https://tinda360.bukluran.com/screenshots/pos.png" width="180" alt="POS Screen" />
   &nbsp;&nbsp;
-  <img src="website/screenshots/checkout.png" width="180" alt="Checkout" />
+  <img src="https://tinda360.bukluran.com/screenshots/checkout.png" width="180" alt="Checkout" />
   &nbsp;&nbsp;
-  <img src="website/screenshots/saledone.png" width="180" alt="Sale Complete" />
+  <img src="https://tinda360.bukluran.com/screenshots/saledone.png" width="180" alt="Sale Complete" />
   &nbsp;&nbsp;
-  <img src="website/screenshots/ai_chat.png" width="180" alt="AI Assistant" />
+  <img src="https://tinda360.bukluran.com/screenshots/ai_chat.png" width="180" alt="AI Assistant" />
 </p>
 
 ---
@@ -152,7 +152,9 @@ lib/
 └── l10n/           # Filipino and English translations
 
 test/               # 100+ unit and widget tests
-website/            # Static site (tinda360.bukluran.com)
+
+The marketing site at tinda360.bukluran.com lives in a separate private
+repository (GodYtteria/tinda360-website) and is not part of this source tree.
 ```
 
 ---

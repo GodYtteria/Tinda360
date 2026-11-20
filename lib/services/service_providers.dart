@@ -1,6 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tinda360/core/app_log.dart';
+import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/services/backup_preferences.dart';
 import 'package:tinda360/services/biometric_auth_service.dart';
 import 'package:tinda360/services/google_drive_backup_service.dart';
@@ -31,4 +32,12 @@ final storePinServiceProvider = Provider<StorePinService>(
 
 final biometricAuthServiceProvider = Provider<BiometricAuthService>(
   (ref) => BiometricAuthService(),
+);
+
+final yumiEngineProvider = Provider<YumiEngine>(
+  (ref) => YumiEngine.instance,
+);
+
+final yumiWarmupProvider = FutureProvider<void>(
+  (ref) => ref.watch(yumiEngineProvider).init(),
 );

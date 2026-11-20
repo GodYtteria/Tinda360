@@ -100,6 +100,37 @@ void main() {
     },
   );
 
+  test('a product with a typed category saves and updates', () async {
+    final draft = ProductFormLogic.buildDraft(
+      name: 'Sardinas',
+      unit: ProductUnit.can,
+      priceInput: '24.50',
+      costInput: '20.00',
+      currency: Currency.php,
+      categoryInput: 'Snacks',
+    );
+    final created = await repos.products.create(draft);
+    final productId = switch (created) {
+      Ok(:final value) => value,
+      Err(:final failure) => fail('Expected Ok, got ${failure.code}'),
+    };
+    final active = await repos.products.watchActive().first;
+    expect(active.single.product.categoryId, 'Snacks');
+
+    final updatedDraft = ProductFormLogic.buildDraft(
+      name: 'Sardinas',
+      unit: ProductUnit.can,
+      priceInput: '24.50',
+      costInput: '20.00',
+      currency: Currency.php,
+      categoryInput: 'Canned goods',
+    );
+    final updated = await repos.products.update(productId, updatedDraft);
+    expect(updated, isA<Ok<void, ProductFailure>>());
+    final refreshed = await repos.products.watchActive().first;
+    expect(refreshed.single.product.categoryId, 'Canned goods');
+  });
+
   test('parseQuantity accepts decimals only for fraction units', () {
     expect(
       ProductFormLogic.parseQuantity('2.5', allowsFraction: true),

@@ -12,6 +12,7 @@ import 'package:tinda360/data/repositories/expense_repository.dart';
 import 'package:tinda360/data/repositories/product_repository.dart';
 import 'package:tinda360/data/repositories/sale_repository.dart';
 import 'package:tinda360/data/repositories/store_profile_repository.dart';
+import 'package:tinda360/features/chat/data/yumi_tool_executor.dart';
 import 'package:tinda360/features/pos/data/cart_storage.dart';
 import 'package:tinda360/services/service_providers.dart';
 
@@ -78,6 +79,19 @@ final expenseRepositoryProvider = Provider<ExpenseRepository>(
     clock: ref.watch(clockProvider),
     ids: ref.watch(idGeneratorProvider),
     log: ref.watch(appLogProvider),
+    currency: ref.watch(storeCurrencyProvider),
+  ),
+);
+
+final yumiToolExecutorProvider = Provider<YumiToolExecutor>(
+  (ref) => YumiToolExecutor(
+    db: ref.watch(appDatabaseProvider),
+    products: ref.watch(productRepositoryProvider),
+    sales: ref.watch(saleRepositoryProvider),
+    customers: ref.watch(customerRepositoryProvider),
+    expenses: ref.watch(expenseRepositoryProvider),
+    storeProfile: ref.watch(storeProfileRepositoryProvider),
+    clock: ref.watch(clockProvider),
     currency: ref.watch(storeCurrencyProvider),
   ),
 );

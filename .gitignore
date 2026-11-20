@@ -39,3 +39,10 @@ windows/flutter/generated_plugins.cmake
 *.sqlite
 *.db
 .DS_Store
+tinda360_training_data.jsonl
+
+assets/ai/model.gguf
+assets/ai/tokenizer.json
+
+# Website lives in the private tinda360-website repository
+website/

@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/store/store_profile.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_logo.dart';
 import 'package:tinda360/theme/app_palette.dart';
@@ -35,6 +36,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     duration: const Duration(milliseconds: 1600),
   );
   bool _hasNavigated = false;
+  bool _yumiReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initYumiEngine());
+  }
+
+  static const Duration _yumiWarmupTimeout = Duration(seconds: 8);
+
+  Future<void> _initYumiEngine() async {
+    final appLog = ref.read(appLogProvider);
+    try {
+      await ref.read(yumiWarmupProvider.future).timeout(_yumiWarmupTimeout);
+    } on Object catch (error, stack) {
+      appLog.error('splash.yumi_warmup', error, stack);
+    }
+    if (mounted) setState(() => _yumiReady = true);
+  }
 
   @override
   void didChangeDependencies() {
@@ -54,6 +74,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   void _handleProfileLoaded(StoreProfile profile) {
     if (_hasNavigated || !mounted) return;
+    if (!_yumiReady) {
+      Future<void>.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) _handleProfileLoaded(profile);
+      });
+      return;
+    }
     _hasNavigated = true;
     Future<void>.delayed(const Duration(milliseconds: 700), () {
       if (!mounted) return;

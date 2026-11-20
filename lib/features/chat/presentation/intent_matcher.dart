@@ -73,6 +73,20 @@ final class MatchedQuery {
   final String normalizedText;
 }
 
+final class ChatClassification {
+  const new({
+    required this.matched,
+    this.toolName,
+    this.toolArgs,
+    this.toolResult,
+  });
+
+  final MatchedQuery matched;
+  final String? toolName;
+  final Map<String, dynamic>? toolArgs;
+  final Map<String, dynamic>? toolResult;
+}
+
 final class IntentMatcher {
   factory fromJsonString(String rawJson) {
     final decoded = jsonDecode(rawJson) as Map<String, dynamic>;

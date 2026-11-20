@@ -42,6 +42,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         appLogProvider.overrideWithValue(appLog),
+        yumiWarmupProvider.overrideWith((ref) async {}),
         cartDirectoryProvider.overrideWithValue(
           () async => throw const FileSystemException('no cart files here'),
         ),
