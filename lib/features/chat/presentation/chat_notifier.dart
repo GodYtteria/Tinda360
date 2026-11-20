@@ -14,9 +14,9 @@ import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
 import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
-import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/chat_store_replies.dart';
 import 'package:tinda360/features/chat/presentation/chat_tool_result_replies.dart';
+import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
 import 'package:tinda360/features/chat/presentation/intent_router.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
@@ -37,9 +37,12 @@ final class ChatMessage {
     required this.createdAt,
     this.source,
     this.options = const <ClarificationOption>[],
+    this.clarifiedQuery,
   });
 
   final List<ClarificationOption> options;
+
+  final String? clarifiedQuery;
 
   final String id;
 
@@ -90,7 +93,6 @@ class ChatNotifier extends Notifier<ChatState> {
   String _modelContextSummary = '';
   int _compactedMessageCount = 0;
   String? _lastTokensPerSecondLabel;
-  String? _queryAwaitingClarification;
   Future<void>? _historyRestore;
   String? _historyStoreId;
 
@@ -165,7 +167,25 @@ class ChatNotifier extends Notifier<ChatState> {
         'text': message.text,
         'source': message.source,
         'created_at_ms': message.createdAt.millisecondsSinceEpoch,
+        'clarified_query': ?message.clarifiedQuery,
+        if (message.options.isNotEmpty)
+          'options': <Map<String, String>>[
+            for (final option in message.options)
+              <String, String>{'tool': option.toolName, 'label': option.label},
+          ],
       };
+
+  static List<ClarificationOption> _optionsFromJson(Object? rawOptions) {
+    if (rawOptions is! List) return const <ClarificationOption>[];
+    return <ClarificationOption>[
+      for (final rawOption in rawOptions)
+        if (rawOption case {
+          'tool': final String toolName,
+          'label': final String label,
+        })
+          ClarificationOption(toolName: toolName, label: label),
+    ];
+  }
 
   static ChatMessage? _messageFromJson(Map<String, Object?> json) {
     final id = json['id'];
@@ -176,26 +196,31 @@ class ChatNotifier extends Notifier<ChatState> {
     final parsedRole = ChatRole.values.where((value) => value.name == role);
     if (parsedRole.isEmpty) return null;
     final source = json['source'];
+    final clarifiedQuery = json['clarified_query'];
     return ChatMessage(
       id: id,
       role: parsedRole.first,
       text: text,
       source: source is String ? source : null,
       createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
+      options: _optionsFromJson(json['options']),
+      clarifiedQuery: clarifiedQuery is String ? clarifiedQuery : null,
     );
   }
 
-  Future<void> sendMessage(String rawText, AppLocalizations localizations) {
-    _queryAwaitingClarification = null;
-    return _send(rawText, localizations, queryText: rawText);
-  }
+  Future<void> sendMessage(String rawText, AppLocalizations localizations) =>
+      _send(rawText, localizations, queryText: rawText);
 
   Future<void> answerClarification(
+    ChatMessage clarification,
     ClarificationOption option,
     AppLocalizations localizations,
-  ) {
-    final originalQuery = _queryAwaitingClarification ?? option.label;
-    _queryAwaitingClarification = null;
+  ) async {
+    final originalQuery = clarification.clarifiedQuery;
+    final isOfferedOption = clarification.options.any(
+      (offered) => offered.toolName == option.toolName,
+    );
+    if (originalQuery == null || !isOfferedOption) return;
     return _send(
       option.label,
       localizations,
@@ -264,8 +289,8 @@ class ChatNotifier extends Notifier<ChatState> {
           : '${reply.source} · $_lastTokensPerSecondLabel',
       createdAt: ref.read(clockProvider).now(),
       options: reply.options,
+      clarifiedQuery: reply.options.isEmpty ? null : queryText.trim(),
     );
-    if (reply.options.isNotEmpty) _queryAwaitingClarification = queryText;
 
     state = state.copyWith(
       messages: [...state.messages, assistantMessage],
