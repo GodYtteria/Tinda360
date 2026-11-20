@@ -9,6 +9,7 @@ import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/chat_history_storage.dart';
+import 'package:tinda360/features/chat/data/intent_classifier.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
 import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
@@ -24,6 +25,9 @@ enum ChatRole {
 
   assistant,
 }
+
+const double _minimumIntentConfidence = 0.45;
+const String _noToolClass = 'no_tool';
 
 final class ChatMessage {
   const new({
@@ -78,6 +82,7 @@ class ChatNotifier extends Notifier<ChatState> {
   Timer? _moodResetTimer;
   Timer? _compactTimer;
   IntentMatcher? _matcher;
+  IntentClassifier? _intentClassifier;
   int _sequence = 0;
   String _modelContextSummary = '';
   int _compactedMessageCount = 0;
@@ -245,6 +250,11 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<ChatClassification> _classifyQuery(String query) async {
     final keywordClassification = await _matchWithIntentMatcher(query);
+    final learnedClassification = await _classifyWithLearnedModel(
+      query,
+      keywordClassification,
+    );
+    if (learnedClassification != null) return learnedClassification;
     if (keywordClassification.matched.intent != ChatIntent.overview) {
       return keywordClassification;
     }
@@ -299,6 +309,32 @@ class ChatNotifier extends Notifier<ChatState> {
       }
     }
     return keywordClassification;
+  }
+
+  Future<ChatClassification?> _classifyWithLearnedModel(
+    String query,
+    ChatClassification keywordClassification,
+  ) async {
+    try {
+      final classifier = _intentClassifier ??=
+          await IntentClassifier.loadFromAsset();
+      final prediction = classifier.classify(query);
+      final isConfident =
+          prediction.confidence >= _minimumIntentConfidence &&
+          prediction.toolName != _noToolClass;
+      if (!isConfident) return null;
+      final keywordMatch = keywordClassification.matched;
+      return ChatClassification(
+        matched: MatchedQuery(
+          intent: toolNameToIntent(prediction.toolName),
+          timeframe: keywordMatch.timeframe,
+          normalizedText: keywordMatch.normalizedText,
+        ),
+      );
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('chat.intent_classifier', error, stack);
+      return null;
+    }
   }
 
   Future<ChatClassification> _matchWithIntentMatcher(String query) async {

@@ -1,0 +1,374 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "get_sales_summary",
+            "description": "Get total revenue, transaction count and items sold for a date range.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timeframe": {
+                        "type": "string",
+                        "enum": [
+                            "today",
+                            "week",
+                            "month"
+                        ]
+                    }
+                },
+                "required": [
+                    "timeframe"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_top_products",
+            "description": "Get best-selling products ranked by quantity sold.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timeframe": {
+                        "type": "string",
+                        "enum": [
+                            "today",
+                            "week",
+                            "month"
+                        ]
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 5
+                    }
+                },
+                "required": [
+                    "timeframe"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_info",
+            "description": "Look up a product by name: price, stock, cost, category.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "product_name"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_low_stock",
+            "description": "List products below a stock threshold.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "threshold": {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "Stock threshold in units (pieces/kilos as whole units). Default 5."
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_forecast",
+            "description": "Predict when a product runs out based on sales velocity.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "product_name"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_utang_list",
+            "description": "List customers with outstanding credit.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "min_balance": {
+                        "type": "number",
+                        "default": 0,
+                        "description": "Minimum outstanding balance in PHP pesos. Default 0."
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_utang_risk",
+            "description": "Rank high-risk debtors by overdue amount and days since payment.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "days_overdue": {
+                        "type": "integer",
+                        "default": 30
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_expenses",
+            "description": "Get operating expenses for a period.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timeframe": {
+                        "type": "string",
+                        "enum": [
+                            "today",
+                            "week",
+                            "month"
+                        ]
+                    }
+                },
+                "required": [
+                    "timeframe"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_expiry_alerts",
+            "description": "Products nearing or past expiry.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "days_ahead": {
+                        "type": "integer",
+                        "default": 7
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_slow_moving",
+            "description": "Products with zero or low sales in the past N days.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "days": {
+                        "type": "integer",
+                        "default": 14
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_profit_margins",
+            "description": "Products ranked by profit margin.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sort": {
+                        "type": "string",
+                        "enum": [
+                            "highest",
+                            "lowest"
+                        ],
+                        "default": "highest"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 10
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_sales_compare",
+            "description": "Compare sales between current and previous period.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "string",
+                        "enum": [
+                            "day",
+                            "week",
+                            "month"
+                        ],
+                        "default": "day"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_sales_trend",
+            "description": "Daily sales totals for the past N days.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "days": {
+                        "type": "integer",
+                        "default": 7
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_busiest_hours",
+            "description": "Transaction counts grouped by hour.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timeframe": {
+                        "type": "string",
+                        "enum": [
+                            "today",
+                            "week",
+                            "month"
+                        ],
+                        "default": "week"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_suki_loyalty",
+            "description": "Top customers by spend or visit frequency.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sort_by": {
+                        "type": "string",
+                        "enum": [
+                            "spend",
+                            "visits"
+                        ],
+                        "default": "spend"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 10
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_payment_breakdown",
+            "description": "Sales split by payment method.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timeframe": {
+                        "type": "string",
+                        "enum": [
+                            "today",
+                            "week",
+                            "month"
+                        ],
+                        "default": "today"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_store_info",
+            "description": "Store profile: name, address, registration.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_count",
+            "description": "Count of active products in inventory.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_restock_suggestions",
+            "description": "Suggest products to restock within a budget.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "budget": {
+                        "type": "number",
+                        "description": "Available restock budget in PHP pesos."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Maximum number of suggestions. Default 10."
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_overview",
+            "description": "Full store dashboard: sales, low stock, utang, expiring.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    }
+]
