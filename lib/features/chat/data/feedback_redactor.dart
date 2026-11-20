@@ -4,6 +4,8 @@ final class FeedbackRedactor {
   static const String customerPlaceholder = '<CUSTOMER>';
   static const String productPlaceholder = '<PRODUCT>';
   static const String numberPlaceholder = '<NUMBER>';
+  static const String emailPlaceholder = '<EMAIL>';
+  static final RegExp _emailAddress = RegExp(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+');
 
   static const int _minimumNameLength = 2;
   static const int _minimumNameWordLength = 3;
@@ -116,15 +118,19 @@ final class FeedbackRedactor {
     '[^$_wordCharacter]+',
     unicode: true,
   );
-  static final RegExp _digitGroupSeparators = RegExp(r'[ \-]');
+  static final RegExp _digitGroupSeparators = RegExp(
+    r'[^\p{Nd}]',
+    unicode: true,
+  );
   static final RegExp _numberRun = RegExp(
-    r'\p{Nd}+(?:[ \-]\p{Nd}+)*',
+    r'\+?\(?\p{Nd}+(?:\)?[ \-./]\(?\p{Nd}+)*\)?',
     unicode: true,
   );
   static final String _existingPlaceholders =
       '${RegExp.escape(customerPlaceholder)}'
       '|${RegExp.escape(productPlaceholder)}'
-      '|${RegExp.escape(numberPlaceholder)}';
+      '|${RegExp.escape(numberPlaceholder)}'
+      '|${RegExp.escape(emailPlaceholder)}';
 
   String redact(
     String text, {
@@ -144,7 +150,11 @@ final class FeedbackRedactor {
       _fullPhrases(productNames),
       productPlaceholder,
     );
-    return _replaceNumbers(_replaceAddressedPeople(withoutProducts));
+    final withoutEmails = withoutProducts.replaceAll(
+      _emailAddress,
+      emailPlaceholder,
+    );
+    return _replaceNumbers(_replaceAddressedPeople(withoutEmails));
   }
 
   String _replaceAddressedPeople(String text) {

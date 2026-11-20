@@ -99,3 +99,10 @@ test('a batch of only invalid events is accepted as empty', () => {
   assert.equal(batch.ok, true);
   assert.deepEqual(batch.accepted, []);
 });
+
+test('phone numbers with dots, slashes or brackets are redacted on the server', () => {
+  for (const phone of ['0917.123.4567', '0917/123/4567', '(0917) 123-4567']) {
+    const sanitized = sanitizeEvent({ ...validEvent(), query: `tawag ${phone} bukas` });
+    assert.equal(sanitized.query, 'tawag <NUMBER> bukas', phone);
+  }
+});

@@ -13,7 +13,7 @@ const VERSION_PATTERN = /^[0-9A-Za-z.+-]+$/;
 const LOCALE_PATTERN = /^[A-Za-z_-]+$/;
 const TOOL_PATTERN = /^(get_[a-z_]{3,40}|no_tool)$/;
 const LONG_DIGIT_RUN_PATTERN = new RegExp(
-  `\\d(?:[\\s-]?\\d){${MINIMUM_DIGIT_RUN_TO_REDACT - 1},}`,
+  `\\+?\\(?\\d(?:\\)?[\\s\\-./]?\\(?\\d){${MINIMUM_DIGIT_RUN_TO_REDACT - 1},}\\)?`,
   'g',
 );
 

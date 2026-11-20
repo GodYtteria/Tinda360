@@ -409,4 +409,34 @@ void main() {
       'tawagan <NUMBER>',
     );
   });
+
+  test('phone numbers with dots, slashes or brackets are redacted', () {
+    for (final phone in [
+      '0917.123.4567',
+      '0917/123/4567',
+      '(0917) 123-4567',
+      '+63 917 123 4567',
+    ]) {
+      expect(
+        redact('tawagan sa $phone bukas', customers: [], products: []),
+        'tawagan sa <NUMBER> bukas',
+        reason: phone,
+      );
+    }
+    expect(
+      redact('benta 1.5 kilo at 500', customers: [], products: []),
+      'benta 1.5 kilo at 500',
+    );
+  });
+
+  test('email addresses are redacted', () {
+    expect(
+      redact('email ko juan.dela@gmail.com po', customers: [], products: []),
+      'email ko <EMAIL> po',
+    );
+    expect(
+      redact('email ko <EMAIL> po', customers: [], products: []),
+      'email ko <EMAIL> po',
+    );
+  });
 }
