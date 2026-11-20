@@ -18,6 +18,7 @@ import 'package:tinda360/features/chat/data/feedback_recorder.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
 import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/tool_call_validator.dart';
+import 'package:tinda360/features/chat/data/product_argument_grounding.dart';
 import 'package:tinda360/features/chat/data/query_language.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
@@ -481,6 +482,18 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  Future<Map<String, dynamic>?> _groundProductArgument(
+    Map<String, dynamic> modelArguments,
+    String query,
+  ) async {
+    if (!modelArguments.containsKey(productArgumentName)) return modelArguments;
+    final products = await ref
+        .read(productRepositoryProvider)
+        .watchActive()
+        .first;
+    return groundProductArgument(modelArguments, query, products);
+  }
+
   Future<ChatClassification> _classifyWithModel(
     String query,
     IntentRouter router,
@@ -509,10 +522,15 @@ class ChatNotifier extends Notifier<ChatState> {
       final toolName = result.toolName;
       if (toolName == null) return outOfScope;
       if (!router.acceptsModelTool(query, toolName)) return outOfScope;
+      final groundedArguments = await _groundProductArgument(
+        result.toolArgs ?? const <String, dynamic>{},
+        query,
+      );
+      if (groundedArguments == null) return keywordClassification;
       final validator = await _loadToolCallValidator();
       final validation = validator?.validate(
         toolName,
-        result.toolArgs,
+        groundedArguments,
         question: query,
       );
       if (validation == null || !validation.isValid) {
