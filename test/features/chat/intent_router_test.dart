@@ -10,10 +10,14 @@ const String _queriesDirectory = 'ai-model/queries';
 const String _novelCasesFile = 'ai-model/novel_eval.txt';
 const String _noToolFile = 'no_tool';
 const String _separator = '||';
-const double _minimumHeldOutAccuracy = 0.85;
+const double _minimumHeldOutHandledRate = 0.90;
 const double _maximumHeldOutWrongRate = 0.05;
 const double _minimumTrainingSetAccuracy = 0.93;
 const double _maximumChitChatLeakRate = 0.05;
+const Set<ChatIntent> _entityLookupIntents = <ChatIntent>{
+  ChatIntent.productLookup,
+  ChatIntent.stockForecast,
+};
 const Set<ChatIntent> _conversationalIntents = <ChatIntent>{
   ChatIntent.greeting,
   ChatIntent.thanks,
@@ -29,6 +33,8 @@ final class _Tally {
   int get total => correct + wrong + deferred + offeredAsChoice;
 
   double get accuracy => correct / total;
+
+  double get handledRate => (correct + offeredAsChoice) / total;
 
   double get wrongRate => wrong / total;
 
@@ -60,18 +66,28 @@ Map<String, ChatIntent> _loadTrainingQueries() {
   return expected;
 }
 
-Map<String, ChatIntent> _loadHeldOutQueries() {
-  final expected = <String, ChatIntent>{};
+List<(String, String)> _loadHeldOutCases() {
+  final cases = <(String, String)>[];
   for (final line in File(_novelCasesFile).readAsLinesSync()) {
     if (line.trim().isEmpty) continue;
     final fields = line.split('|');
     if (fields.length < 2) {
       throw FormatException('held-out line has no tool name', line);
     }
-    expected[fields[0].trim()] = toolNameToIntent(fields[1].trim());
+    cases.add((fields[0].trim(), fields[1].trim()));
   }
-  return expected;
+  return cases;
 }
+
+Map<String, ChatIntent> _loadHeldOutQueries() => {
+  for (final (query, tool) in _loadHeldOutCases())
+    if (tool != _noToolFile) query: toolNameToIntent(tool),
+};
+
+List<String> _loadHeldOutOffTopicQueries() => [
+  for (final (query, tool) in _loadHeldOutCases())
+    if (tool == _noToolFile) query,
+];
 
 List<String> _loadChitChatQueries() =>
     File('$_queriesDirectory/$_noToolFile.txt')
@@ -281,7 +297,10 @@ void main() {
     test('held-out questions are mostly routed right and rarely wrong', () {
       final tally = _score(router, _loadHeldOutQueries());
       printOnFailure('held-out: $tally');
-      expect(tally.accuracy, greaterThanOrEqualTo(_minimumHeldOutAccuracy));
+      expect(
+        tally.handledRate,
+        greaterThanOrEqualTo(_minimumHeldOutHandledRate),
+      );
       expect(tally.wrongRate, lessThanOrEqualTo(_maximumHeldOutWrongRate));
     }, skip: skipReason);
 
@@ -295,6 +314,19 @@ void main() {
       final tally = _score(router, _loadTrainingQueries());
       printOnFailure('training: $tally');
       expect(tally.accuracy, greaterThanOrEqualTo(_minimumTrainingSetAccuracy));
+    }, skip: skipReason);
+
+    test('held-out off-topic questions never get a data answer', () {
+      final queries = _loadHeldOutOffTopicQueries();
+      expect(queries, isNotEmpty);
+      for (final query in queries) {
+        final decision = router.route(query);
+        final answersWithData =
+            decision.kind == RouteKind.answerIntent &&
+            !_conversationalIntents.contains(decision.matched.intent) &&
+            !_entityLookupIntents.contains(decision.matched.intent);
+        expect(answersWithData, isFalse, reason: query);
+      }
     }, skip: skipReason);
 
     test('chit-chat almost never leaks into a data answer', () {

@@ -1,41 +1,58 @@
-ano ang pinakamabenta ngayon|get_top_products|
-sino ang may utang|get_utang_list|
-magkano ang benta ko ngayon|get_sales_summary|
-anong produkto ang paubos na|get_low_stock|
-magkano ang presyo ng coke|get_product_info|coke
-how many products do i have|get_product_count|
-what is my store name|get_store_info|
-ano ang matumal na paninda|get_slow_moving|
-magkano gastos ko ngayong linggo|get_expenses|
-anong oras pinakamaraming bumibili|get_busiest_hours|
-sino ang pinaka suki ko|get_suki_loyalty|
-sino ang delikadong pautangin|get_utang_risk|
-kamusta ang benta ngayon kumpara kahapon|get_sales_compare|
-ano ang malapit nang ma-expire|get_expiry_alerts|
-gaano kalaki ang tubo ko sa bawat produkto|get_profit_margins|
-how is my sales trend this week|get_sales_trend|
-cash ba o gcash mas marami|get_payment_breakdown|
-ilang araw tatagal ang stock ng bigas|get_stock_forecast|bigas
-magkano ang dapat kong ibudget sa palengke|get_restock_suggestions|
-overview ng tindahan ko|get_overview|
-may stock pa ba ng gatas|get_product_info|gatas
-saan ako dapat magtipid, ano ang gastos ko ngayong buwan|get_expenses|
-gaano kabilis mauubos ang Lucky Me|get_stock_forecast|Lucky Me
-sinong suki ang bumibili araw-araw|get_suki_loyalty|
-paano ang kita ko compared sa last week|get_sales_compare|
-what are my top sellers this month|get_top_products|
-pakitingnan kung ano ang hindi nabili nitong buwan|get_slow_moving|
-may mga produkto bang paso na|get_expiry_alerts|
-anong oras dapat may bantay sa tindahan|get_busiest_hours|
-mga umutang na malaki ang balance|get_utang_list|
-ilan na ang benta namin sa buong linggo|get_sales_summary|
-nagkano na ba ang Safeguard|get_product_info|Safeguard
-saan nagmula ang bayad ngayong araw, cash o gcash|get_payment_breakdown|
-how many items are in my inventory|get_product_count|
-anong pangalan ng store ko|get_store_info|
-anong paninda ang halos ubos na|get_low_stock|
-tumataas ba ang benta ko nitong dalawang linggo|get_sales_trend|
-kailan mauubos ang itlog|get_stock_forecast|itlog
-ano ang pinakamataas ang patong sa paninda ko|get_profit_margins|
-buod ng negosyo ko ngayon|get_overview|
-may babayaran ba akong dapat bilhin para sa tindahan, 2000 ang budget|get_restock_suggestions|
+gaano na kalaki ang naipon kong benta mula kaninang umaga|get_sales_summary|{"timeframe": "today"}
+pakisuma nga lahat ng nabili sa akin nitong pitong araw|get_sales_summary|{"timeframe": "week"}
+alin sa mga tinda ko ang laging binibili ng mga tao|get_top_products|
+which snacks are flying off the shelf lately|get_top_products|
+how much do i charge for one bottle of Nature Spring|get_product_info|Nature Spring
+ilan pa ang natitirang Bingo biscuit sa estante|get_product_info|Bingo biscuit
+may natitira pa bang Datu Puti toyo o wala na|get_product_info|Datu Puti toyo
+may kalamansi pa ba tayo o kailangan nang bumili|get_product_info|kalamansi
+aling mga paninda ang kailangan ko nang orderin dahil kaunti na|get_low_stock|
+anong items ang halos simot na sa tindahan|get_low_stock|
+hanggang kailan pa aabot ang supply ko ng Bear Brand Swak|get_stock_forecast|Bear Brand Swak
+will my Kopiko Black last until payday|get_stock_forecast|Kopiko Black
+gaano pa katagal bago maubos ang uling ko|get_stock_forecast|uling
+sinong mga kapitbahay ang may listahan pa sa akin|get_utang_list|
+give me the names of people who still owe the store|get_utang_list|
+kanino ako dapat mag-ingat magpautang ulit|get_utang_risk|
+which borrowers keep missing their payment dates|get_utang_risk|
+magkano lahat ng inilabas kong pera para sa tindahan this week|get_expenses|{"timeframe": "week"}
+how much went out for bills and supplies this month|get_expenses|{"timeframe": "month"}
+may mga de lata ba akong lagpas na sa petsa|get_expiry_alerts|
+which items should i pull from the shelf because they are expiring|get_expiry_alerts|
+anong paninda ang inaalikabok na lang sa estante|get_slow_moving|
+which products have been sitting unsold for weeks|get_slow_moving|
+saan ako mas kumikita bawat pirasong naibenta|get_profit_margins|
+which item gives me the thinnest profit|get_profit_margins|{"sort": "lowest"}
+lumakas ba o humina ang tindahan kumpara noong isang linggo|get_sales_compare|{"period": "week"}
+did i sell more today than i did yesterday|get_sales_compare|{"period": "day"}
+ipakita mo kung paano gumalaw ang benta araw-araw|get_sales_trend|
+show me a day by day picture of my sales|get_sales_trend|
+kailan ang oras na dapat may dalawang tao sa tindahan|get_busiest_hours|
+what part of the day brings the most buyers|get_busiest_hours|
+kaninong pangalan ang lagi kong nakikita sa mga resibo|get_suki_loyalty|{"sort_by": "visits"}
+who comes back to buy most often|get_suki_loyalty|{"sort_by": "visits"}
+gaano karami ang nagbayad gamit ang maya o gcash|get_payment_breakdown|
+split my sales into cash and digital payments|get_payment_breakdown|
+paano naka-rehistro ang negosyo ko sa app|get_store_info|
+what address did i put for the shop|get_store_info|
+gaano na kahaba ang listahan ng mga tinda ko sa app|get_product_count|
+how many items have i added to the app so far|get_product_count|
+may tatlong libo ako, ano ang dapat kong ipamili|get_restock_suggestions|{"budget": 3000}
+what should go on my next supplier order|get_restock_suggestions|
+bigyan mo ako ng mabilis na lagay ng buong negosyo|get_overview|
+quick status of the whole store please|get_overview|
+kinsa pa ang wala nakabayad sa ilang utang|get_utang_list|
+mano ti nailako ko ita nga aldaw|get_sales_summary|{"timeframe": "today"}
+pls chk kng ano na ubos n paninda|get_low_stock|
+naku po, parang ang laki ng nagastos ko ngayong buwan, magkano ba talaga|get_expenses|{"timeframe": "month"}
+pa-check naman kung sino yung mga may unpaid balance pa sa store|get_utang_list|
+sino ang sikat na artista ngayon|no_tool|
+how do i cook sinigang na baboy|no_tool|
+ano ang presyo ng ginto sa merkado|no_tool|
+can you tell me a bedtime story|no_tool|
+magkano ang pamasahe papuntang maynila|no_tool|
+what is the best phone to buy|no_tool|
+nais ko po sanang malaman ang halaga ng lahat ng naibenta ko mula pagbukas kanina|get_sales_summary|{"timeframe": "today"}
+ano po ang mga produktong malapit nang maubos sa aking tindahan|get_low_stock|
+sino po sa aking mga suki ang may pinakamalaking pagkakautang|get_utang_list|
+ilang araw pa po kaya bago maubos ang aking Lucky Me Pancit Canton|get_stock_forecast|Lucky Me Pancit Canton

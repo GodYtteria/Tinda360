@@ -27,10 +27,19 @@ def load_cases(path):
     return cases
 
 
+def values_match(expected, actual):
+    if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        try:
+            return float(actual) == float(expected)
+        except (TypeError, ValueError):
+            return False
+    return str(actual).strip().lower() == str(expected).strip().lower()
+
+
 def arguments_match(expected, actual):
     actual = actual or {}
     return all(
-        str(actual.get(key, '')).strip().lower() == str(value).strip().lower()
+        values_match(value, actual.get(key, ''))
         for key, value in expected.items()
     )
 
