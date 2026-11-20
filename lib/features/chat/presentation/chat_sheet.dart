@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
+import 'package:tinda360/features/chat/data/feedback_log.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
 import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
@@ -15,6 +16,7 @@ import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
 
 const double _clarificationChipMinHeight = 48;
+const double _ratingButtonSize = 48;
 
 class ChatSheet extends ConsumerStatefulWidget {
   const new({
@@ -118,6 +120,14 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
           .answerClarification(clarification, option, localizations),
     );
     _scrollToBottom(force: true);
+  }
+
+  void _rateMessage(ChatMessage message, FeedbackRating rating) {
+    if (message.rating == rating) return;
+    unawaited(HapticFeedback.selectionClick());
+    unawaited(
+      ref.read(chatNotifierProvider.notifier).rateMessage(message, rating),
+    );
   }
 
   void _scrollToBottom({bool force = false}) {
@@ -240,6 +250,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                           option,
                           localizations,
                         ),
+                    onRate: _rateMessage,
                     onOpenTab: widget.onOpenTab == null
                         ? null
                         : (index) {
@@ -370,6 +381,7 @@ class _MessageList extends StatelessWidget {
     required this.isThinking,
     required this.scrollController,
     required this.onSelectOption,
+    required this.onRate,
     this.revealingMessageId,
     this.onRevealComplete,
     this.onOpenTab,
@@ -381,6 +393,7 @@ class _MessageList extends StatelessWidget {
   final ScrollController scrollController;
   final void Function(ChatMessage clarification, ClarificationOption option)
   onSelectOption;
+  final void Function(ChatMessage message, FeedbackRating rating) onRate;
   final String? revealingMessageId;
   final ValueChanged<String>? onRevealComplete;
   final ValueChanged<int>? onOpenTab;
@@ -429,6 +442,7 @@ class _MessageList extends StatelessWidget {
                     ? (option) => onSelectOption(message, option)
                     : null,
                 onOpenTab: onOpenTab,
+                onRate: (rating) => onRate(message, rating),
               );
       },
     );
@@ -477,6 +491,7 @@ class _AssistantBubble extends StatelessWidget {
     this.onRevealComplete,
     this.onSelectOption,
     this.onOpenTab,
+    this.onRate,
   });
 
   final ChatMessage message;
@@ -484,6 +499,7 @@ class _AssistantBubble extends StatelessWidget {
   final VoidCallback? onRevealComplete;
   final ValueChanged<ClarificationOption>? onSelectOption;
   final ValueChanged<int>? onOpenTab;
+  final ValueChanged<FeedbackRating>? onRate;
 
   @override
   Widget build(BuildContext context) {
@@ -568,10 +584,64 @@ class _AssistantBubble extends StatelessWidget {
                     ),
                   ),
               ],
+              if (message.feedbackEventId != null &&
+                  message.options.isEmpty &&
+                  onRate != null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _RatingButton(
+                      outlinedIcon: Icons.thumb_up_outlined,
+                      filledIcon: Icons.thumb_up,
+                      tooltip: localizations.chatFeedbackHelpful,
+                      selected: message.rating == FeedbackRating.up,
+                      onPressed: () => onRate!(FeedbackRating.up),
+                    ),
+                    _RatingButton(
+                      outlinedIcon: Icons.thumb_down_outlined,
+                      filledIcon: Icons.thumb_down,
+                      tooltip: localizations.chatFeedbackNotHelpful,
+                      selected: message.rating == FeedbackRating.down,
+                      onPressed: () => onRate!(FeedbackRating.down),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RatingButton extends StatelessWidget {
+  const new({
+    required this.outlinedIcon,
+    required this.filledIcon,
+    required this.tooltip,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final IconData outlinedIcon;
+  final IconData filledIcon;
+  final String tooltip;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
+    return IconButton(
+      tooltip: tooltip,
+      isSelected: selected,
+      constraints: const BoxConstraints.tightFor(
+        width: _ratingButtonSize,
+        height: _ratingButtonSize,
+      ),
+      icon: Icon(outlinedIcon, color: palette.textMuted),
+      selectedIcon: Icon(filledIcon, color: palette.accent),
+      onPressed: onPressed,
     );
   }
 }
