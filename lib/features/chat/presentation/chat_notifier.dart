@@ -150,8 +150,7 @@ class ChatNotifier extends Notifier<ChatState> {
       _historyStoreId = storeId;
       if (state.messages.isNotEmpty || stored.isEmpty) return;
       final restored = <ChatMessage>[
-        for (final entry in stored)
-          if (_messageFromJson(entry) case final message?) message,
+        for (final entry in stored) ?_messageFromJson(entry),
       ];
       _sequence = _highestSequence(restored);
       state = state.copyWith(messages: restored);
