@@ -50,7 +50,6 @@ void main() {
     StoreSoundSettingStore store,
   ) {
     final container = ProviderContainer(
-      retry: (retryCount, error) => null,
       overrides: [
         storeSoundOutputProvider.overrideWithValue(output),
         storeSoundSettingStoreProvider.overrideWithValue(store),
@@ -140,8 +139,10 @@ void main() {
       output,
       FileStoreSoundSettingStore(directoryProvider: () async => scratch),
     );
-    await container.read(storeSoundPlayerProvider).playNow(StoreSound.scanned);
-    expect(output.played, [StoreSound.scanned]);
+    final player = container.read(storeSoundPlayerProvider);
+    await player.playNow(StoreSound.scanned);
+    await player.playNow(StoreSound.addedToCart);
+    expect(output.played, [StoreSound.scanned, StoreSound.addedToCart]);
     expect(log.events, ['sound.setting']);
   });
 

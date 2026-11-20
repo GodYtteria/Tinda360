@@ -107,11 +107,24 @@ final storeSoundsEnabledProvider =
 
 class StoreSoundsEnabledNotifier extends AsyncNotifier<bool> {
   @override
-  Future<bool> build() => ref.read(storeSoundSettingStoreProvider).read();
+  Future<bool> build() async {
+    try {
+      return await ref.read(storeSoundSettingStoreProvider).read();
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('sound.setting', error, stack);
+      return FileStoreSoundSettingStore.enabledByDefault;
+    }
+  }
 
   Future<void> setEnabled({required bool enabled}) async {
-    await ref.read(storeSoundSettingStoreProvider).write(enabled: enabled);
+    final previous = state;
     state = AsyncData(enabled);
+    try {
+      await ref.read(storeSoundSettingStoreProvider).write(enabled: enabled);
+    } on Object {
+      state = previous;
+      rethrow;
+    }
   }
 }
 
@@ -127,20 +140,11 @@ final class StoreSoundPlayer {
   void play(StoreSound sound) => unawaited(playNow(sound));
 
   Future<void> playNow(StoreSound sound) async {
-    if (!await _isEnabled()) return;
+    if (!await _ref.read(storeSoundsEnabledProvider.future)) return;
     try {
       await _ref.read(storeSoundOutputProvider).play(sound);
     } on Object catch (error, stack) {
       _ref.read(appLogProvider).error('sound.play', error, stack);
-    }
-  }
-
-  Future<bool> _isEnabled() async {
-    try {
-      return await _ref.read(storeSoundsEnabledProvider.future);
-    } on Object catch (error, stack) {
-      _ref.read(appLogProvider).error('sound.setting', error, stack);
-      return FileStoreSoundSettingStore.enabledByDefault;
     }
   }
 }
