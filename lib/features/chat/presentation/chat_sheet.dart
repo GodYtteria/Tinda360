@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +18,10 @@ import 'package:tinda360/theme/app_tokens.dart';
 
 const double _clarificationChipMinHeight = 48;
 const double _ratingButtonSize = 48;
+const int _typingDotCount = 3;
+const double _typingDotStagger = 0.15;
+const double _typingLiftPortion = 0.6;
+const double _typingDotLift = 4;
 
 class ChatSheet extends ConsumerStatefulWidget {
   const new({
@@ -64,6 +69,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
+    _jumpToLatest();
   }
 
   void _handleScroll() {
@@ -130,6 +136,14 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     );
   }
 
+  void _jumpToLatest() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      if (_showScrollToBottom) setState(() => _showScrollToBottom = false);
+    });
+  }
+
   void _scrollToBottom({bool force = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
@@ -159,6 +173,14 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
       _revealedIds.addAll(chatState.messages.map((m) => m.id));
     }
     ref.listen<ChatState>(chatNotifierProvider, (previous, next) {
+      final restoredHistory =
+          (previous == null || previous.messages.isEmpty) &&
+          next.messages.length > 1;
+      if (restoredHistory) {
+        _revealedIds.addAll(next.messages.map((message) => message.id));
+        _jumpToLatest();
+        return;
+      }
       if (previous != null && next.messages.length > previous.messages.length) {
         final last = next.messages.last;
         if (last.role == ChatRole.assistant) {
@@ -838,13 +860,15 @@ class _TypingDotsState extends State<_TypingDots>
       animation: _controller,
       builder: (context, _) => Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(3, (index) {
-          final t = (_controller.value + index / 3) % 1.0;
-          final opacity = 0.25 + 0.75 * (t < 0.5 ? t * 2 : (1 - t) * 2);
+        children: List.generate(_typingDotCount, (index) {
+          final phase = (_controller.value - index * _typingDotStagger) % 1.0;
+          final lift = phase < _typingLiftPortion
+              ? math.sin(phase / _typingLiftPortion * math.pi)
+              : 0.0;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Opacity(
-              opacity: opacity,
+            child: Transform.translate(
+              offset: Offset(0, -_typingDotLift * lift),
               child: Container(
                 width: 6,
                 height: 6,
