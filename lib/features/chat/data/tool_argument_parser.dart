@@ -77,12 +77,16 @@ final class ToolArgumentParser {
     'sampu': 10,
     'sampung': 10,
     'ten': 10,
+    'fourteen': 14,
+    'fifteen': 15,
     'bente': 20,
     'twenty': 20,
     'trenta': 30,
     'thirty': 30,
     'singkwenta': 50,
     'fifty': 50,
+    'sixty': 60,
+    'ninety': 90,
     'limandaan': 500,
     'limandaang': 500,
   };
@@ -110,6 +114,9 @@ final class ToolArgumentParser {
     'nitong',
     'nakaraang',
     'karong',
+    'whole',
+    'entire',
+    'buong',
   };
 
   static const Set<String> _linkerWords = <String>{'na', 'ka'};
@@ -117,6 +124,7 @@ final class ToolArgumentParser {
   static const Map<String, int> _periodAdjectives = <String, int>{
     'weekly': _daysPerWeek,
     'monthly': _daysPerMonth,
+    'tomorrow': 1,
   };
 
   static const Map<String, int> _durationUnits = <String, int>{
@@ -146,6 +154,11 @@ final class ToolArgumentParser {
     'bottom',
     'lugi',
     'gamay',
+    'least',
+    'smallest',
+    'barely',
+    'manipis',
+    'losing',
   };
 
   static const Set<String> _visitWords = <String>{
@@ -160,6 +173,13 @@ final class ToolArgumentParser {
     'bumabalik',
     'dalas',
     'comes',
+    'coming',
+    'regulars',
+    'times',
+    'trips',
+    'faithful',
+    'lagi',
+    'nandito',
   };
 
   static const Map<String, String> _durationArgumentNames = <String, String>{
@@ -229,6 +249,9 @@ final class ToolArgumentParser {
     int? lastScale;
     for (final word in words) {
       final multiplier = _multipliers[word];
+      if (multiplier != null && _endsWithNumberAndLinker(tokens)) {
+        tokens.removeLast();
+      }
       if (multiplier != null && tokens.isNotEmpty && tokens.last is int) {
         final last = tokens.last as int;
         final pending = lastScale == null ? last : last % lastScale;
@@ -253,6 +276,11 @@ final class ToolArgumentParser {
     }
     return tokens;
   }
+
+  bool _endsWithNumberAndLinker(List<Object> tokens) =>
+      tokens.length >= 2 &&
+      _linkerWords.contains(tokens.last) &&
+      tokens[tokens.length - 2] is int;
 
   bool _containsAny(List<Object> tokens, Set<String> words) =>
       tokens.any(words.contains);

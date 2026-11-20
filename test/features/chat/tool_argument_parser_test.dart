@@ -234,6 +234,74 @@ void main() {
       expect(parse('get_utang_list', 'may isang suki na may utang'), isNull);
     });
 
+    test('a number joined to thousands by na is one amount', () {
+      expect(
+        parse(
+          'get_restock_suggestions',
+          'apat na libo ang hawak ko, ano ang dapat kong bilhin',
+        ),
+        {'budget': 4000},
+      );
+      expect(parse('get_utang_list', 'utang na lampas dalawang libo'), {
+        'min_balance': 2000,
+      });
+    });
+
+    test('spelled-out and whole-period durations become days', () {
+      expect(
+        parse(
+          'get_expiry_alerts',
+          'which products go bad within fourteen days',
+        ),
+        {'days_ahead': 14},
+      );
+      expect(
+        parse(
+          'get_slow_moving',
+          'anong paninda ang buong buwan nang walang bumibili',
+        ),
+        {'days': 30},
+      );
+      expect(
+        parse(
+          'get_slow_moving',
+          'which products had no sales for the whole month',
+        ),
+        {'days': 30},
+      );
+      expect(parse('get_expiry_alerts', 'what expires tomorrow'), {
+        'days_ahead': 1,
+      });
+    });
+
+    test('least and thin profit words sort by lowest margin', () {
+      expect(
+        parse('get_profit_margins', 'which 5 products make me the least money'),
+        {'sort': 'lowest', 'limit': 5},
+      );
+      expect(
+        parse(
+          'get_profit_margins',
+          'ano ang mga paninda kong manipis ang kita',
+        ),
+        {'sort': 'lowest'},
+      );
+      expect(parse('get_profit_margins', 'top 5 products by profit'), {
+        'sort': 'highest',
+        'limit': 5,
+      });
+    });
+
+    test('regulars and coming back sort suki by visits', () {
+      expect(parse('get_suki_loyalty', 'who are my regulars'), {
+        'sort_by': 'visits',
+      });
+      expect(parse('get_suki_loyalty', 'which customers keep coming back'), {
+        'sort_by': 'visits',
+      });
+      expect(parse('get_suki_loyalty', 'who are my biggest spenders'), isNull);
+    });
+
     test('tools without numeric arguments yield nothing', () {
       expect(parse('get_store_info', 'top 5 store info 2000'), isNull);
       expect(parse('not_a_tool', 'lampas 500'), isNull);
