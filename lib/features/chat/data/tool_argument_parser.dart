@@ -3,6 +3,7 @@ final class ToolArgumentParser {
 
   static const int _largestLimit = 50;
   static const int _smallestBudget = 100;
+  static const int _smallestPhoneLikeNumber = 10000000;
   static const int _daysPerWeek = 7;
   static const int _daysPerMonth = 30;
 
@@ -262,7 +263,7 @@ final class ToolArgumentParser {
     int? firstPlain;
     for (var index = 0; index < tokens.length; index++) {
       final token = tokens[index];
-      if (token is! int) continue;
+      if (token is! int || token >= _smallestPhoneLikeNumber) continue;
       if (_isFollowedBy(tokens, index, _durationUnits.keys)) continue;
       if (_followsComparator(tokens, index)) return token;
       final isArticle = index + 1 < tokens.length && tokens[index + 1] is! int;
@@ -295,7 +296,8 @@ final class ToolArgumentParser {
 
   Map<String, dynamic> _restock(List<Object> tokens) {
     final budget = tokens.whereType<int>().where(
-      (amount) => amount >= _smallestBudget,
+      (amount) =>
+          amount >= _smallestBudget && amount < _smallestPhoneLikeNumber,
     );
     final limit = _limit(tokens);
     return <String, dynamic>{

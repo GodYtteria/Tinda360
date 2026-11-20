@@ -172,6 +172,24 @@ void main() {
       expect(parse('get_utang_list', ''), isNull);
     });
 
+    test('a phone number is not read as an amount', () {
+      expect(
+        parse('get_utang_list', 'utang ni aling nena tawag 09171234567'),
+        isNull,
+      );
+      expect(
+        parse('get_restock_suggestions', 'restock tawagan 09171234567'),
+        isNull,
+      );
+      expect(
+        parse('get_utang_list', 'utang lampas 500 tawag 09171234567'),
+        {'min_balance': 500},
+      );
+      expect(parse('get_utang_list', 'utang lampas 9999999'), {
+        'min_balance': 9999999,
+      });
+    });
+
     test('an article is not read as the number one', () {
       expect(parse('get_utang_list', 'may isang suki na may utang'), isNull);
     });
