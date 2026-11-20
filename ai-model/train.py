@@ -508,8 +508,9 @@ class Trainer:
                     _, loss = self.model(inputs, targets=targets)
                     loss = loss / grad_accum
                 loss.backward()
-                accum_loss += loss.item() * grad_accum
-                accum_tokens += (targets != -100).sum().item()
+                trainable_tokens = (targets != -100).sum().item()
+                accum_loss += loss.item() * grad_accum * trainable_tokens
+                accum_tokens += trainable_tokens
                 is_last_batch = (batch_idx + 1) == len(train_loader)
                 if (batch_idx + 1) % grad_accum == 0 or is_last_batch:
                     step_in_phase += 1
