@@ -401,7 +401,10 @@
         "owing",
         "credit list",
         "kuwaderno",
-        "not paid"
+        "not paid",
+        "utang ni",
+        "utang ko",
+        "may utang"
       ]
     },
     {
@@ -578,14 +581,17 @@
         "retail price",
         "cost price",
         "price list",
-        "ilan pa",
-        "ilang piraso",
-        "ilan na lang",
+        "ilan pa ang",
+        "ilan pa yung",
+        "ilan pa po",
+        "ilan pa stock",
+        "ilan pa natitira",
+        "ilan pa ba ang",
+        "ilang piraso pa",
         "how much for",
         "how much are",
-        "how much is a",
+        "how much is a ",
         "are left",
-        "we still have",
         "may natitira",
         "pila pa kabuok"
       ]
@@ -769,15 +775,19 @@
         "stock days",
         "supply forecast",
         "gaano katagal",
-        "aabot pa",
         "tatagal pa",
         "how long until",
         "how soon will",
         "last through",
         "pila pa ka adlaw",
+        "mano pay nga aldaw",
         "katagal pa",
         "bago maubos",
-        "mauubusan"
+        "mauubusan na ba",
+        "days of",
+        "aabot pa ba hanggang",
+        "aabot pa ba ng isang",
+        "aabot pa ba ang supply"
       ]
     }
   ]
