@@ -304,4 +304,50 @@ void main() {
     await log.append(event(7));
     expect((await uploader.uploadPending()).sentCount, 1);
   });
+
+  test('turning sharing off stops the next chunk from being sent', () async {
+    await appendEvents(120);
+    var allowed = true;
+    var requests = 0;
+    final uploader = FeedbackUploader(
+      log: log,
+      client: MockClient((request) async {
+        requests += 1;
+        allowed = false;
+        return acceptAll(request);
+      }),
+      endpoint: endpoint,
+      isStillAllowed: () async => allowed,
+    );
+    final result = await uploader.uploadPending();
+    expect(requests, 1);
+    expect(result.failed, isFalse);
+    expect(await log.readAll(), hasLength(70));
+  });
+
+  test('a chunk the server rejects is dropped and reported', () async {
+    await appendEvents(60);
+    var requests = 0;
+    final result = await uploaderWith((request) async {
+      requests += 1;
+      return http.Response('{"error":"bad"}', 400);
+    }).uploadPending();
+    expect(requests, 1);
+    expect(result.failed, isTrue);
+    expect(result.error, isA<FeedbackUploadRejected>());
+    expect((result.error! as FeedbackUploadRejected).statusCode, 400);
+    expect(await log.readAll(), hasLength(10));
+  });
+
+  test('rate limiting and server errors keep the chunk for later', () async {
+    for (final status in [429, 500, 503]) {
+      await log.clear();
+      await appendEvents(5);
+      final result = await uploaderWith(
+        (request) async => http.Response('', status),
+      ).uploadPending();
+      expect(result.failed, isTrue, reason: '$status');
+      expect(await log.readAll(), hasLength(5), reason: '$status');
+    }
+  });
 }

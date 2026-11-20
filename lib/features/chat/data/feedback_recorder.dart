@@ -39,6 +39,7 @@ final feedbackUploaderProvider = Provider<FeedbackUploader>(
     log: ref.watch(feedbackLogProvider),
     client: ref.watch(feedbackHttpClientProvider),
     endpoint: ref.watch(feedbackEndpointProvider),
+    isStillAllowed: ref.watch(feedbackConsentStoreProvider).read,
   ),
 );
 

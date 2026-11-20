@@ -20,12 +20,31 @@ final class FeedbackUploadResult {
   final StackTrace? stackTrace;
 }
 
+final class FeedbackUploadRejected implements Exception {
+  const new(this.statusCode);
+
+  final int statusCode;
+
+  @override
+  String toString() => 'feedback upload got HTTP $statusCode';
+}
+
 final class FeedbackUploader {
-  new({required this.log, required this.client, required this.endpoint});
+  new({
+    required this.log,
+    required this.client,
+    required this.endpoint,
+    Future<bool> Function()? isStillAllowed,
+  }) : _isStillAllowed = isStillAllowed ?? _alwaysAllowed;
+
+  static Future<bool> _alwaysAllowed() async => true;
 
   static const int maximumEventsPerRequest = 50;
   static const Duration requestTimeout = Duration(seconds: 15);
   static const int _successStatus = 200;
+  static const int _firstClientErrorStatus = 400;
+  static const int _firstServerErrorStatus = 500;
+  static const int _tooManyRequestsStatus = 429;
   static const String _contentTypeHeader = 'content-type';
   static const String _jsonContentType = 'application/json';
   static const String _eventsKey = 'events';
@@ -34,6 +53,7 @@ final class FeedbackUploader {
   final FeedbackLog log;
   final http.Client client;
   final Uri? endpoint;
+  final Future<bool> Function() _isStillAllowed;
   Future<FeedbackUploadResult>? _inFlight;
 
   Future<FeedbackUploadResult> uploadPending() {
@@ -66,9 +86,25 @@ final class FeedbackUploader {
             if (queued[event.id] case final current?) current,
         ];
         if (chunk.isEmpty) continue;
+        if (!await _isStillAllowed()) {
+          return FeedbackUploadResult(sentCount: sentCount, failed: false);
+        }
         final response = await _post(target, chunk);
-        if (response.statusCode != _successStatus) {
-          return FeedbackUploadResult(sentCount: sentCount, failed: true);
+        final status = response.statusCode;
+        final isRejected =
+            status >= _firstClientErrorStatus &&
+            status < _firstServerErrorStatus &&
+            status != _tooManyRequestsStatus;
+        if (isRejected) {
+          await log.removeAll([for (final event in chunk) event.id]);
+        }
+        if (status != _successStatus) {
+          return FeedbackUploadResult(
+            sentCount: sentCount,
+            failed: true,
+            error: FeedbackUploadRejected(status),
+            stackTrace: StackTrace.current,
+          );
         }
         sentCount += _countAccepted(response, chunk);
         await log.removeAll([for (final event in chunk) event.id]);
