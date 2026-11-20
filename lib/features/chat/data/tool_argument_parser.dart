@@ -6,7 +6,37 @@ final class ToolArgumentParser {
   static const int _daysPerWeek = 7;
   static const int _daysPerMonth = 30;
 
+  static const int _thousand = 1000;
+  static const int _comparatorReach = 2;
+
   static final RegExp _separators = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+  static final RegExp _thousandsSeparator = RegExp(r'(?<=\d),(?=\d{3}(?!\d))');
+  static final RegExp _thousandsSuffix = RegExp(r'\b(\d+)(?:\.(\d+))?k\b');
+  static final RegExp _decimalFraction = RegExp(r'(\d)\.\d+');
+
+  static const Set<String> _numberConnectors = <String>{'t', 'at', 'and'};
+
+  static const Set<String> _comparatorWords = <String>{
+    'lampas',
+    'higit',
+    'mahigit',
+    'over',
+    'above',
+    'below',
+    'under',
+    'mababa',
+    'less',
+    'more',
+  };
+
+  static const Set<String> _nonCountUnits = <String>{
+    'porsyento',
+    'porsiyento',
+    'percent',
+    'pesos',
+    'piso',
+    'php',
+  };
 
   static const Map<String, int> _numberWords = <String, int>{
     'isa': 1,
@@ -157,23 +187,45 @@ final class ToolArgumentParser {
     return arguments.isEmpty ? null : arguments;
   }
 
+  String _normalizeDigits(String query) => query
+      .toLowerCase()
+      .replaceAll(_thousandsSeparator, '')
+      .replaceAllMapped(_thousandsSuffix, (match) {
+        final fraction = match.group(2) ?? '';
+        final scaled = num.parse('${match.group(1)}.${fraction}0') * _thousand;
+        return '${scaled.round()}';
+      })
+      .replaceAllMapped(_decimalFraction, (match) => match.group(1)!);
+
   List<Object> _numericTokens(String query) {
-    final words = query
-        .toLowerCase()
-        .split(_separators)
-        .where((word) => word.isNotEmpty);
+    final words = _normalizeDigits(
+      query,
+    ).split(_separators).where((word) => word.isNotEmpty);
     final tokens = <Object>[];
+    int? lastScale;
     for (final word in words) {
       final multiplier = _multipliers[word];
       if (multiplier != null && tokens.isNotEmpty && tokens.last is int) {
-        tokens[tokens.length - 1] = (tokens.last as int) * multiplier;
+        final last = tokens.last as int;
+        final pending = lastScale == null ? last : last % lastScale;
+        tokens[tokens.length - 1] =
+            last - pending + (pending == 0 ? 1 : pending) * multiplier;
+        lastScale = multiplier;
         continue;
       }
       if (multiplier != null && _standaloneMultipliers.contains(word)) {
         tokens.add(multiplier);
+        lastScale = multiplier;
         continue;
       }
-      tokens.add(int.tryParse(word) ?? _numberWords[word] ?? word);
+      if (lastScale != null && _numberConnectors.contains(word)) continue;
+      final value = int.tryParse(word) ?? _numberWords[word];
+      if (value != null && lastScale != null && value < lastScale) {
+        tokens[tokens.length - 1] = (tokens.last as int) + value;
+        continue;
+      }
+      lastScale = null;
+      tokens.add(value ?? word);
     }
     return tokens;
   }
@@ -198,25 +250,35 @@ final class ToolArgumentParser {
     return null;
   }
 
+  bool _isFollowedBy(List<Object> tokens, int index, Iterable<Object> words) =>
+      index + 1 < tokens.length && words.contains(tokens[index + 1]);
+
+  bool _followsComparator(List<Object> tokens, int index) {
+    final start = index - _comparatorReach < 0 ? 0 : index - _comparatorReach;
+    return tokens.sublist(start, index).any(_comparatorWords.contains);
+  }
+
   int? _firstAmount(List<Object> tokens) {
+    int? firstPlain;
     for (var index = 0; index < tokens.length; index++) {
       final token = tokens[index];
       if (token is! int) continue;
+      if (_isFollowedBy(tokens, index, _durationUnits.keys)) continue;
+      if (_followsComparator(tokens, index)) return token;
       final isArticle = index + 1 < tokens.length && tokens[index + 1] is! int;
       if (token == 1 && isArticle) continue;
-      return token;
+      firstPlain ??= token;
     }
-    return null;
+    return firstPlain;
   }
 
   int? _limit(List<Object> tokens) {
     for (var index = 0; index < tokens.length; index++) {
       final token = tokens[index];
       if (token is! int || token > _largestLimit) continue;
+      if (_isFollowedBy(tokens, index, _nonCountUnits)) continue;
       final followsTop = index > 0 && tokens[index - 1] == 'top';
-      final isDuration =
-          index + 1 < tokens.length &&
-          _durationUnits.containsKey(tokens[index + 1]);
+      final isDuration = _isFollowedBy(tokens, index, _durationUnits.keys);
       if (followsTop || (token > 1 && !isDuration)) return token;
     }
     return null;

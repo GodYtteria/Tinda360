@@ -82,6 +82,49 @@ void main() {
       });
     });
 
+    test('formatted amounts keep their full value', () {
+      expect(parse('get_utang_list', 'utang na lampas 1,000'), {
+        'min_balance': 1000,
+      });
+      expect(parse('get_utang_list', 'utang na lampas ₱1,500.50'), {
+        'min_balance': 1500,
+      });
+      expect(parse('get_utang_list', 'utang na lampas 2k'), {
+        'min_balance': 2000,
+      });
+      expect(parse('get_restock_suggestions', 'budget ko 1.5k'), {
+        'budget': 1500,
+      });
+    });
+
+    test('compound number words add up', () {
+      expect(
+        parse('get_utang_list', 'utang na lampas two thousand five hundred'),
+        {'min_balance': 2500},
+      );
+      expect(parse('get_utang_list', "lampas dalawang libo't limandaan"), {
+        'min_balance': 2500,
+      });
+      expect(parse('get_restock_suggestions', 'budget 1 libo 500'), {
+        'budget': 1500,
+      });
+    });
+
+    test('counts and durations are not read as amounts', () {
+      expect(parse('get_utang_list', 'may 2 suki na may utang na lampas 500'), {
+        'min_balance': 500,
+      });
+      expect(
+        parse('get_utang_list', 'sino ang may utang na 2 linggo na'),
+        isNull,
+      );
+      expect(parse('get_low_stock', 'ano mauubos sa loob ng 3 araw'), isNull);
+      expect(
+        parse('get_profit_margins', 'mga produkto na may tubo na 20 porsyento'),
+        isNull,
+      );
+    });
+
     test('durations convert weeks and months to days', () {
       expect(parse('get_utang_risk', 'sino ang 2 weeks late na'), {
         'days_overdue': 14,
