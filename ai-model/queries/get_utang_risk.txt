@@ -41,3 +41,30 @@ mga utang na lampas 7 araw na
 sino ang tatlong buwan nang hindi nagbabayad
 customers overdue for three months
 mga utang na lampas 90 araw na
+@ {"days_overdue":30}
+sino ang matagal nang may utang na hindi nagbabayad
+mga may utang na lampas na sa takdang araw
+sino ang overdue na sa utang
+which debtors are late
+who hasn't paid in a long time
+mga suki na natetengga ang bayad
+sino ang nanganganib na hindi na magbayad
+customers with overdue utang
+alin sa mga may utang ang delikado na
+sino ang mga pasaway sa bayaran
+sino ang dapat kong singilin agad
+risky na utang po
+which unpaid accounts are at risk
+mga utang na matagal nang nakatengga
+sino ang isang buwan nang hindi nagbabayad
+listahan ng overdue na utang
+late payers please
+sino ang ayaw nang pautangin dahil matagal magbayad
+kinsa ang dugay na wala mobayad
+sinno dagiti nabayagen a saan nagbayad
+mga utang na lampas isang buwan
+sino ang mahirap singilin
+may mga utang bang nanganganib na hindi mabayaran
+utang na delikado
+sino ang pinakamatagal nang may utang
+high risk na may utang

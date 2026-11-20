@@ -16,6 +16,7 @@ import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
 import 'package:tinda360/features/chat/presentation/chat_store_replies.dart';
 import 'package:tinda360/features/chat/presentation/chat_tool_result_replies.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
+import 'package:tinda360/features/chat/presentation/intent_router.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
@@ -25,10 +26,6 @@ enum ChatRole {
 
   assistant,
 }
-
-const double _minimumIntentConfidence = 0.45;
-const double _minimumModelAgreement = 0.1;
-const String _noToolClass = 'no_tool';
 
 final class ChatMessage {
   const new({
@@ -250,30 +247,17 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<ChatClassification> _classifyQuery(String query) async {
-    final keywordClassification = await _matchWithIntentMatcher(query);
-    final classifier = await _loadIntentClassifier();
-    final prediction = classifier?.classify(query);
-    final isConfident =
-        prediction != null && prediction.confidence >= _minimumIntentConfidence;
-    if (isConfident && prediction.toolName == _noToolClass) {
-      return keywordClassification.matched.intent == ChatIntent.overview
-          ? _outOfScopeClassification(keywordClassification)
-          : keywordClassification;
-    }
-    if (isConfident) {
-      final keywordMatch = keywordClassification.matched;
-      return ChatClassification(
-        matched: MatchedQuery(
-          intent: toolNameToIntent(prediction.toolName),
-          timeframe: keywordMatch.timeframe,
-          normalizedText: keywordMatch.normalizedText,
-        ),
-      );
-    }
-    if (keywordClassification.matched.intent != ChatIntent.overview) {
-      return keywordClassification;
-    }
-    return _classifyWithModel(query, classifier, keywordClassification);
+    final router = IntentRouter(
+      matcher: _matcher ??= await IntentMatcher.loadFromAsset(),
+      classifier: await _loadIntentClassifier(),
+    );
+    final decision = router.route(query);
+    final routed = ChatClassification(matched: decision.matched);
+    return switch (decision.kind) {
+      RouteKind.answerIntent => routed,
+      RouteKind.outOfScope => _outOfScopeClassification(routed),
+      RouteKind.askModel => _classifyWithModel(query, router, routed),
+    };
   }
 
   ChatClassification _outOfScopeClassification(ChatClassification keyword) =>
@@ -290,7 +274,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<ChatClassification> _classifyWithModel(
     String query,
-    IntentClassifier? classifier,
+    IntentRouter router,
     ChatClassification keywordClassification,
   ) async {
     final engine = ref.read(yumiEngineProvider);
@@ -315,10 +299,7 @@ class ChatNotifier extends Notifier<ChatState> {
       }
       final toolName = result.toolName;
       if (toolName == null) return outOfScope;
-      if (classifier != null &&
-          classifier.probabilityFor(query, toolName) < _minimumModelAgreement) {
-        return outOfScope;
-      }
+      if (!router.acceptsModelTool(query, toolName)) return outOfScope;
       final classification = yumiResultToClassification(result, query);
       final toolResult = await _executeModelTool(classification);
       if (toolResult?['error'] == 'unknown_tool') return outOfScope;
@@ -350,11 +331,6 @@ class ChatNotifier extends Notifier<ChatState> {
       ref.read(appLogProvider).error('chat.tool_execute', error, stack);
       return null;
     }
-  }
-
-  Future<ChatClassification> _matchWithIntentMatcher(String query) async {
-    final matcher = _matcher ??= await IntentMatcher.loadFromAsset();
-    return ChatClassification(matched: matcher.match(query));
   }
 
   List<YumiTurn> _recentTurnsForModel({required int limit}) {

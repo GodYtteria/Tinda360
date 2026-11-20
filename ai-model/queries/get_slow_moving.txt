@@ -37,3 +37,30 @@ items with no sales in the last three days
 @ {"days":90}
 anong produkto ang hindi nabenta sa loob ng tatlong buwan
 items not sold in three months
+@ {"days":14}
+anong paninda ang hindi nabibili
+mga produktong walang gumagalaw na benta
+alin ang mga matumal na item
+which products are just sitting on the shelf
+what's not selling in my store
+mga paninda na natetengga lang
+anong mga item ang walang kumukuha
+products nobody is buying
+alin sa mga paninda ko ang mabagal mabenta
+mga produktong inaamag na sa estante
+anong item ang tulog ang benta
+slow sellers po
+ano ang mga produktong laos na
+which stock is not moving
+mga paninda na ayaw mabenta
+anong produkto ang dapat ko nang i-sale kasi walang bumibili
+listahan ng matumal na paninda
+non-moving items please
+alin ang hindi mabenta-benta
+unsa ang mga baligya nga dili mahalin
+ania dagiti saan a malako
+mga item na matagal nang walang benta
+ano ang mga hindi patok sa mga suki
+worst selling products
+mga paninda na walang nagtatanong
+anong mga produkto ang sayang lang sa puhunan dahil walang benta

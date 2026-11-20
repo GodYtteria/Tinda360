@@ -25,3 +25,22 @@ busiest hour this month
 anong oras ang rush nitong buwan
 which hours were busy this month
 peak hours buwan na ito
+@ {"timeframe":"week"}
+anong oras maraming tao sa tindahan
+anong oras dagsa ang mga bumibili
+kailan pinakamaraming benta sa loob ng araw
+what hours are the busiest in my store
+when do most customers come in
+anong oras malakas ang benta
+anong oras ang pinakamatao
+peak hours po ng tindahan
+anong oras ako pinaka-busy
+what time of day do I sell the most
+sa anong oras dumadagsa ang mga suki
+anong oras matumal ang tindahan
+unsa nga oras ang pinakadaghan og kustomer
+ania nga oras ti kaaduan ti gumatang
+oras ng pinakamaraming transaksyon
+anong oras kailangan ko ng katulong sa tindahan
+when should I have extra help at the counter
+anong oras pwede akong magpahinga dahil walang bumibili

@@ -16,3 +16,31 @@ how many items are in my catalog
 ilan ba lahat ng nabebenta ko
 bilang ng aktibong produkto
 total ng mga item sa listahan
+@ {}
+ilan ang kabuuang bilang ng produkto ko
+bilang ng lahat ng item sa tindahan
+ilang produkto na ang nasa listahan ko
+how many different products do I sell
+how many SKUs do I have
+total number of items in my store
+ilang klase ng paninda ang meron sa inventory
+pakibilang ang mga produkto ko
+ilan na ba ang na-add kong produkto
+gaano na karami ang produkto sa app
+count my products please
+number of products registered
+ilang items ang nakalista sa inventory ko po
+pila kabuok ang akong mga produkto
+mano ti produkto ko amin
+ilan lahat ng items ko
+ilang produkto meron ang tindahan namin
+product count po
+how many things do I have for sale
+ilan ang total na produkto sa sistema
+bilangin mo nga ang mga paninda ko
+ilang produkto ang active ngayon
+total items count
+ilan na ang laman ng inventory list ko
+may ilang produkto na akong nailagay
+how big is my product list
+ilang produkto ba ang binebenta ko

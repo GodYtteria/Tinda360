@@ -47,3 +47,30 @@ who owes more than 50 pesos
 sino ang may utang na higit sa 200
 who owes over 200 pesos
 mga balance na lampas dalawang daan
+@ {"min_balance":0}
+sino ang mga may utang ngayon
+lahat ng may utang po
+pakilista ang mga umutang
+who has unpaid utang
+show me everyone who owes
+mga suki na may utang pa
+sino pa ang hindi bayad
+customers with a balance
+ilan ang may utang sa tindahan
+magkano ang utang ng bawat suki
+sino sino ang may listahan sa akin
+utang ng mga suki po
+which customers owe me
+mga pangalan ng may utang
+total na pautang ko sa mga tao
+listahan ng utang
+all outstanding utang please
+magkano lahat ang pautang ko
+kinsa ang naay utang nako
+sinno dagiti adda utangna kaniak
+mga may balanse pa sa tindahan
+sino ang may babayaran pa
+may nangutang ba ngayon
+utang ledger summary
+kanino ako may sisingilin
+lahat ng hindi pa nababayarang utang

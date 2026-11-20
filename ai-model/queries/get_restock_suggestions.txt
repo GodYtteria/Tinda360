@@ -48,3 +48,21 @@ sampung libo ang puhunan ko, ano ang uunahin kong bilhin
 top 5 na dapat kong i-restock
 limang produkto na dapat kong bilhin
 five items I should restock first
+@ {"limit":10}
+ano ang mga dapat kong i-order ulit
+ano ang bibilhin ko sa supplier
+anong paninda ang kailangan kong pamilihin
+what should I buy from the supplier
+help me plan my next restock
+ano ang ilalagay ko sa listahan ng pamimili
+anong mga paninda ang dapat kong dagdagan
+restock plan po
+ano ang irerekomenda mong bilhin ko
+what do you suggest I reorder
+mamamalengke ako bukas, ano ang bibilhin ko
+pupunta ako sa grocery, ano ang kukunin ko para sa tindahan
+unsa ang akong paliton sa supplier
+ania ti gatangek iti supplier
+gumawa ka ng listahan ng dapat kong i-restock
+magkano ang kailangan kong ihanda para sa restock
+ano ang order ko ngayong linggo

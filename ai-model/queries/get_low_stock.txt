@@ -45,3 +45,30 @@ items with only 1 or 2 left
 @ {"threshold":15}
 mga produktong wala pang 15 ang stock
 stock below 15 anong mga item
+@ {"threshold":5}
+anong paninda ang kaunti na lang
+mga produktong malapit nang maubos ang stock
+alin ang mga paubos na item
+which products are running out
+what's low in my inventory
+mga paninda na konti na lang ang natitira
+anong mga item ang nauubusan na ako
+products that are nearly gone
+alin sa mga paninda ko ang kulang na ang stock
+ano ang mga manipis na ang stock
+anong item ang paubos na po
+running low list
+which stock levels are low
+mga paninda na kailangan nang dagdagan
+anong produkto ang halos said na
+listahan ng paubos na paninda
+almost out of stock items please
+alin ang ubos na
+unsa ang mga baligya nga hapit na mahurot
+ania dagiti dandani maibus
+mga item na mababa na ang bilang
+ano ang mga kulang sa estante
+ano ang wala na akong stock
+stock na paubos
+mababa na ba ang stock ng kahit ano
+may naubos na ba sa paninda

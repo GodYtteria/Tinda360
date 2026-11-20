@@ -2,71 +2,81 @@
  {
   "query": "kumusta ang benta ngayon",
   "tool": "get_sales_summary",
-  "confidence": 0.9708
+  "confidence": 0.9436
  },
  {
   "query": "sino ang may utang sa akin",
   "tool": "get_utang_list",
-  "confidence": 0.9922
+  "confidence": 0.9916
  },
  {
   "query": "magkano ang Piattos",
   "tool": "get_product_info",
-  "confidence": 0.9712
+  "confidence": 0.9668
  },
  {
   "query": "kailan mauubos ang bigas",
   "tool": "get_stock_forecast",
-  "confidence": 0.9976
+  "confidence": 0.9969
  },
  {
   "query": "how's everything in the store",
   "tool": "get_overview",
-  "confidence": 0.9026
+  "confidence": 0.963
  },
  {
   "query": "ok na salamat",
   "tool": "no_tool",
-  "confidence": 0.9799
+  "confidence": 0.9907
  },
  {
   "query": "ilan lahat ng paninda ko",
   "tool": "get_product_count",
-  "confidence": 0.9706
+  "confidence": 0.9723
  },
  {
   "query": "cash vs gcash today",
   "tool": "get_payment_breakdown",
-  "confidence": 0.9777
+  "confidence": 0.9717
  },
  {
   "query": "wala nang stock ang itlog",
   "tool": "get_low_stock",
-  "confidence": 0.6713
+  "confidence": 0.7797
  },
  {
   "query": "pinakamabenta ngayong linggo po",
   "tool": "get_top_products",
-  "confidence": 0.975
+  "confidence": 0.9706
  },
  {
   "query": "mga umutang lampas 500",
   "tool": "get_utang_list",
-  "confidence": 0.9856
+  "confidence": 0.9787
  },
  {
   "query": "anong oras ang rush",
   "tool": "get_busiest_hours",
-  "confidence": 0.9968
+  "confidence": 0.9828
  },
  {
   "query": "hello",
   "tool": "no_tool",
-  "confidence": 0.9253
+  "confidence": 0.9671
  },
  {
   "query": "xyz qwerty",
   "tool": "no_tool",
-  "confidence": 0.1817
+  "confidence": 0.4312
+ },
+ {
+  "query": "ano ang ulam mamaya",
+  "tool": "no_tool",
+  "confidence": 0.9561
+ },
+ {
+  "query": "sino ang overdue na sa utang",
+  "tool": "get_utang_risk",
+  "confidence": 0.9976
  }
 ]
