@@ -1,0 +1,11 @@
+name = "tinda360-feedback"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[[r2_buckets]]
+binding = "FEEDBACK_BUCKET"
+bucket_name = "tinda360-feedback"

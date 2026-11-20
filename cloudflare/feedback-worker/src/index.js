@@ -1,0 +1,61 @@
+import { MAXIMUM_BODY_BYTES, sanitizeBatch } from './validate.js';
+
+const FEEDBACK_PATH = '/v1/feedback';
+const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
+
+function jsonResponse(status, body) {
+  return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
+}
+
+async function readLimitedText(request) {
+  const declaredLength = Number(request.headers.get('content-length') ?? '0');
+  if (declaredLength > MAXIMUM_BODY_BYTES) return null;
+  const buffer = await request.arrayBuffer();
+  if (buffer.byteLength > MAXIMUM_BODY_BYTES) return null;
+  return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+}
+
+async function isWithinRateLimit(request, environment) {
+  if (environment.FEEDBACK_RATE_LIMITER === undefined) return true;
+  const clientAddress = request.headers.get('cf-connecting-ip') ?? 'unknown';
+  const { success } = await environment.FEEDBACK_RATE_LIMITER.limit({ key: clientAddress });
+  return success;
+}
+
+export default {
+  async fetch(request, environment) {
+    const url = new URL(request.url);
+    if (url.pathname !== FEEDBACK_PATH) return jsonResponse(404, { error: 'not found' });
+    if (request.method !== 'POST') return jsonResponse(405, { error: 'method not allowed' });
+    if (!(await isWithinRateLimit(request, environment))) {
+      return jsonResponse(429, { error: 'too many requests' });
+    }
+
+    let text;
+    try {
+      text = await readLimitedText(request);
+    } catch (error) {
+      return jsonResponse(400, { error: 'body is not valid utf-8' });
+    }
+    if (text === null) return jsonResponse(413, { error: 'body too large' });
+
+    let payload;
+    try {
+      payload = JSON.parse(text);
+    } catch (error) {
+      return jsonResponse(400, { error: 'body is not valid json' });
+    }
+
+    const batch = sanitizeBatch(payload);
+    if (!batch.ok) return jsonResponse(400, { error: batch.reason });
+    if (batch.accepted.length === 0) return jsonResponse(200, { accepted: [] });
+
+    const receivedDay = new Date().toISOString().slice(0, 10);
+    const objectKey = `feedback/${receivedDay}/${crypto.randomUUID()}.ndjson`;
+    const lines = batch.accepted.map((event) => JSON.stringify(event)).join('\n');
+    await environment.FEEDBACK_BUCKET.put(objectKey, `${lines}\n`, {
+      httpMetadata: { contentType: 'application/x-ndjson' },
+    });
+    return jsonResponse(200, { accepted: batch.acceptedIdentifiers });
+  },
+};

@@ -1,0 +1,8 @@
+{
+  "name": "tinda360-feedback-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
