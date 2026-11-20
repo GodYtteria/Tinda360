@@ -80,21 +80,22 @@ class _TypingDotsState extends State<_TypingDots>
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
+    final dot = Container(
+      width: 6,
+      height: 6,
+      decoration: BoxDecoration(
+        color: palette.primary,
+        shape: BoxShape.circle,
+      ),
+    );
     if (MediaQuery.disableAnimationsOf(context)) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(
-          3,
+          _typingDotCount,
           (index) => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: palette.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
+            child: dot,
           ),
         ),
       );
@@ -112,14 +113,7 @@ class _TypingDotsState extends State<_TypingDots>
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Transform.translate(
               offset: Offset(0, -_typingDotLift * lift),
-              child: Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: palette.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              child: dot,
             ),
           );
         }),

@@ -18,6 +18,7 @@ import 'package:tinda360/theme/app_tokens.dart';
 
 const double _clarificationChipMinHeight = 48;
 const double _ratingButtonSize = 48;
+const int _maxJumpToLatestPasses = 4;
 
 class ChatSheet extends ConsumerStatefulWidget {
   const new({
@@ -132,10 +133,14 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     );
   }
 
-  void _jumpToLatest() {
+  void _jumpToLatest({int pass = 0}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      final position = _scrollController.position;
+      if (position.pixels < position.maxScrollExtent) {
+        _scrollController.jumpTo(position.maxScrollExtent);
+        if (pass + 1 < _maxJumpToLatestPasses) _jumpToLatest(pass: pass + 1);
+      }
       if (_showScrollToBottom) setState(() => _showScrollToBottom = false);
     });
   }
@@ -171,9 +176,9 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     ref.listen<ChatState>(chatNotifierProvider, (previous, next) {
       final restoredHistory =
           (previous == null || previous.messages.isEmpty) &&
-          next.messages.length > 1;
+          next.messages.isNotEmpty &&
+          !next.isThinking;
       if (restoredHistory) {
-        _revealedIds.addAll(next.messages.map((message) => message.id));
         _jumpToLatest();
         return;
       }
