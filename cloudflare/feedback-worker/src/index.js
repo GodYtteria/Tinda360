@@ -1,3 +1,4 @@
+import { storeFeedback } from './store.js';
 import { MAXIMUM_BODY_BYTES, sanitizeBatch } from './validate.js';
 
 const FEEDBACK_PATH = '/v1/feedback';
@@ -51,11 +52,11 @@ export default {
     if (batch.accepted.length === 0) return jsonResponse(200, { accepted: [] });
 
     const receivedDay = new Date().toISOString().slice(0, 10);
-    const objectKey = `feedback/${receivedDay}/${crypto.randomUUID()}.ndjson`;
-    const lines = batch.accepted.map((event) => JSON.stringify(event)).join('\n');
-    await environment.FEEDBACK_BUCKET.put(objectKey, `${lines}\n`, {
-      httpMetadata: { contentType: 'application/x-ndjson' },
-    });
+    try {
+      await storeFeedback(environment.FEEDBACK_DB, batch.accepted, receivedDay);
+    } catch (error) {
+      return jsonResponse(503, { error: 'storage unavailable' });
+    }
     return jsonResponse(200, { accepted: batch.acceptedIdentifiers });
   },
 };

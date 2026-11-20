@@ -1,3 +1,4 @@
 {
-  "GOOGLE_SERVER_CLIENT_ID": "1007032444539-7umkato7fjgjr34q187av5tos9b3h183.apps.googleusercontent.com"
+  "GOOGLE_SERVER_CLIENT_ID": "1007032444539-7umkato7fjgjr34q187av5tos9b3h183.apps.googleusercontent.com",
+  "TINDA360_FEEDBACK_ENDPOINT": "https://tinda360-feedback.bukluran.workers.dev/v1/feedback"
 }
