@@ -8,14 +8,23 @@ enum RouteKind {
   outOfScope,
 
   askModel,
+
+  clarify,
 }
 
 final class RouteDecision {
-  const new({required this.kind, required this.matched, this.toolName});
+  const new({
+    required this.kind,
+    required this.matched,
+    this.toolName,
+    this.candidateToolNames = const <String>[],
+  });
 
   final RouteKind kind;
 
   final String? toolName;
+
+  final List<String> candidateToolNames;
 
   final MatchedQuery matched;
 }
@@ -26,6 +35,14 @@ final class IntentRouter {
   static const double minimumIntentConfidence = 0.45;
   static const double minimumModelAgreement = 0.1;
   static const String noToolClass = 'no_tool';
+  static const double minimumCandidateConfidence = 0.12;
+  static const int minimumClarificationChoices = 2;
+  static const int maximumClarificationChoices = 3;
+  static const Set<ChatIntent> conversationalIntents = <ChatIntent>{
+    ChatIntent.greeting,
+    ChatIntent.thanks,
+    ChatIntent.help,
+  };
 
   final IntentMatcher matcher;
 
@@ -56,10 +73,44 @@ final class IntentRouter {
         ),
       );
     }
+    final candidates = _plausibleToolNames(query);
+    final keywordAgreesWithTopCandidate =
+        candidates.isNotEmpty &&
+        toolNameToIntent(candidates.first) == keywordMatch.intent;
+    final keywordCanAnswer =
+        keywordFoundIntent &&
+        (candidates.length < minimumClarificationChoices ||
+            keywordAgreesWithTopCandidate ||
+            conversationalIntents.contains(keywordMatch.intent));
+    if (keywordCanAnswer) {
+      return RouteDecision(kind: RouteKind.answerIntent, matched: keywordMatch);
+    }
+    if (candidates.length >= minimumClarificationChoices) {
+      return RouteDecision(
+        kind: RouteKind.clarify,
+        matched: keywordMatch,
+        candidateToolNames: candidates,
+      );
+    }
     return RouteDecision(
       kind: keywordFoundIntent ? RouteKind.answerIntent : RouteKind.askModel,
       matched: keywordMatch,
     );
+  }
+
+  List<String> _plausibleToolNames(String query) {
+    final loadedClassifier = classifier;
+    if (loadedClassifier == null) return const <String>[];
+    return loadedClassifier
+        .rankedPredictions(query)
+        .where(
+          (prediction) =>
+              prediction.toolName != noToolClass &&
+              prediction.confidence >= minimumCandidateConfidence,
+        )
+        .take(maximumClarificationChoices)
+        .map((prediction) => prediction.toolName)
+        .toList(growable: false);
   }
 
   bool acceptsModelTool(String query, String toolName) {

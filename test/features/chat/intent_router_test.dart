@@ -11,7 +11,7 @@ const String _novelCasesFile = 'ai-model/novel_eval.txt';
 const String _noToolFile = 'no_tool';
 const String _separator = '||';
 const double _minimumHeldOutAccuracy = 0.85;
-const double _maximumHeldOutWrongRate = 0.10;
+const double _maximumHeldOutWrongRate = 0.05;
 const double _minimumTrainingSetAccuracy = 0.93;
 const double _maximumChitChatLeakRate = 0.05;
 const Set<ChatIntent> _conversationalIntents = <ChatIntent>{
@@ -24,8 +24,9 @@ final class _Tally {
   int correct = 0;
   int wrong = 0;
   int deferred = 0;
+  int offeredAsChoice = 0;
 
-  int get total => correct + wrong + deferred;
+  int get total => correct + wrong + deferred + offeredAsChoice;
 
   double get accuracy => correct / total;
 
@@ -33,7 +34,8 @@ final class _Tally {
 
   @override
   String toString() =>
-      'correct $correct, wrong $wrong, deferred to model $deferred of $total';
+      'correct $correct, wrong $wrong, deferred to model $deferred, '
+      'offered as a choice $offeredAsChoice of $total';
 }
 
 Map<String, ChatIntent> _loadTrainingQueries() {
@@ -88,6 +90,13 @@ _Tally _score(IntentRouter router, Map<String, ChatIntent> expected) {
     } else if (decision.kind == RouteKind.answerIntent &&
         decision.matched.intent == entry.value) {
       tally.correct++;
+    } else if (decision.kind == RouteKind.clarify &&
+        decision.candidateToolNames
+            .map(toolNameToIntent)
+            .contains(
+              entry.value,
+            )) {
+      tally.offeredAsChoice++;
     } else {
       tally.wrong++;
     }
@@ -105,6 +114,49 @@ void main() {
   );
   final router = IntentRouter(matcher: matcher, classifier: classifier);
   final keywordOnlyRouter = IntentRouter(matcher: matcher, classifier: null);
+
+  group('clarification', () {
+    test('an ambiguous question offers the plausible tools as choices', () {
+      final decision = router.route(
+        'ano ang pinakamataas ang patong sa paninda ko',
+      );
+      expect(decision.kind, RouteKind.clarify);
+      expect(decision.candidateToolNames, contains('get_profit_margins'));
+      expect(
+        decision.candidateToolNames.length,
+        inInclusiveRange(
+          IntentRouter.minimumClarificationChoices,
+          IntentRouter.maximumClarificationChoices,
+        ),
+      );
+      expect(
+        decision.candidateToolNames,
+        isNot(contains(IntentRouter.noToolClass)),
+      );
+    });
+
+    test('a confident question is answered without asking', () {
+      final decision = router.route('sino ang may utang sa akin');
+      expect(decision.kind, RouteKind.answerIntent);
+      expect(decision.candidateToolNames, isEmpty);
+    });
+
+    test('greetings are never turned into a clarification', () {
+      for (final query in ['hello', 'salamat po', 'kumusta']) {
+        expect(router.route(query).kind, RouteKind.answerIntent, reason: query);
+      }
+    });
+
+    test('without a classifier nothing is clarified', () {
+      for (final query in ['benta ngayon', 'zzzz qqqq', '']) {
+        expect(
+          keywordOnlyRouter.route(query).kind,
+          isNot(RouteKind.clarify),
+          reason: query,
+        );
+      }
+    });
+  });
 
   group('routing decisions', () {
     test('a confident store question is answered with its intent', () {

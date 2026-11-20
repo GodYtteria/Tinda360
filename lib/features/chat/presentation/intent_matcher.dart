@@ -80,9 +80,12 @@ final class ChatClassification {
     this.toolArgs,
     this.toolResult,
     this.isOutOfScope = false,
+    this.clarificationToolNames = const <String>[],
   });
 
   final bool isOutOfScope;
+
+  final List<String> clarificationToolNames;
 
   final MatchedQuery matched;
   final String? toolName;

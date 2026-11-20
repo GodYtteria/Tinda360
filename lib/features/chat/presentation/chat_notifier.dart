@@ -14,6 +14,7 @@ import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
 import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
+import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/chat_store_replies.dart';
 import 'package:tinda360/features/chat/presentation/chat_tool_result_replies.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
@@ -35,7 +36,10 @@ final class ChatMessage {
     required this.text,
     required this.createdAt,
     this.source,
+    this.options = const <ClarificationOption>[],
   });
+
+  final List<ClarificationOption> options;
 
   final String id;
 
@@ -86,6 +90,7 @@ class ChatNotifier extends Notifier<ChatState> {
   String _modelContextSummary = '';
   int _compactedMessageCount = 0;
   String? _lastTokensPerSecondLabel;
+  String? _queryAwaitingClarification;
   Future<void>? _historyRestore;
   String? _historyStoreId;
 
@@ -180,10 +185,31 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
-  Future<void> sendMessage(
-    String rawText,
+  Future<void> sendMessage(String rawText, AppLocalizations localizations) {
+    _queryAwaitingClarification = null;
+    return _send(rawText, localizations, queryText: rawText);
+  }
+
+  Future<void> answerClarification(
+    ClarificationOption option,
     AppLocalizations localizations,
-  ) async {
+  ) {
+    final originalQuery = _queryAwaitingClarification ?? option.label;
+    _queryAwaitingClarification = null;
+    return _send(
+      option.label,
+      localizations,
+      queryText: originalQuery,
+      forcedToolName: option.toolName,
+    );
+  }
+
+  Future<void> _send(
+    String rawText,
+    AppLocalizations localizations, {
+    required String queryText,
+    String? forcedToolName,
+  }) async {
     final trimmed = rawText.trim();
     if (trimmed.isEmpty || state.isThinking) return;
     await _historyRestore;
@@ -208,7 +234,12 @@ class ChatNotifier extends Notifier<ChatState> {
     final thinkingStarted = DateTime.now();
     AssistantReply reply;
     try {
-      reply = await _answerFromStoreData(trimmed, now, localizations);
+      reply = await _answerFromStoreData(
+        queryText.trim(),
+        now,
+        localizations,
+        forcedToolName: forcedToolName,
+      );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.answer', error, stack);
       reply = AssistantReply(
@@ -232,7 +263,9 @@ class ChatNotifier extends Notifier<ChatState> {
           ? reply.source
           : '${reply.source} · $_lastTokensPerSecondLabel',
       createdAt: ref.read(clockProvider).now(),
+      options: reply.options,
     );
+    if (reply.options.isNotEmpty) _queryAwaitingClarification = queryText;
 
     state = state.copyWith(
       messages: [...state.messages, assistantMessage],
@@ -247,9 +280,30 @@ class ChatNotifier extends Notifier<ChatState> {
     unawaited(_persistHistory());
   }
 
-  Future<ChatClassification> _classifyQuery(String query) async {
+  Future<ChatClassification> _classifyQuery(
+    String query, {
+    String? forcedToolName,
+  }) async {
+    final matcher = _matcher ??= await IntentMatcher.loadFromAsset();
+    if (forcedToolName != null) {
+      final keywordMatch = matcher.match(query);
+      final decision = RouteDecision(
+        kind: RouteKind.answerIntent,
+        toolName: forcedToolName,
+        matched: MatchedQuery(
+          intent: toolNameToIntent(forcedToolName),
+          timeframe: keywordMatch.timeframe,
+          normalizedText: keywordMatch.normalizedText,
+        ),
+      );
+      return _withExplicitArguments(
+        query,
+        decision,
+        ChatClassification(matched: decision.matched),
+      );
+    }
     final router = IntentRouter(
-      matcher: _matcher ??= await IntentMatcher.loadFromAsset(),
+      matcher: matcher,
       classifier: await _loadIntentClassifier(),
     );
     final decision = router.route(query);
@@ -258,6 +312,10 @@ class ChatNotifier extends Notifier<ChatState> {
       RouteKind.answerIntent => _withExplicitArguments(query, decision, routed),
       RouteKind.outOfScope => _outOfScopeClassification(routed),
       RouteKind.askModel => _classifyWithModel(query, router, routed),
+      RouteKind.clarify => ChatClassification(
+        matched: decision.matched,
+        clarificationToolNames: decision.candidateToolNames,
+      ),
     };
   }
 
@@ -457,11 +515,27 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<AssistantReply> _answerFromStoreData(
     String query,
     DateTime now,
-    AppLocalizations localizations,
-  ) async {
-    final classification = await _classifyQuery(query);
+    AppLocalizations localizations, {
+    String? forcedToolName,
+  }) async {
+    final classification = await _classifyQuery(
+      query,
+      forcedToolName: forcedToolName,
+    );
     final matched = classification.matched;
     final isFilipino = localizations.localeName.startsWith('fil');
+    final clarificationOptions = buildClarificationOptions(
+      classification.clarificationToolNames,
+      isFilipino: isFilipino,
+    );
+    if (clarificationOptions.length >=
+        IntentRouter.minimumClarificationChoices) {
+      return buildClarificationReply(
+        clarificationOptions,
+        isFilipino,
+        localizations,
+      );
+    }
 
     if (matched.intent == ChatIntent.greeting) {
       return buildGreetingReply(now, isFilipino, localizations);

@@ -63,6 +63,17 @@ final class IntentClassifier {
     );
   }
 
+  List<IntentPrediction> rankedPredictions(String text) {
+    final probabilities = _probabilities(text);
+    return <IntentPrediction>[
+      for (var index = 0; index < classes.length; index++)
+        IntentPrediction(
+          toolName: classes[index],
+          confidence: probabilities[index],
+        ),
+    ]..sort((first, second) => second.confidence.compareTo(first.confidence));
+  }
+
   double probabilityFor(String text, String toolName) {
     final index = classes.indexOf(toolName);
     return index < 0 ? 0.0 : _probabilities(text)[index];

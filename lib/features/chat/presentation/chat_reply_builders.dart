@@ -15,6 +15,7 @@ import 'package:tinda360/core/sales/payment_method.dart';
 import 'package:tinda360/core/sales/sale_record.dart';
 import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
+import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/intent_matcher.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -25,12 +26,25 @@ final class AssistantReply {
     required this.text,
     required this.source,
     required this.mood,
+    this.options = const <ClarificationOption>[],
   });
 
   final String text;
   final String source;
   final TindaAvatarMood mood;
+  final List<ClarificationOption> options;
 }
+
+AssistantReply buildClarificationReply(
+  List<ClarificationOption> options,
+  bool isFilipino,
+  AppLocalizations localizations,
+) => AssistantReply(
+  text: clarificationPrompt(isFilipino: isFilipino),
+  source: localizations.chatSourceSummary,
+  mood: TindaAvatarMood.thinking,
+  options: options,
+);
 
 AssistantReply buildGreetingReply(
   DateTime now,
