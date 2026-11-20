@@ -577,7 +577,17 @@
         "selling price",
         "retail price",
         "cost price",
-        "price list"
+        "price list",
+        "ilan pa",
+        "ilang piraso",
+        "ilan na lang",
+        "how much for",
+        "how much are",
+        "how much is a",
+        "are left",
+        "we still have",
+        "may natitira",
+        "pila pa kabuok"
       ]
     },
     {
@@ -758,7 +768,16 @@
         "days left",
         "stock days",
         "supply forecast",
-        "gaano katagal"
+        "gaano katagal",
+        "aabot pa",
+        "tatagal pa",
+        "how long until",
+        "how soon will",
+        "last through",
+        "pila pa ka adlaw",
+        "katagal pa",
+        "bago maubos",
+        "mauubusan"
       ]
     }
   ]
