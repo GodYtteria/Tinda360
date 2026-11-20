@@ -1,3 +1,4 @@
+import difflib
 import json
 import os
 import sys
@@ -74,6 +75,70 @@ def rows_for_file(path):
 
 
 NOVEL_CASES_PATH = Path(__file__).parent / 'novel_eval.txt'
+CONVERSATIONS_PATH = Path(__file__).parent / 'conversations.jsonl'
+ENTITY_ARGUMENTS = ('product_name', 'customer_name')
+HELD_OUT_SIMILARITY_LIMIT = 0.8
+
+
+def entity_missing_from_query(row):
+    user_text = ' '.join(
+        message['content'].lower() for message in row['messages'] if message['role'] == 'user'
+    )
+    return any(
+        str(call['arguments'][key]).lower() not in user_text
+        for message in row['messages']
+        for call in message.get('tool_calls') or []
+        for key in ENTITY_ARGUMENTS
+        if key in call['arguments']
+    )
+
+
+def resembles_held_out(query, held_out):
+    return any(
+        difflib.SequenceMatcher(None, query, case).ratio() >= HELD_OUT_SIMILARITY_LIMIT
+        for case in held_out
+    )
+
+
+def row_key(row):
+    return row['messages'][0]['content'].strip().lower()
+
+
+def row_label(row):
+    return json.dumps(row['messages'][1].get('tool_calls'), sort_keys=True)
+
+
+def conversation_rows(held_out, curated_keys):
+    candidates = [
+        json.loads(line)
+        for line in CONVERSATIONS_PATH.read_text(encoding='utf-8').splitlines()
+        if line.strip()
+    ]
+    labels_by_key = {}
+    for row in candidates:
+        labels_by_key.setdefault(row_key(row), set()).add(row_label(row))
+    rows = []
+    dropped_entity = dropped_held_out = dropped_curated = dropped_conflict = 0
+    for row in candidates:
+        key = row_key(row)
+        if key in curated_keys:
+            dropped_curated += 1
+            continue
+        if len(labels_by_key[key]) > 1:
+            dropped_conflict += 1
+            continue
+        if entity_missing_from_query(row):
+            dropped_entity += 1
+            continue
+        if resembles_held_out(key, held_out):
+            dropped_held_out += 1
+            continue
+        rows.append(row)
+    print(f'conversations: {len(rows)} kept, {dropped_entity} dropped for a name not in the question, '
+          f'{dropped_held_out} dropped for resembling a held-out question, '
+          f'{dropped_curated} dropped because queries/ already has the question, '
+          f'{dropped_conflict} dropped for conflicting labels')
+    return rows
 
 
 def held_out_queries():
@@ -92,13 +157,14 @@ def build():
     for path in sorted(QUERIES_DIRECTORY.glob('*.txt')):
         rows.extend(rows_for_file(path))
     held_out = held_out_queries()
+    rows.extend(conversation_rows(held_out, {row_key(row) for row in rows}))
     seen = {}
     unique = []
     for row in rows:
-        key = row['messages'][0]['content'].strip().lower()
+        key = row_key(row)
         if key in held_out:
             raise ValueError(f'held-out query is also in training data: {key!r}')
-        label = json.dumps(row['messages'][1].get('tool_calls'), sort_keys=True)
+        label = row_label(row)
         if key in seen and seen[key] != label:
             raise ValueError(f'query has two different labels: {key!r}')
         if key not in seen:
