@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +18,7 @@ import 'package:tinda360/features/chat/data/feedback_recorder.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
 import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/tool_call_validator.dart';
+import 'package:tinda360/features/chat/data/query_language.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
 import 'package:tinda360/features/chat/presentation/chat_message_codec.dart';
@@ -111,6 +113,8 @@ final NotifierProvider<ChatNotifier, ChatState> chatNotifierProvider =
     );
 
 class ChatNotifier extends Notifier<ChatState> {
+  static const String _filipinoLocale = 'fil';
+  static const String _englishLocale = 'en';
   Timer? _moodResetTimer;
   Timer? _compactTimer;
   IntentMatcher? _matcher;
@@ -668,7 +672,7 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<AssistantReply> _answerFromStoreData(
     String query,
     DateTime now,
-    AppLocalizations localizations, {
+    AppLocalizations appLocalizations, {
     String? forcedToolName,
   }) async {
     final classification = await _classifyQuery(
@@ -676,7 +680,13 @@ class ChatNotifier extends Notifier<ChatState> {
       forcedToolName: forcedToolName,
     );
     final matched = classification.matched;
-    final isFilipino = localizations.localeName.startsWith('fil');
+    final isFilipino = const QueryLanguage().isFilipino(
+      query,
+      appIsFilipino: appLocalizations.localeName.startsWith(_filipinoLocale),
+    );
+    final localizations = lookupAppLocalizations(
+      Locale(isFilipino ? _filipinoLocale : _englishLocale),
+    );
     final clarificationOptions = buildClarificationOptions(
       classification.clarificationToolNames,
       isFilipino: isFilipino,
