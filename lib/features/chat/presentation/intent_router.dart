@@ -18,9 +18,12 @@ final class RouteDecision {
     required this.matched,
     this.toolName,
     this.candidateToolNames = const <String>[],
+    this.confidence,
   });
 
   final RouteKind kind;
+
+  final double? confidence;
 
   final String? toolName;
 
@@ -49,8 +52,19 @@ final class IntentRouter {
   final IntentClassifier? classifier;
 
   RouteDecision route(String query) {
-    final keywordMatch = matcher.match(query);
     final prediction = classifier?.classify(query);
+    final decision = _decide(query, prediction);
+    return RouteDecision(
+      kind: decision.kind,
+      matched: decision.matched,
+      toolName: decision.toolName,
+      candidateToolNames: decision.candidateToolNames,
+      confidence: prediction?.confidence,
+    );
+  }
+
+  RouteDecision _decide(String query, IntentPrediction? prediction) {
+    final keywordMatch = matcher.match(query);
     final isConfident =
         prediction != null && prediction.confidence >= minimumIntentConfidence;
     final keywordFoundIntent = keywordMatch.intent != ChatIntent.overview;

@@ -9,6 +9,8 @@ import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/chat_history_storage.dart';
+import 'package:tinda360/features/chat/data/feedback_log.dart';
+import 'package:tinda360/features/chat/data/feedback_recorder.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
 import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
@@ -38,11 +40,30 @@ final class ChatMessage {
     this.source,
     this.options = const <ClarificationOption>[],
     this.clarifiedQuery,
+    this.feedbackEventId,
+    this.rating,
   });
 
   final List<ClarificationOption> options;
 
   final String? clarifiedQuery;
+
+  final String? feedbackEventId;
+
+  final FeedbackRating? rating;
+
+  ChatMessage withFeedback({String? feedbackEventId, FeedbackRating? rating}) =>
+      ChatMessage(
+        id: id,
+        role: role,
+        text: text,
+        createdAt: createdAt,
+        source: source,
+        options: options,
+        clarifiedQuery: clarifiedQuery,
+        feedbackEventId: feedbackEventId ?? this.feedbackEventId,
+        rating: rating ?? this.rating,
+      );
 
   final String id;
 
@@ -93,6 +114,7 @@ class ChatNotifier extends Notifier<ChatState> {
   String _modelContextSummary = '';
   int _compactedMessageCount = 0;
   String? _lastTokensPerSecondLabel;
+  RouteDecision? _lastRouteDecision;
   Future<void>? _historyRestore;
   String? _historyStoreId;
 
@@ -105,6 +127,7 @@ class ChatNotifier extends Notifier<ChatState> {
       _compactTimer = null;
     });
     _historyRestore = _restoreHistory();
+    unawaited(ref.read(feedbackRecorderProvider).uploadPending());
     return const ChatState(
       messages: <ChatMessage>[],
       mood: TindaAvatarMood.idle,
@@ -221,6 +244,14 @@ class ChatNotifier extends Notifier<ChatState> {
       (offered) => offered.toolName == option.toolName,
     );
     if (originalQuery == null || !isOfferedOption) return;
+    final feedbackEventId = clarification.feedbackEventId;
+    if (feedbackEventId != null) {
+      unawaited(
+        ref
+            .read(feedbackRecorderProvider)
+            .recordChosenTool(feedbackEventId, option.toolName),
+      );
+    }
     return _send(
       option.label,
       localizations,
@@ -303,6 +334,75 @@ class ChatNotifier extends Notifier<ChatState> {
     });
     _scheduleIdleCompact();
     unawaited(_persistHistory());
+    final decision = _lastRouteDecision;
+    if (forcedToolName == null && decision != null) {
+      unawaited(
+        _recordFeedback(
+          assistantMessage.id,
+          queryText.trim(),
+          decision,
+          localizations.localeName,
+        ),
+      );
+    }
+  }
+
+  Future<void> rateMessage(ChatMessage message, FeedbackRating rating) async {
+    final feedbackEventId = message.feedbackEventId;
+    if (feedbackEventId == null) return;
+    final saved = await ref
+        .read(feedbackRecorderProvider)
+        .rate(feedbackEventId, rating);
+    if (!saved || !ref.mounted) return;
+    _replaceMessage(
+      message.id,
+      (current) => current.withFeedback(rating: rating),
+    );
+  }
+
+  Future<void> _recordFeedback(
+    String messageId,
+    String query,
+    RouteDecision decision,
+    String locale,
+  ) async {
+    final recorder = ref.read(feedbackRecorderProvider);
+    final products = await ref
+        .read(productRepositoryProvider)
+        .watchActive()
+        .first;
+    final balances = await ref
+        .read(customerRepositoryProvider)
+        .watchBalances()
+        .first;
+    final candidates = decision.candidateToolNames;
+    final feedbackEventId = await recorder.record(
+      query: query,
+      locale: locale,
+      routeKind: decision.kind.name,
+      toolName:
+          decision.toolName ?? (candidates.isEmpty ? null : candidates.first),
+      confidence: decision.confidence,
+      customerNames: balances.map((balance) => balance.customer.name),
+      productNames: products.map((stocked) => stocked.product.name),
+    );
+    if (feedbackEventId == null || !ref.mounted) return;
+    _replaceMessage(
+      messageId,
+      (current) => current.withFeedback(feedbackEventId: feedbackEventId),
+    );
+  }
+
+  void _replaceMessage(
+    String messageId,
+    ChatMessage Function(ChatMessage current) update,
+  ) {
+    state = state.copyWith(
+      messages: [
+        for (final message in state.messages)
+          message.id == messageId ? update(message) : message,
+      ],
+    );
   }
 
   Future<ChatClassification> _classifyQuery(
@@ -310,6 +410,7 @@ class ChatNotifier extends Notifier<ChatState> {
     String? forcedToolName,
   }) async {
     final matcher = _matcher ??= await IntentMatcher.loadFromAsset();
+    _lastRouteDecision = null;
     if (forcedToolName != null) {
       final keywordMatch = matcher.match(query);
       final decision = RouteDecision(
@@ -332,6 +433,7 @@ class ChatNotifier extends Notifier<ChatState> {
       classifier: await _loadIntentClassifier(),
     );
     final decision = router.route(query);
+    _lastRouteDecision = decision;
     final routed = ChatClassification(matched: decision.matched);
     return switch (decision.kind) {
       RouteKind.answerIntent => _withExplicitArguments(query, decision, routed),
