@@ -11,6 +11,8 @@ import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/bantay_name_store.dart';
 import 'package:tinda360/services/receipt_print_service.dart';
+import 'package:tinda360/services/service_providers.dart';
+import 'package:tinda360/services/store_sounds.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
@@ -18,8 +20,6 @@ import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
-import 'package:tinda360/services/service_providers.dart';
-import 'package:tinda360/services/store_sounds.dart';
 
 class SaleDoneSheet extends ConsumerStatefulWidget {
   const new({
@@ -72,10 +72,11 @@ class _SaleDoneSheetState extends ConsumerState<SaleDoneSheet> {
 
   Future<void> _playSaleCelebrationFeedback() async {
     ref.read(storeSoundPlayerProvider).play(StoreSound.saleComplete);
+    final log = ref.read(appLogProvider);
     try {
       await HapticFeedback.mediumImpact();
-    } on PlatformException catch (error, stack) {
-      ref.read(appLogProvider).error('sale.haptic', error, stack);
+    } on Exception catch (error, stack) {
+      log.error('sale.haptic', error, stack);
     }
   }
 

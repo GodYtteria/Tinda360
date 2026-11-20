@@ -50,6 +50,7 @@ void main() {
     StoreSoundSettingStore store,
   ) {
     final container = ProviderContainer(
+      retry: (retryCount, error) => null,
       overrides: [
         storeSoundOutputProvider.overrideWithValue(output),
         storeSoundSettingStoreProvider.overrideWithValue(store),
@@ -120,13 +121,37 @@ void main() {
     await expectLater(store.read(), throwsFormatException);
   });
 
+  test('quick toggles keep the last choice', () async {
+    final store = FileStoreSoundSettingStore(
+      directoryProvider: () async => scratch,
+    );
+    await Future.wait([
+      store.write(enabled: false),
+      store.write(enabled: true),
+      store.write(enabled: false),
+    ]);
+    expect(await store.read(), isFalse);
+  });
+
+  test('a damaged setting is logged and sounds keep the default', () async {
+    File('${scratch.path}/store_sounds.json').writeAsStringSync('not json');
+    final output = _RecordingSoundOutput();
+    final container = containerWith(
+      output,
+      FileStoreSoundSettingStore(directoryProvider: () async => scratch),
+    );
+    await container.read(storeSoundPlayerProvider).playNow(StoreSound.scanned);
+    expect(output.played, [StoreSound.scanned]);
+    expect(log.events, ['sound.setting']);
+  });
+
   test('every sound has a name the Android side knows', () {
-    final kotlin = File(
+    final mainActivity = File(
       'android/app/src/main/java/com/tinda360/app/MainActivity.java',
     ).readAsStringSync();
     for (final sound in StoreSound.values) {
       expect(
-        kotlin,
+        mainActivity,
         contains('TONES.put("${sound.wireName}", new int[]'),
         reason: sound.name,
       );

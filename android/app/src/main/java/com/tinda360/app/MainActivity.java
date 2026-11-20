@@ -25,6 +25,7 @@ public class MainActivity extends FlutterFragmentActivity {
         TONES.put("scanned", new int[] {ToneGenerator.TONE_PROP_BEEP, 120});
         TONES.put("added_to_cart", new int[] {ToneGenerator.TONE_PROP_BEEP, 120});
         TONES.put("not_found", new int[] {ToneGenerator.TONE_PROP_NACK, 300});
+        TONES.put("out_of_stock", new int[] {ToneGenerator.TONE_PROP_PROMPT, 300});
         TONES.put("sale_complete", new int[] {ToneGenerator.TONE_PROP_ACK, 400});
     }
 
@@ -56,7 +57,17 @@ public class MainActivity extends FlutterFragmentActivity {
 
     private void playTone(int toneType, int durationMilliseconds) {
         ToneGenerator generator = new ToneGenerator(AudioManager.STREAM_MUSIC, TONE_VOLUME);
-        generator.startTone(toneType, durationMilliseconds);
+        boolean started;
+        try {
+            started = generator.startTone(toneType, durationMilliseconds);
+        } catch (RuntimeException error) {
+            generator.release();
+            throw error;
+        }
+        if (!started) {
+            generator.release();
+            throw new IllegalStateException("tone did not start: " + toneType);
+        }
         mainHandler.postDelayed(generator::release, durationMilliseconds + RELEASE_MARGIN_MILLISECONDS);
     }
 }

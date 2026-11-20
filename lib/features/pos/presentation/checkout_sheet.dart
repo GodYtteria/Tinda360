@@ -33,6 +33,7 @@ import 'package:tinda360/features/pos/presentation/sale_done_sheet.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/services/bantay_name_store.dart';
+import 'package:tinda360/services/store_sounds.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
@@ -40,7 +41,6 @@ import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
-import 'package:tinda360/services/store_sounds.dart';
 
 bool addToCartOrWarn(
   BuildContext context,
@@ -55,7 +55,7 @@ bool addToCartOrWarn(
     sounds.play(StoreSound.addedToCart);
     return true;
   }
-  sounds.play(StoreSound.notFound);
+  sounds.play(StoreSound.outOfStock);
   unawaited(HapticFeedback.heavyImpact());
   ScaffoldMessenger.of(context)
     ..clearSnackBars()

@@ -12,9 +12,10 @@ enum StoreSound {
   scanned('scanned'),
   addedToCart('added_to_cart'),
   notFound('not_found'),
+  outOfStock('out_of_stock'),
   saleComplete('sale_complete');
 
-  const StoreSound(this.wireName);
+  new(this.wireName);
 
   final String wireName;
 }
@@ -52,6 +53,7 @@ final class FileStoreSoundSettingStore implements StoreSoundSettingStore {
   static const bool enabledByDefault = true;
 
   final Future<Directory> Function() _directoryProvider;
+  Future<void> _lastWrite = Future<void>.value();
 
   @override
   Future<bool> read() async {
@@ -65,7 +67,15 @@ final class FileStoreSoundSettingStore implements StoreSoundSettingStore {
   }
 
   @override
-  Future<void> write({required bool enabled}) async {
+  Future<void> write({required bool enabled}) {
+    final current = _lastWrite
+        .catchError((Object _) {})
+        .then((_) => _writeNow(enabled));
+    _lastWrite = current;
+    return current;
+  }
+
+  Future<void> _writeNow(bool enabled) async {
     final file = await _resolveFile();
     await file.parent.create(recursive: true);
     final temporary = File('${file.path}.tmp');
@@ -117,12 +127,20 @@ final class StoreSoundPlayer {
   void play(StoreSound sound) => unawaited(playNow(sound));
 
   Future<void> playNow(StoreSound sound) async {
+    if (!await _isEnabled()) return;
     try {
-      final enabled = await _ref.read(storeSoundsEnabledProvider.future);
-      if (!enabled) return;
       await _ref.read(storeSoundOutputProvider).play(sound);
     } on Object catch (error, stack) {
       _ref.read(appLogProvider).error('sound.play', error, stack);
+    }
+  }
+
+  Future<bool> _isEnabled() async {
+    try {
+      return await _ref.read(storeSoundsEnabledProvider.future);
+    } on Object catch (error, stack) {
+      _ref.read(appLogProvider).error('sound.setting', error, stack);
+      return FileStoreSoundSettingStore.enabledByDefault;
     }
   }
 }

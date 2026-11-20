@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/store_sounds.dart';
 import 'package:tinda360/shared/widgets/scan_debouncer.dart';
 import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
-import 'package:tinda360/services/store_sounds.dart';
 
 class BarcodeScannerSheet extends StatefulWidget {
   const new({super.key, this.continuous = false, this.onCode});

@@ -17,6 +17,7 @@ import 'package:tinda360/features/pos/presentation/cart_quantity_dialog.dart';
 import 'package:tinda360/features/pos/presentation/checkout_sheet.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/store_sounds.dart';
 import 'package:tinda360/shared/widgets/adaptive_widgets.dart';
 import 'package:tinda360/shared/widgets/barcode_scanner_sheet.dart';
 import 'package:tinda360/shared/widgets/formatters.dart';
@@ -28,7 +29,6 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
-import 'package:tinda360/services/store_sounds.dart';
 
 final StreamProvider<StoreProfile> posStoreProfileProvider =
     StreamProvider.autoDispose<StoreProfile>(

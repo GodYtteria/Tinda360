@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/services/store_sounds.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
@@ -24,16 +25,22 @@ class StoreSoundsTile extends ConsumerWidget {
         value: isEnabled,
         onChanged: (enabled) {
           unawaited(HapticFeedback.selectionClick());
-          unawaited(
-            ref
-                .read(storeSoundsEnabledProvider.notifier)
-                .setEnabled(enabled: enabled),
-          );
-          if (enabled) {
-            ref.read(storeSoundPlayerProvider).play(StoreSound.addedToCart);
-          }
+          unawaited(_applyChoice(ref, enabled: enabled));
         },
       ),
     );
+  }
+
+  Future<void> _applyChoice(WidgetRef ref, {required bool enabled}) async {
+    final notifier = ref.read(storeSoundsEnabledProvider.notifier);
+    final player = ref.read(storeSoundPlayerProvider);
+    final log = ref.read(appLogProvider);
+    try {
+      await notifier.setEnabled(enabled: enabled);
+    } on Object catch (error, stack) {
+      log.error('sound.setting', error, stack);
+      return;
+    }
+    if (enabled) await player.playNow(StoreSound.addedToCart);
   }
 }
