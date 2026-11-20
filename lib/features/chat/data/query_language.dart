@@ -2,6 +2,7 @@ final class QueryLanguage {
   const new();
 
   static final RegExp _wordSeparators = RegExp(r'[^\p{L}]+', unicode: true);
+  static final RegExp _combiningMarks = RegExp(r'\p{M}+', unicode: true);
 
   static const Map<String, String> _accentFolds = <String, String>{
     'á': 'a',
@@ -128,20 +129,39 @@ final class QueryLanguage {
     'thanks',
   };
 
+  static const Set<String> _taglishLoanwords = <String>{
+    'today',
+    'sales',
+    'sell',
+    'sold',
+    'left',
+    'best',
+    'low',
+    'price',
+    'customers',
+    'products',
+    'items',
+  };
+
   bool isFilipino(String query, {required bool appIsFilipino}) {
     final words = query
+        .replaceAll(_combiningMarks, '')
         .split(_wordSeparators)
         .where((word) => word.isNotEmpty)
         .toList(growable: false);
     var filipinoCount = 0;
     var englishCount = 0;
+    var loanwordCount = 0;
     for (var index = 0; index < words.length; index++) {
       final word = words[index];
       final lower = _foldAccents(word.toLowerCase());
       if (_filipinoWords.contains(lower)) filipinoCount++;
       final looksLikeName = index > 0 && word != word.toLowerCase();
-      if (!looksLikeName && _englishWords.contains(lower)) englishCount++;
+      if (looksLikeName) continue;
+      if (_englishWords.contains(lower)) englishCount++;
+      if (_taglishLoanwords.contains(lower)) loanwordCount++;
     }
+    if (filipinoCount == 0) englishCount += loanwordCount;
     if (filipinoCount == englishCount) return appIsFilipino;
     return filipinoCount > englishCount;
   }

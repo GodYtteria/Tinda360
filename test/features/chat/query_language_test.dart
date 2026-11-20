@@ -107,6 +107,34 @@ void main() {
     expect(language.isFilipino('Ilán pa', appIsFilipino: false), isTrue);
   });
 
+  test('decomposed accents still count as Filipino', () {
+    expect(
+      language.isFilipino(
+        'ila\u0301n pa ang biga\u0301s',
+        appIsFilipino: false,
+      ),
+      isTrue,
+    );
+    expect(
+      language.isFilipino(
+        'magka\u0301no\u0301 kahapo\u0301n',
+        appIsFilipino: false,
+      ),
+      isTrue,
+    );
+  });
+
+  test('loanwords alone still mark an English question', () {
+    for (final query in [
+      'sales today',
+      'best sellers today',
+      'low stock items',
+      'top customers',
+    ]) {
+      expect(language.isFilipino(query, appIsFilipino: true), isFalse);
+    }
+  });
+
   test('Taglish loanwords do not outvote Tagalog words', () {
     expect(
       language.isFilipino(

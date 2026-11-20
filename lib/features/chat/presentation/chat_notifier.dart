@@ -254,7 +254,7 @@ class ChatNotifier extends Notifier<ChatState> {
       reply = await _answerFromStoreData(
         queryText.trim(),
         now,
-        localizations,
+        replyLocalizations,
         forcedToolName: forcedToolName,
       );
     } on Object catch (error, stack) {
@@ -689,7 +689,7 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<AssistantReply> _answerFromStoreData(
     String query,
     DateTime now,
-    AppLocalizations appLocalizations, {
+    AppLocalizations localizations, {
     String? forcedToolName,
   }) async {
     final classification = await _classifyQuery(
@@ -697,7 +697,6 @@ class ChatNotifier extends Notifier<ChatState> {
       forcedToolName: forcedToolName,
     );
     final matched = classification.matched;
-    final localizations = _replyLocalizations(query, appLocalizations);
     final isFilipino = localizations.localeName.startsWith(_filipinoLocale);
     final clarificationOptions = buildClarificationOptions(
       classification.clarificationToolNames,
