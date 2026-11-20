@@ -11,6 +11,7 @@ import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/data/db/database_maintenance.dart';
 import 'package:tinda360/data/db/store_registry.dart';
 import 'package:tinda360/features/pos/presentation/bantay_chip.dart';
+import 'package:tinda360/features/settings/presentation/feedback_sharing_tile.dart';
 import 'package:tinda360/features/settings/presentation/optional_text_dialog.dart';
 import 'package:tinda360/features/settings/presentation/settings_notifier.dart';
 import 'package:tinda360/features/ulat/presentation/ulat_notifier.dart';
@@ -74,6 +75,8 @@ class SettingsScreen extends ConsumerWidget {
                   _SectionHeader(title: localizations.settingsSectionAi),
                   const SizedBox(height: AppSpacing.s10),
                   _AiSection(),
+                  const SizedBox(height: AppSpacing.s10),
+                  const FeedbackSharingTile(),
                   const SizedBox(height: AppSpacing.s20),
                   _SectionHeader(title: localizations.settingsSectionStore),
                   const SizedBox(height: AppSpacing.s10),
