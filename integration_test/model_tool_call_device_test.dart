@@ -44,6 +44,28 @@ const List<(String, String)> _questions = [
 
 const Duration _slowestAnswer = Duration(seconds: 20);
 
+const Set<String> _modelPathFailureEvents = {
+  'chat.answer',
+  'chat.engine_init',
+  'chat.engine_infer',
+  'chat.tool_execute',
+};
+
+const int _scratchDeleteAttempts = 5;
+const Duration _scratchDeleteWait = Duration(milliseconds: 200);
+
+Future<void> _deleteAfterPendingWrites(Directory directory) async {
+  for (var attempt = 1; ; attempt++) {
+    try {
+      await directory.delete(recursive: true);
+      return;
+    } on FileSystemException {
+      if (attempt == _scratchDeleteAttempts) rethrow;
+      await Future<void>.delayed(_scratchDeleteWait);
+    }
+  }
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   late TestRepositories repos;
@@ -76,7 +98,7 @@ void main() {
 
   tearDown(() async {
     await repos.close();
-    await scratch.delete(recursive: true);
+    await _deleteAfterPendingWrites(scratch);
   });
 
   testWidgets('the real model on the phone answers inside the time limit', (
@@ -165,7 +187,11 @@ void main() {
             .sendMessage(question, localizations);
         final reply = container.read(chatNotifierProvider).messages.last.text;
         debugPrint('DEVICE reply: "$question" -> $reply');
-        expect(repos.log.events, isNot(contains('chat.answer')));
+        expect(
+          repos.log.events.where(_modelPathFailureEvents.contains),
+          isEmpty,
+          reason: question,
+        );
         expect(reply, isNot(localizations.chatErrorReply), reason: question);
         expect(
           reply,

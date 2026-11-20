@@ -192,7 +192,7 @@ def build():
     seen = {}
     seen_conversations = set()
     unique = []
-    for row in rows:
+    for row in map(without_entity_arguments, rows):
         key = row_key(row)
         leaked = held_out.intersection(user_queries(row))
         if leaked:
@@ -209,7 +209,7 @@ def build():
     with temporary_path.open('w', encoding='utf-8') as handle:
         handle.write(header + '\n')
         for row in unique:
-            handle.write(json.dumps(without_entity_arguments(row), ensure_ascii=False) + '\n')
+            handle.write(json.dumps(row, ensure_ascii=False) + '\n')
     os.replace(temporary_path, DATASET_PATH)
     print(f'rows: {len(unique)} (dropped duplicates: {len(rows) - len(unique)})')
 
