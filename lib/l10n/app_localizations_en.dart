@@ -6,7 +6,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Tinda 360';
+  String get appTitle => 'Shop 360';
 
   @override
   String get homeDatabaseReady => 'Store data is ready';
@@ -1158,7 +1158,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsShareFeedbackDetails =>
-      'When on, the questions you type to Yumi and your thumbs up or down are sent to Tinda 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Your sales records, utang ledger and store details are never sent, but amounts or names you type in a question may be. Turn it off anytime; anything not yet sent is deleted.';
+      'When on, the questions you type to Yumi and your thumbs up or down are sent to Shop 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Your sales records, utang ledger and store details are never sent, but amounts or names you type in a question may be. Turn it off anytime; anything not yet sent is deleted.';
 
   @override
   String get chatFeedbackHelpful => 'Helpful answer';
@@ -1351,7 +1351,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLocalImportInvalid =>
-      'Invalid or corrupted Tinda360 backup file.';
+      'Invalid or corrupted Shop 360 backup file.';
 
   @override
   String get inventoryImportCsvTooltip => 'Import CSV';
