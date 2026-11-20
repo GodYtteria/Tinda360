@@ -72,3 +72,7 @@ ano ang wala na akong stock
 stock na paubos
 mababa na ba ang stock ng kahit ano
 may naubos na ba sa paninda
+@ {"threshold":5}
+kailangan ko na bang bumili ng bagong stock ng kahit ano
+anong paninda ang dapat ko nang palitan dahil paubos
+what do i need to buy more of soon

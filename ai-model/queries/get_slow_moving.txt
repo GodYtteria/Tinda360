@@ -71,3 +71,8 @@ ano ang mga paninda na parang nakalimutan na ng mga mamimili
 which goods are stuck on my shelves
 anong mga item ang ilang linggo nang hindi nababawasan
 products that just won't sell
+@ {"days":14}
+anong paninda ang matagal nang nakadisplay pero walang bumibili
+which items have been on the shelf too long without selling
+mga produktong nakapatong lang sa estante
+anong paninda ang lumang-luma na sa display

@@ -71,3 +71,8 @@ anong produkto ang pinag-aagawan ng mga customer
 which goods move the quickest in my store
 what's the crowd favorite in my store
 saan ako pinakamaraming nabebentahan na item
+@ {"timeframe":"week"}
+anong paninda ang mabilis maubos sa estante
+which products disappear from the shelf quickly
+what are my hottest selling items
+anong item ang laging nauunang maubos

@@ -46,3 +46,7 @@ sino ang mga laging bumabalik na mamimili
 who has bought the most from me overall
 which customer is my biggest buyer
 sino ang pinakamalakas bumili sa akin sa lahat
+@ {"sort_by":"visits","limit":10}
+sino ang madalas kong makitang bumibili
+which customer name shows up most in my sales
+sino ang suking laging nasa listahan ng benta

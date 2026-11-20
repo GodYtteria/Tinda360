@@ -78,3 +78,11 @@ total ng buwang ito po
 30 days sales ko magkano
 nakabenta ba ako ng maganda this month
 ano ang kita ko sa loob ng isang buwan
+@ {"timeframe":"week"}
+magkano lahat ng naibenta ko sa mga suki nitong linggo
+pakikuwenta ang kabuuang benta nitong nakaraang linggo
+kabuuan ng nabili ng mga customer sa akin ngayong linggo
+add up everything customers bought from me this week
+@ {"timeframe":"today"}
+magkano na ang nabili ng mga tao sa akin ngayong araw
+how much have customers bought from me today

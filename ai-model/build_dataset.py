@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-import gen_tool_rows as generator
+import tool_results
 
 QUERIES_DIRECTORY = Path(__file__).parent / 'queries'
 DATASET_PATH = Path(__file__).parent / 'tinda360_tool_calling.jsonl'
@@ -29,7 +29,7 @@ def parse_query_file(path):
 
 
 def tool_row(tool_name, arguments, query):
-    result = generator._result_for(tool_name, arguments)
+    result = tool_results.result_for(tool_name, arguments)
     return {
         'source': 'tinda360/tools',
         'tools': '@tinda360_tools',

@@ -45,3 +45,6 @@ saan ako pinakamalaki kumita sa bawat benta
 @ {"sort":"lowest","limit":10}
 which items barely make me any money
 saan ako halos walang kita bawat piraso
+@ {"sort":"highest","limit":10}
+saang produkto pinakamalaki ang kita ko kada piraso
+which product earns the most per unit sold

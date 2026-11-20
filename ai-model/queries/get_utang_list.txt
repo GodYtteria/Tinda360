@@ -82,3 +82,8 @@ sino-sino ang may hindi pa bayad na kuha
 who bought on credit and has not paid yet
 show me the credit list
 sino ang naka-lista pa sa kuwaderno ng utang
+@ {"min_balance":0}
+who still owes the store money
+names of customers who owe the store
+tell me which customers have debts with the store
+who has not paid back the store yet

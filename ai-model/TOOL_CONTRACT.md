@@ -89,7 +89,7 @@ magkano bigas?
 
 - Dataset `ai-model/tinda360_tool_calling.jsonl`: 4440 rows, SUKLI-style, canonical tool results (DB-truth), JSON valid, hand-crafted/generated unique, 8 registers, 20 tools.
 - Tool-call distribution (high→low): `get_product_info` (1380), `get_sales_summary`, `get_stock_forecast`, `get_utang_list`, `get_sales_compare`, `get_top_products`, `get_utang_risk`, `get_expenses`, ... (more in 6.b).
-- Generator: `ai-model/gen_tool_rows.py` (deterministic, args→result consistency) + `ai-model/topper.py`; backups `tinda360_tool_calling_backup_2361/2435.jsonl`.
+- Generator: `ai-model/build_dataset.py` builds rows from the hand-written `ai-model/queries/*.txt`; tool results come from `ai-model/tool_results.py`.
 - Next: after 50M training+eval, export to `assets/ai/model.gguf`, sync `assets/ai/tokenizer.json`, re-audit dataset JSON + tool JSON validity, then report gate.
 
 

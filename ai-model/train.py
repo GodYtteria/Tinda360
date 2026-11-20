@@ -278,7 +278,7 @@ def _build_message_segments(messages, all_tools):
 def load_tool_calling_data():
     fname = "tinda360_tool_calling.jsonl"
     if not os.path.exists(fname):
-        return []
+        raise FileNotFoundError(f"training data not found: {os.path.abspath(fname)}")
     all_tools = _load_all_tools_from_jsonl(fname)
     all_segments = []
     with open(fname) as file_handle:
@@ -596,6 +596,7 @@ def _run_finetune_phase(trainer, tokenizer, config, args, device):
 
 
 def main():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     args = parse_args()
     torch.manual_seed(args.seed)
     device = get_device(args.device)

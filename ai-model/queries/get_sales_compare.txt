@@ -33,3 +33,8 @@ mas maganda ba ang buwang ito kaysa noong nakaraan
 monthly comparison po ng benta
 mas dako ba ang benta karong bulan kaysa naglabay
 hay, mas lumaki ba ang kita ko ngayong buwan kaysa dati
+@ {"period":"day"}
+did i earn more today compared to yesterday
+was today better than yesterday for sales
+mas marami ba akong naibenta ngayon kaysa kahapon
+is today's revenue higher than yesterday's
