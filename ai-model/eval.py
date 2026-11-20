@@ -83,8 +83,8 @@ def format_all_tools(tools):
         function_def = tool_entry["function"]
         params = function_def.get("parameters", {}).get("properties", {})
         param_str = ", ".join(
-            f"{key}: {val.get('type', '?')}"
-            for key, val in params.items()
+            f"{key}: {specification.get('type', '?')}"
+            for key, specification in params.items()
             if key not in build_dataset.ENTITY_ARGUMENTS
         )
         lines.append(f"{function_def['name']}({param_str})")
