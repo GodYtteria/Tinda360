@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Tinda 360",
+  "appTitle": "Shop 360",
   "@appTitle": {"description": "App name in the task switcher."},
   "homeDatabaseReady": "Store data is ready",
   "@homeDatabaseReady": {"description": "Shown once the on-device database opens."},
@@ -392,7 +392,7 @@
   "settingsPrivacyDataSafety": "Your store data stays on your device.",
   "settingsShareFeedbackTitle": "Help improve Yumi",
   "settingsShareFeedbackSubtitle": "Share chat questions with names removed. Off unless you turn it on.",
-  "settingsShareFeedbackDetails": "When on, the questions you type to Yumi and your thumbs up or down are sent to Tinda 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Your sales records, utang ledger and store details are never sent, but amounts or names you type in a question may be. Turn it off anytime; anything not yet sent is deleted.",
+  "settingsShareFeedbackDetails": "When on, the questions you type to Yumi and your thumbs up or down are sent to Shop 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Your sales records, utang ledger and store details are never sent, but amounts or names you type in a question may be. Turn it off anytime; anything not yet sent is deleted.",
   "chatFeedbackHelpful": "Helpful answer",
   "chatFeedbackNotHelpful": "Not helpful",
   "settingsVersion": "Version 1.0.0",
@@ -455,7 +455,7 @@
   "settingsLocalImportConfirmTitle": "Import .sqlite backup?",
   "settingsLocalImportConfirmBody": "This will replace the current store data with the selected backup file.",
   "settingsLocalImportSuccess": "Backup restored from file.",
-  "settingsLocalImportInvalid": "Invalid or corrupted Tinda360 backup file.",
+  "settingsLocalImportInvalid": "Invalid or corrupted Shop 360 backup file.",
 
   "inventoryImportCsvTooltip": "Import CSV",
   "inventoryImportCsvTitle": "Import Products (CSV)",

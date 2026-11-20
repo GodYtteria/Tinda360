@@ -121,9 +121,28 @@ void main() {
       timestamp: DateTime(2026, 11, 18),
       localizations: AppLocalizationsEn(),
     );
-    expect(text, contains('Tinda 360'));
+    expect(text, contains('Shop 360'));
+    expect(text, isNot(contains('Tinda 360')));
     expect(text, contains('(No items)'));
   });
+
+  test(
+    'a receipt with no store name uses the Filipino app name in Filipino',
+    () {
+      final text = ReceiptPrintService.buildReceiptText(
+        storeName: '',
+        lines: const [],
+        total: _php(0),
+        paid: _php(0),
+        change: _php(0),
+        paymentLabel: 'Cash',
+        timestamp: DateTime(2026, 11, 18),
+        localizations: AppLocalizationsFil(),
+      );
+      expect(text, contains('Tinda 360'));
+      expect(text, isNot(contains('Shop 360')));
+    },
+  );
 
   test('Filipino receipt uses Filipino labels', () {
     final text = ReceiptPrintService.buildReceiptText(

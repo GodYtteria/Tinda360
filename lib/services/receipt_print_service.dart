@@ -89,7 +89,9 @@ abstract final class ReceiptPrintService {
   }) {
     final trimmedStoreName = storeName.trim();
     final buffer = StringBuffer()
-      ..writeln(trimmedStoreName.isEmpty ? 'Tinda 360' : trimmedStoreName);
+      ..writeln(
+        trimmedStoreName.isEmpty ? localizations.appTitle : trimmedStoreName,
+      );
     details.storeContactLines().forEach(buffer.writeln);
     buffer.writeln(_formatTimestamp(timestamp));
     for (final (label, value) in details.labeledRows(localizations)) {
@@ -135,7 +137,7 @@ abstract final class ReceiptPrintService {
     final document = pw.Document();
     final printableStoreName = sanitizeForReceiptFont(storeName);
     final effectiveStoreName = printableStoreName.isEmpty
-        ? 'Tinda 360'
+        ? localizations.appTitle
         : printableStoreName;
 
     document.addPage(

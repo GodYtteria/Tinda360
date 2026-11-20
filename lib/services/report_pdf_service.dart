@@ -26,7 +26,7 @@ abstract final class ReportPdfService {
     final resolvedLogoBytes = await _loadLogoBytes(logoBytes);
     final document = pw.Document();
     final effectiveStoreName = storeName.trim().isEmpty
-        ? 'Tinda 360'
+        ? localizations.appTitle
         : storeName.trim();
 
     document.addPage(
@@ -39,6 +39,7 @@ abstract final class ReportPdfService {
             periodLabel: periodLabel,
             range: state.range,
             logoBytes: resolvedLogoBytes,
+            appTitle: localizations.appTitle,
           ),
           pw.SizedBox(height: 20),
           _buildSectionTitle(localizations.reportsTitle),
@@ -85,6 +86,7 @@ abstract final class ReportPdfService {
     required String periodLabel,
     required DayRange range,
     required Uint8List? logoBytes,
+    required String appTitle,
   }) {
     final logoImage = logoBytes != null && logoBytes.isNotEmpty
         ? pw.MemoryImage(logoBytes)
@@ -108,7 +110,7 @@ abstract final class ReportPdfService {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  'Tinda 360',
+                  appTitle,
                   style: pw.TextStyle(
                     fontSize: 18,
                     fontWeight: pw.FontWeight.bold,
