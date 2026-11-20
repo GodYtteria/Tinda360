@@ -31,6 +31,20 @@ void main() {
     expect(unfiltered, contains('No customers have an outstanding'));
   });
 
+  test('a name that is not a product gets the store-only reminder', () {
+    final named = reply('get_product_info', <String, dynamic>{
+      'error': 'not_found',
+      'query': 'pamasahe',
+    });
+    expect(named, contains('"pamasahe" is not one of the products'));
+    expect(named, contains('only answer questions about your store'));
+
+    final unnamed = reply('get_stock_forecast', <String, dynamic>{
+      'found': false,
+    });
+    expect(unnamed, contains('only answer questions about your store'));
+  });
+
   test('empty restock list blames the budget only when items need it', () {
     final overBudget = reply('get_restock_suggestions', <String, dynamic>{
       'budget_minor': 10000,

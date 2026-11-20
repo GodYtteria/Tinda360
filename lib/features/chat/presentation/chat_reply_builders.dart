@@ -211,6 +211,10 @@ bool namesUnknownProduct(String normalizedQuery) => normalizedQuery
       (word) => word.isNotEmpty && !_questionFillerWords.contains(word),
     );
 
+String unknownProductText(bool isFilipino) => isFilipino
+    ? 'Wala iyan sa mga produkto sa inventory mo. Kung produkto ito, subukan ang eksaktong pangalan. Tungkol lang sa tindahan mo ang masasagot ko.'
+    : 'That is not one of the products in your inventory. If it is a product, try its exact name. I can only answer questions about your store.';
+
 AssistantReply buildProductPromptReply(
   bool isFilipino,
   AppLocalizations localizations, {
@@ -218,9 +222,7 @@ AssistantReply buildProductPromptReply(
 }) {
   final String text;
   if (namesUnknownProduct) {
-    text = isFilipino
-        ? 'Hindi ko nakita ang produktong iyon sa inventory. Subukan ang eksaktong pangalan.'
-        : 'I could not find that product in your inventory. Try its exact name.';
+    text = unknownProductText(isFilipino);
   } else {
     text = isFilipino
         ? 'Pakilagay ang pangalan ng produkto (hal. "Magkano Pancit Canton?").'
@@ -815,9 +817,7 @@ AssistantReply buildStockForecastReply(
 }) {
   if (mentionedProduct == null) {
     final text = namesUnknownProduct
-        ? (isFilipino
-              ? 'Hindi ko nakita ang produktong iyon sa inventory. Subukan ang eksaktong pangalan.'
-              : 'I could not find that product in your inventory. Try its exact name.')
+        ? unknownProductText(isFilipino)
         : (isFilipino
               ? 'Pakilagay ang pangalan ng produkto (hal. "Kailan mauubos ang Bigas?").'
               : 'Include the product name (e.g. "When will Rice run out?").');

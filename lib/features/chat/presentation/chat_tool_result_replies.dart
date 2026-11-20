@@ -103,11 +103,11 @@ AssistantReply _notFoundReply(
     'get_product_info' || 'get_stock_forecast' =>
       isFilipino
           ? (query == null || query.isEmpty
-                ? 'Hindi ko nakita ang produktong hinahanap mo sa inventory.'
-                : 'Hindi ko nakita ang "$query" sa inventory.')
+                ? unknownProductText(isFilipino)
+                : 'Wala ang "$query" sa mga produkto sa inventory mo. Tungkol lang sa tindahan mo ang masasagot ko.')
           : (query == null || query.isEmpty
-                ? 'I could not find that product in inventory.'
-                : 'I could not find "$query" in inventory.'),
+                ? unknownProductText(isFilipino)
+                : '"$query" is not one of the products in your inventory. I can only answer questions about your store.'),
     _ => isFilipino ? 'Walang nahanap na datos.' : 'No data found.',
   };
   return AssistantReply(
