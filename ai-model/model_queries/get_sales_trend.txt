@@ -1,0 +1,50 @@
+@ {}
+are my sales going up or down lately || {"days": 7}
+how have sales moved over the last week || {"days": 7}
+show me this week's sales day by day as a trend || {"days": 7}
+was there a dip in sales any day this week || {"days": 7}
+which day this week sold the most || {"days": 7}
+is the shop doing better than a few days ago || {"days": 7}
+how is business over the past seven days || {"days": 7}
+sales curve for the week please || {"days": 7}
+give me the daily totals since last week || {"days": 7}
+have my earnings been steady this week || {"days": 7}
+what's the sales pattern this past week || {"days": 7}
+what day was my worst for sales this week || {"days": 7}
+tell me how my last 7 days of sales looked || {"days": 7}
+is my income climbing day to day || {"days": 7}
+mukhang tumataas ba ang benta ko nitong mga nakaraang araw || {"days": 7}
+anong araw ang pinakamalaki ang benta ngayong linggo || {"days": 7}
+may bumaba bang araw sa benta ko nitong linggo || {"days": 7}
+pakita ang takbo ng kita ko sa loob ng isang linggo || {"days": 7}
+hay, matumal ba ang mga huling araw || {"days": 7}
+kumusta ang benta bawat araw nitong 7 days || {"days": 7}
+naku, parang bumababa ang kita ko, tama ba || {"days": 7}
+ilan ang benta ko kada araw ngayong week || {"days": 7}
+how did sales move across the past fourteen days || {"days": 14}
+is there an upward trend over two weeks || {"days": 14}
+show daily revenue for the last 14 days || {"days": 14}
+did my sales improve over the last two weeks || {"days": 14}
+takbo ng benta sa loob ng dalawang linggo, tumaas ba || {"days": 14}
+benta ko bawat araw nitong 14 days || {"days": 14}
+how have my sales trended this past month || {"days": 30}
+show a month of daily sales || {"days": 30}
+which days were strongest over the last 30 days || {"days": 30}
+am i growing over the last thirty days || {"days": 30}
+daily sales chart for the month please || {"days": 30}
+paano ang takbo ng benta ko sa nakaraang 30 araw || {"days": 30}
+ipakita ang benta araw-araw sa isang buwan || {"days": 30}
+hay, bumaba ba ang benta ko nitong buwan || {"days": 30}
+how were the last three days for sales || {"days": 3}
+what did i sell each day for the past 3 days || {"days": 3}
+kumusta ang benta nitong tatlong araw || {"days": 3}
+how did sales go in the last five days || {"days": 5}
+benta ko sa nakalipas na 5 araw, kumusta || {"days": 5}
+show me the sales trend for ten days || {"days": 10}
+ilang araw na ba ang matumal, check mo benta ng huling 10 araw || {"days": 10}
+sales trend over the last two months || {"days": 60}
+takbo ng benta sa nakaraang 60 araw || {"days": 60}
+how have my sales gone over the last three months || {"days": 90}
+benta bawat araw sa loob ng tatlong buwan || {"days": 90}
+sales per day for the last three weeks || {"days": 21}
+benta sa nakaraang 21 araw, ano ang takbo || {"days": 21}

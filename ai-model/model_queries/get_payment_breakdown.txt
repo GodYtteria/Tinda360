@@ -1,0 +1,71 @@
+@ {}
+how much of today's sales was cash || {"timeframe": "today"}
+did anyone pay with gcash today || {"timeframe": "today"}
+what share of today's money came in through e-wallet || {"timeframe": "today"}
+split of today's payments by type || {"timeframe": "today"}
+how much cash should be in the drawer from today's sales || {"timeframe": "today"}
+today's payments, cash versus utang versus gcash || {"timeframe": "today"}
+are more people paying digitally today || {"timeframe": "today"}
+show me the payment mix for today || {"timeframe": "today"}
+who paid cash and who put it on credit today || {"timeframe": "today"}
+how much did i collect via gcash so far today || {"timeframe": "today"}
+what payment types did customers use today || {"timeframe": "today"}
+percent cash and percent gcash today please || {"timeframe": "today"}
+is gcash overtaking cash today || {"timeframe": "today"}
+how much of today's total is still unpaid on credit || {"timeframe": "today"}
+how many customers paid in cash today || {"timeframe": "today"}
+my cash count today, how much should it be || {"timeframe": "today"}
+magkano ang pumasok na gcash ngayon || {"timeframe": "today"}
+ilan ang nag-utang at ilan ang nagbayad agad ngayong araw || {"timeframe": "today"}
+hay, puro utang ba ang benta ngayon || {"timeframe": "today"}
+anong porsyento ng benta ngayon ang cash || {"timeframe": "today"}
+paano ang bayad ng mga suki ngayong araw po || {"timeframe": "today"}
+ilan sa mga bumili ngayon ay nag-gcash || {"timeframe": "today"}
+mas marami bang cash o gcash ang pumasok ngayon || {"timeframe": "today"}
+magkano dapat ang laman ng kaha ko ngayon galing sa cash || {"timeframe": "today"}
+may nagbayad ba ng gcash ngayong araw || {"timeframe": "today"}
+ipakita ang hati ng cash, gcash at utang ngayon || {"timeframe": "today"}
+what was the cash versus gcash split over the past week || {"timeframe": "week"}
+how much did i receive by each payment method this week || {"timeframe": "week"}
+which payment method is most popular this week || {"timeframe": "week"}
+how much of this week's sales were on credit || {"timeframe": "week"}
+weekly cash and e-wallet totals please || {"timeframe": "week"}
+are customers moving from cash to gcash this week || {"timeframe": "week"}
+payment method breakdown for the last seven days || {"timeframe": "week"}
+show how this week's money came in || {"timeframe": "week"}
+how much gcash came in during the week || {"timeframe": "week"}
+what portion of the week's sales was paid in cash || {"timeframe": "week"}
+this week's collections by payment type || {"timeframe": "week"}
+did credit sales pile up this week || {"timeframe": "week"}
+magkano ang total na cash nitong nakaraang linggo || {"timeframe": "week"}
+alin ang mas madalas gamitin ngayong linggo, cash o gcash || {"timeframe": "week"}
+ilang porsyento ng benta this week ang utang || {"timeframe": "week"}
+naku, ang dami yatang nag-utang ngayong linggo || {"timeframe": "week"}
+paano nagbayad ang mga tao sa buong linggo || {"timeframe": "week"}
+magkano ang pumasok sa gcash ko nitong linggo || {"timeframe": "week"}
+pakilista po ang bayad ayon sa uri ngayong linggo || {"timeframe": "week"}
+mas lumaki ba ang gcash kesa cash this week || {"timeframe": "week"}
+ilan ang hindi pa bayad na benta ngayong linggo || {"timeframe": "week"}
+hati ng cash at gcash sa nakalipas na pitong araw || {"timeframe": "week"}
+what is the cash vs gcash vs credit split for the month || {"timeframe": "month"}
+how much came in by cash this month || {"timeframe": "month"}
+what percentage of monthly sales are gcash || {"timeframe": "month"}
+payment breakdown for the whole month please || {"timeframe": "month"}
+is gcash growing as a share of my sales this month || {"timeframe": "month"}
+which payment method brought in the most this month || {"timeframe": "month"}
+how much utang did i give out this month in total || {"timeframe": "month"}
+my monthly collections split by payment type || {"timeframe": "month"}
+how much of this month's income is in e-wallet || {"timeframe": "month"}
+monthly payment mix || {"timeframe": "month"}
+how much cash did the store take in during the month || {"timeframe": "month"}
+show how customers paid across the month || {"timeframe": "month"}
+do most of my customers still pay cash this month || {"timeframe": "month"}
+magkano ang cash ko nitong buong buwan || {"timeframe": "month"}
+ilang porsyento ng benta ngayong buwan ang gcash || {"timeframe": "month"}
+hay, ang laki ng utang ngayong buwan ba || {"timeframe": "month"}
+paano nagbayad ang mga customer sa loob ng isang buwan || {"timeframe": "month"}
+anong paraan ng bayad ang pinakamarami ngayong buwan || {"timeframe": "month"}
+pakitingnan po ang hati ng bayad nitong buwan || {"timeframe": "month"}
+mas marami pa ring cash kesa gcash this month || {"timeframe": "month"}
+magkano ang pumasok na gcash sa loob ng buwan || {"timeframe": "month"}
+ipakita ang cash, gcash at utang para sa buwang ito || {"timeframe": "month"}

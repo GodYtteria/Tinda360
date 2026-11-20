@@ -1,0 +1,35 @@
+@ {}
+is anything about to sell out || {"threshold": 5}
+check the shelves for what's nearly gone || {"threshold": 5}
+which items do I have hardly any of || {"threshold": 5}
+anything I'm about to run out of || {"threshold": 5}
+tell me which goods need refilling || {"threshold": 5}
+am I short on anything right now || {"threshold": 5}
+what's almost finished in my stock || {"threshold": 5}
+show me the products that are close to zero || {"threshold": 5}
+do I have anything that's about to run dry || {"threshold": 5}
+what's left in small quantities || {"threshold": 5}
+any item I should worry about running out || {"threshold": 5}
+which products are down to the last few || {"threshold": 5}
+pls list what's low || {"threshold": 5}
+what stock is getting thin || {"threshold": 5}
+what's nearly sold out in my store || {"threshold": 5}
+show me everything with less than 10 in stock || {"threshold": 10}
+which items are under 10 pieces || {"threshold": 10}
+what products have 10 or fewer units left || {"threshold": 10}
+list stock that's at ten or below || {"threshold": 10}
+find items with fewer than 20 units left || {"threshold": 20}
+which products are below 20 pieces || {"threshold": 20}
+I want to see everything under 20 in stock || {"threshold": 20}
+what's down to 3 or fewer || {"threshold": 3}
+which items only have a couple left, like 3 or less || {"threshold": 3}
+anything with only 1 left || {"threshold": 1}
+which products are down to their last piece || {"threshold": 1}
+what has less than 8 in stock || {"threshold": 8}
+list the items with 8 or fewer left || {"threshold": 8}
+products below 25 units please || {"threshold": 25}
+show me anything under 50 in stock || {"threshold": 50}
+what's under 50 pieces right now || {"threshold": 50}
+which items are lower than 12 in stock || {"threshold": 12}
+any products with less than 30 left in the shop || {"threshold": 30}
+which goods are under 30 pieces || {"threshold": 30}

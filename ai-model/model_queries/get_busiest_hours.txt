@@ -1,0 +1,40 @@
+@ {}
+what hours of the day do most people come this week || {"timeframe": "week"}
+when should i open earlier to catch more customers || {"timeframe": "week"}
+what's the rush hour at my store lately || {"timeframe": "week"}
+at which time are fewer customers around || {"timeframe": "week"}
+which hour has the highest number of transactions || {"timeframe": "week"}
+tell me the peak shopping time || {"timeframe": "week"}
+what time do the crowds show up || {"timeframe": "week"}
+when are my slow hours, i want to take a break || {"timeframe": "week"}
+is the morning or evening busier || {"timeframe": "week"}
+when do i get the most buyers || {"timeframe": "week"}
+which hour should i stock up before || {"timeframe": "week"}
+which times of day are dead || {"timeframe": "week"}
+anong oras ba talaga dagsa ang mga tao || {"timeframe": "week"}
+saang oras pinakamarami ang bumibili sa akin || {"timeframe": "week"}
+kailan ako dapat nandoon sa tindahan, anong oras sobrang busy || {"timeframe": "week"}
+hay nako, anong oras ba pinakamatumal ngayong linggo || {"timeframe": "week"}
+mas marami ba tao sa umaga o sa hapon || {"timeframe": "week"}
+anong oras ang peak ng mga suki ko || {"timeframe": "week"}
+kailan ako pwedeng umalis sandali, anong oras walang bumibili || {"timeframe": "week"}
+pakitingin po kung anong oras pinakamaraming nagbabayad || {"timeframe": "week"}
+anong oras sobrang dami ng pila || {"timeframe": "week"}
+anong oras ko dapat ihanda ang mga paninda || {"timeframe": "week"}
+oras ng pinakamalakas na bentahan || {"timeframe": "week"}
+saang oras kaya ako magbubukas para hindi mawalan ng customer || {"timeframe": "week"}
+naku, sa anong oras ba pinakamarami ang transaksyon || {"timeframe": "week"}
+when was i busiest so far today || {"timeframe": "today"}
+which hours had the most customers today || {"timeframe": "today"}
+what time did people come in today || {"timeframe": "today"}
+anong oras dumating ang mga bumili ngayon || {"timeframe": "today"}
+anong oras pinakamatao ngayong araw || {"timeframe": "today"}
+oras na marami ang customer today || {"timeframe": "today"}
+tuwing anong oras ang daming bumili ngayon || {"timeframe": "today"}
+what are the busiest hours over the whole month || {"timeframe": "month"}
+what time of day has been strongest this past month || {"timeframe": "month"}
+which hour gets the most transactions in a month || {"timeframe": "month"}
+anong oras ang pinakamadalas na bilihan sa loob ng buwan || {"timeframe": "month"}
+nitong buwan, anong oras ang pinakamaraming tao || {"timeframe": "month"}
+pakilista ang oras ng bentahan ngayong buwan || {"timeframe": "month"}
+anong oras ang pinakamatumal buong buwan || {"timeframe": "month"}

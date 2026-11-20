@@ -1,0 +1,45 @@
+@ {}
+rank my debtors by how risky they are || {"days_overdue": 30}
+I'm worried some of my utang will never get paid, who are they || {"days_overdue": 30}
+anyone I should chase before the month ends? || {"days_overdue": 30}
+show me the customers who owe me and haven't paid for over a month || {"days_overdue": 30}
+give me a list of the people most likely to run off with their balance || {"days_overdue": 30}
+who's been dodging me about their tab || {"days_overdue": 30}
+which regulars have a big balance that's been sitting forever || {"days_overdue": 30}
+tell me who the worst payers are || {"days_overdue": 30}
+need to know who not to give credit to anymore || {"days_overdue": 30}
+are there any bad debts I should worry about || {"days_overdue": 30}
+which suki owe me the most and are late || {"days_overdue": 30}
+pull up the overdue debtors sorted by danger || {"days_overdue": 30}
+who do I need to remind about their unpaid tab || {"days_overdue": 30}
+anyone with an old unpaid balance? || {"days_overdue": 30}
+whose tab is the oldest and the biggest || {"days_overdue": 30}
+I want to see who's high risk for utang || {"days_overdue": 30}
+check which customers are behind on paying || {"days_overdue": 30}
+which neighbors keep delaying their payment || {"days_overdue": 30}
+list the late accounts, worst first || {"days_overdue": 30}
+who should I be strict with when it comes to credit || {"days_overdue": 30}
+sino po ba ang mga pinakamalalang may atraso sa akin || {"days_overdue": 30}
+any utang that's gone cold? || {"days_overdue": 30}
+who owes me and doesn't answer when I ask || {"days_overdue": 30}
+credit risk report please || {"days_overdue": 30}
+which tabs are almost impossible to collect now || {"days_overdue": 30}
+show customers whose payments are way past due || {"days_overdue": 30}
+ayoko nang magpautang, sino ba ang mga hindi nagbabayad || {"days_overdue": 30}
+kanino ako dapat maghigpit sa credit || {"days_overdue": 30}
+who are the delinquent accounts in my store || {"days_overdue": 30}
+list down people with delayed payment on their utang || {"days_overdue": 30}
+sino pa ba ang di pa bayad tapos ang tagal na || {"days_overdue": 30}
+which debts are more than two weeks old and unpaid || {"days_overdue": 14}
+anyone past 14 days on their payment? || {"days_overdue": 14}
+sino yung mga lagpas dalawang linggo na ang utang || {"days_overdue": 14}
+who missed their payment by a week || {"days_overdue": 7}
+show me debts that are a week late already || {"days_overdue": 7}
+naku, sino na naman ang lagpas isang linggo sa bayad || {"days_overdue": 7}
+who owes me for more than 2 months now || {"days_overdue": 60}
+list the accounts that are 60 days or more behind || {"days_overdue": 60}
+sino ang mahigit dalawang buwan nang nakaabang ang utang || {"days_overdue": 60}
+which debts have gone three months without payment || {"days_overdue": 90}
+anything over 90 days unpaid? who || {"days_overdue": 90}
+hay nako, sino ang tatlong buwan na wala pang bayad || {"days_overdue": 90}
+which old utang am I probably never getting back || {"days_overdue": 90}

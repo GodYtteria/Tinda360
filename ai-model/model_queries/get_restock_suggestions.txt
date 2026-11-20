@@ -1,0 +1,38 @@
+@ {}
+whats worth restocking before the weekend || {"limit": 10}
+which items should I order more of || {"limit": 10}
+I'm heading to the wholesaler tomorrow, what do I pick up || {"limit": 10}
+tell me what to stock up on || {"limit": 10}
+what's selling out that I need to replace || {"limit": 10}
+make me a buying list for the next supplier run || {"limit": 10}
+which goods should I reorder first || {"limit": 10}
+what do I have to refill on the shelves || {"limit": 10}
+suggest what I should buy to keep the shop full || {"limit": 10}
+which goods belong on my shopping list this week || {"limit": 10}
+ano ba ang dapat kong i-reorder kay supplier || {"limit": 10}
+saan ko ilalagay ang pera ko sa restock || {"limit": 10}
+sabihin mo kung ano ang kulang na dapat bilhin || {"limit": 10}
+pakilista ang mga paninda na kailangan nang i-restock po || {"limit": 10}
+bukas ang delivery, ano ang oorderin ko || {"limit": 10}
+I have 3000 to spend on stock, what first || {"budget": 3000, "limit": 10}
+with a 3000 peso budget what should I buy || {"budget": 3000, "limit": 10}
+3k lang ang pera ko pang-restock, ano ang bibilhin || {"budget": 3000, "limit": 10}
+I've got 1500 pesos for restocking, where should it go || {"budget": 1500, "limit": 10}
+what's the best way to spend 1500 on stock || {"budget": 1500, "limit": 10}
+may 1500 ako ngayon, ano ang dapat kong bilhin para sa tindahan || {"budget": 1500, "limit": 10}
+only 800 pesos to restock with, what do you recommend || {"budget": 800, "limit": 10}
+ano ang kaya kong bilhin sa 800 lang || {"budget": 800, "limit": 10}
+given 2500 pesos, what should I restock || {"budget": 2500, "limit": 10}
+may dala akong 2500 papunta sa palengke, ano ang uunahin || {"budget": 2500, "limit": 10}
+my restock budget is 4000, plan it for me || {"budget": 4000, "limit": 10}
+how should I split 4000 pesos across stock || {"budget": 4000, "limit": 10}
+apat na libo ang hawak ko, ano ang dapat kong bilhin || {"budget": 4000, "limit": 10}
+I'm ready to spend 5000 on inventory, what do you suggest || {"budget": 5000, "limit": 10}
+got 1000 pesos, which products need to be bought first || {"budget": 1000, "limit": 10}
+if I put 2000 into restock, what gives me the most value || {"budget": 2000, "limit": 10}
+500 pesos budget, restock what || {"budget": 500, "limit": 10}
+give me just the top 3 items to restock || {"limit": 3}
+tatlo lang muna ang gusto kong bilhin, ano ang mga iyon || {"limit": 3}
+show me 7 products I should restock || {"limit": 7}
+top 5 things to buy with 3000 pesos || {"budget": 3000, "limit": 5}
+three items I should buy with my 1000 pesos || {"budget": 1000, "limit": 3}

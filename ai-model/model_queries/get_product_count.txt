@@ -1,0 +1,53 @@
+@ {}
+how many products have I put in so far
+what's the total number of products I'm selling
+tell me how many items are in my inventory
+can you count how many products are active
+how many different things do I stock
+quick count of my products
+how many products are in the app right now
+I forgot, how many items did I add
+total number of active items please
+how many products does my store have in the system
+is my product list getting long? how many are there
+number of items in my catalog
+how many goods are listed in my shop
+just tell me the number of products
+how many kinds of products are on my list
+how many items are currently on my inventory list
+what's my product total
+count the products in my store
+do I have a lot of products registered? how many
+how many items have I encoded
+product count of the whole store
+how many SKUs are active now
+give me the headcount of my items
+how many unique items am I selling
+how many things are in my store app
+how many products na po ang naka-encode
+ilang items na ba ang meron ako ngayon
+ilang paninda na ang nasa app, pakisabi
+gaano kadami ang produkto ko ngayon
+ilan na lahat ang tinda ko
+naku, ilan na ba talaga ang mga produkto ko
+bilang ng produkto sa inventory
+ilan na kaya lahat-lahat ang produkto ko
+pakisabi kung ilan ang mga item sa tindahan ko
+ilang tinda ang naka-save sa akin
+ilan na po ang mga produkto sa listahan ko
+total ng produkto ko ilan
+tinitignan ko lang, ilan lahat ng items sa app
+ilang aktibong paninda ang mayroon ako ngayon
+dami na ba ng produkto ko? ilan na
+ilan na pala ang mga naidagdag ko sa listahan
+ilang piraso ng produkto ang nakarehistro
+ilang item pa ba ang nasa sistema
+bilang ng lahat ng tinda ko po
+ilan kaya ang produkto namin ngayon
+ilan lahat ng produkto na binebenta ng tindahan
+gaano karami ang laman ng aking inventory
+ilan na yung nilagay kong paninda sa app
+sabihin mo kung ilan ang mga produkto ko
+ilan lahat ng produkto na meron sa shop
+teka, ilan nga ba ang produkto ko
+ilang klaseng produkto ang binebenta ko ngayon

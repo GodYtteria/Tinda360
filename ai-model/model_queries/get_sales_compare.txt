@@ -1,0 +1,87 @@
+@ {}
+are we up or down compared with yesterday || {"period": "day"}
+yesterday was slow, is today any better || {"period": "day"}
+sales today against yesterday, which is higher || {"period": "day"}
+did the store make more money today than the day before || {"period": "day"}
+hey yumi, beat yesterday's sales yet? || {"period": "day"}
+compare today and yesterday for me please || {"period": "day"}
+is today's total ahead of yesterday's total || {"period": "day"}
+how are we doing today relative to yesterday || {"period": "day"}
+am i selling better today than yesterday || {"period": "day"}
+today vs yesterday, who wins || {"period": "day"}
+tell me if today's takings are bigger than yesterday's || {"period": "day"}
+did sales drop today compared to yesterday || {"period": "day"}
+how much more or less did i make today than yesterday || {"period": "day"}
+is today busier money-wise than yesterday || {"period": "day"}
+yesterday vs today revenue || {"period": "day"}
+was yesterday's income higher than what i have so far today || {"period": "day"}
+did i top yesterday's sales yet || {"period": "day"}
+sales check: today compared to the previous day || {"period": "day"}
+mas malakas ba ang benta ko ngayon kesa kahapon || {"period": "day"}
+kumpara kahapon, ano na ang lagay ng benta ngayon || {"period": "day"}
+hay nako, mas mababa ba ang kita ngayon kaysa kahapon || {"period": "day"}
+lamang ba ang benta ngayong araw sa benta kahapon || {"period": "day"}
+mas ok ba benta ko today kesa kahapon || {"period": "day"}
+nakalamang na ba kami ngayon sa kahapon || {"period": "day"}
+ngayon at kahapon, alin ang mas mataas ang benta || {"period": "day"}
+pakicompare po ng benta ngayon sa kahapon || {"period": "day"}
+bumaba ba benta ko ngayon vs kahapon || {"period": "day"}
+naku, mas konti ba ang nabenta ko ngayon kumpara kahapon || {"period": "day"}
+are sales up this week compared to last week || {"period": "week"}
+how is this week stacking up against the last one || {"period": "week"}
+did i do better this week than last week || {"period": "week"}
+this week or last week, which was stronger || {"period": "week"}
+compare my weekly sales to the week before || {"period": "week"}
+is the store earning more this week than last || {"period": "week"}
+weekly sales now versus the previous week || {"period": "week"}
+how does the current week measure up to last week's sales || {"period": "week"}
+am i ahead of last week's numbers || {"period": "week"}
+last week against this week in sales please || {"period": "week"}
+did sales slip this week compared with last week || {"period": "week"}
+which week made more money, this one or the last || {"period": "week"}
+week over week sales check || {"period": "week"}
+is this week a better one for the shop than last week || {"period": "week"}
+how much higher or lower is this week than last week || {"period": "week"}
+are we beating last week's revenue || {"period": "week"}
+compare this week's takings with last week's || {"period": "week"}
+sales growth from last week to this week || {"period": "week"}
+mas ok ba ang benta ngayong linggo kesa last week || {"period": "week"}
+kumpara sa nakaraang linggo, kumusta ang benta ngayon || {"period": "week"}
+bumaba ba ang kita ko this week vs last week || {"period": "week"}
+lamang ba ang linggong ito pagdating sa benta || {"period": "week"}
+hay, mas matumal ba ngayong linggo kaysa noong isang linggo || {"period": "week"}
+nakahabol na ba ang benta ngayong linggo sa nakaraan || {"period": "week"}
+alin ang mas malaki ang benta, ngayong linggo o last week || {"period": "week"}
+paki-compare po ang benta ng dalawang linggo || {"period": "week"}
+mas dumami ba ang naibenta ko nitong linggo kesa sa nakaraan || {"period": "week"}
+grabe, mas mahina ba ang benta this week kumpara last week || {"period": "week"}
+ano ang pinagkaiba ng benta ngayong linggo sa nakaraang linggo || {"period": "week"}
+how is this month doing compared to last month || {"period": "month"}
+are monthly sales up or down || {"period": "month"}
+did i earn more this month than the month before || {"period": "month"}
+this month against last month, which one is bigger || {"period": "month"}
+compare my sales for this month and last month || {"period": "month"}
+is the shop growing month over month || {"period": "month"}
+how does the current month stack up against the previous month || {"period": "month"}
+are we selling more this month than last || {"period": "month"}
+month on month sales comparison please || {"period": "month"}
+last month's revenue versus this month's || {"period": "month"}
+did my income go up compared with last month || {"period": "month"}
+is this month a better month for the store || {"period": "month"}
+how far ahead or behind am i compared to last month || {"period": "month"}
+tell me if this month's sales beat last month's || {"period": "month"}
+sales this month vs the month before, higher or lower || {"period": "month"}
+is business better this month than last month || {"period": "month"}
+am i making more money than the previous month || {"period": "month"}
+mas malaki ba ang kita ngayong buwan kesa last month || {"period": "month"}
+kumusta ang benta ngayong buwan kumpara noong nakaraan || {"period": "month"}
+bumaba ba o tumaas ang benta ko compared to last month || {"period": "month"}
+lamang ba ang buwang ito sa buwan na lumipas || {"period": "month"}
+hay nako, mas mahina ba ang benta ngayong buwan || {"period": "month"}
+ihambing mo nga ang benta this month at last month || {"period": "month"}
+nalampasan na ba ng benta ngayong buwan ang nakaraang buwan || {"period": "month"}
+mas marami ba akong kinita nitong buwan kaysa sa dati || {"period": "month"}
+buwan na ito vs nakaraang buwan, ano ang lamang || {"period": "month"}
+po, pwede po bang makita ang paghahambing ng benta ngayong buwan at noong nakaraan || {"period": "month"}
+tumaba ba ang benta ko ngayong buwan kesa noong isang buwan || {"period": "month"}
+mas ok ba ang takbo ng tindahan ngayong buwan kaysa last month || {"period": "month"}

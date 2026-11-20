@@ -124,8 +124,19 @@ final class ToolArgumentParser {
   static const Map<String, int> _periodAdjectives = <String, int>{
     'weekly': _daysPerWeek,
     'monthly': _daysPerMonth,
-    'tomorrow': 1,
   };
+
+  static const String _upcomingDurationArgument = 'days_ahead';
+
+  static const Map<String, int> _upcomingPeriodAdjectives = <String, int>{
+    ..._periodAdjectives,
+    'tomorrow': 1,
+    'bukas': 1,
+  };
+
+  static const String _leastWord = 'least';
+  static const String _minimumPhrasePrefix = 'at';
+  static const String _rankingRangeLinker = 'to';
 
   static const Map<String, int> _durationUnits = <String, int>{
     'araw': 1,
@@ -178,8 +189,19 @@ final class ToolArgumentParser {
     'times',
     'trips',
     'faithful',
-    'lagi',
     'nandito',
+  };
+
+  static const String _alwaysWord = 'lagi';
+
+  static const Set<String> _spendWords = <String>{
+    'gumastos',
+    'gumagastos',
+    'gastos',
+    'malaki',
+    'spend',
+    'spends',
+    'spent',
   };
 
   static const Map<String, String> _durationArgumentNames = <String, String>{
@@ -203,13 +225,13 @@ final class ToolArgumentParser {
       'get_profit_margins' => _ranked(
         tokens,
         sortKey: 'sort',
-        sortValue: _containsAny(tokens, _lowestMarginWords) ? 'lowest' : null,
+        sortValue: _asksLowestMargin(tokens) ? 'lowest' : null,
         defaultSort: 'highest',
       ),
       'get_suki_loyalty' => _ranked(
         tokens,
         sortKey: 'sort_by',
-        sortValue: _containsAny(tokens, _visitWords) ? 'visits' : null,
+        sortValue: _asksVisits(tokens) ? 'visits' : null,
         defaultSort: 'spend',
       ),
       _ => _duration(toolName, tokens),
@@ -247,10 +269,12 @@ final class ToolArgumentParser {
     ).split(_separators).where((word) => word.isNotEmpty);
     final tokens = <Object>[];
     int? lastScale;
+    int? scaleBeforeLinker;
     for (final word in words) {
       final multiplier = _multipliers[word];
       if (multiplier != null && _endsWithNumberAndLinker(tokens)) {
         tokens.removeLast();
+        lastScale = scaleBeforeLinker;
       }
       if (multiplier != null && tokens.isNotEmpty && tokens.last is int) {
         final last = tokens.last as int;
@@ -271,6 +295,7 @@ final class ToolArgumentParser {
         tokens[tokens.length - 1] = (tokens.last as int) + value;
         continue;
       }
+      scaleBeforeLinker = lastScale;
       lastScale = null;
       tokens.add(value ?? word);
     }
@@ -285,12 +310,29 @@ final class ToolArgumentParser {
   bool _containsAny(List<Object> tokens, Set<String> words) =>
       tokens.any(words.contains);
 
-  int? _durationDays(List<Object> tokens) {
+  bool _asksVisits(List<Object> tokens) =>
+      _containsAny(tokens, _visitWords) ||
+      (tokens.contains(_alwaysWord) && !_containsAny(tokens, _spendWords));
+
+  bool _asksLowestMargin(List<Object> tokens) {
+    for (var index = 0; index < tokens.length; index++) {
+      final token = tokens[index];
+      if (!_lowestMarginWords.contains(token)) continue;
+      final previous = index > 0 ? tokens[index - 1] : null;
+      final isMinimumPhrase =
+          token == _leastWord && previous == _minimumPhrasePrefix;
+      final isRankingEnd = previous == _rankingRangeLinker;
+      if (!isMinimumPhrase && !isRankingEnd) return true;
+    }
+    return false;
+  }
+
+  int? _durationDays(List<Object> tokens, Map<String, int> periodAdjectives) {
     final words = tokens
         .where((token) => !_linkerWords.contains(token))
         .toList(growable: false);
     for (var index = 0; index < words.length; index++) {
-      final adjectiveDays = _periodAdjectives[words[index]];
+      final adjectiveDays = periodAdjectives[words[index]];
       if (adjectiveDays != null) return adjectiveDays;
       if (index + 1 >= words.length) continue;
       final unit = _durationUnits[words[index + 1]];
@@ -343,7 +385,10 @@ final class ToolArgumentParser {
   Map<String, dynamic> _duration(String toolName, List<Object> tokens) {
     final argumentName = _durationArgumentNames[toolName];
     if (argumentName == null) return <String, dynamic>{};
-    return _single(argumentName, _durationDays(tokens));
+    final periodAdjectives = argumentName == _upcomingDurationArgument
+        ? _upcomingPeriodAdjectives
+        : _periodAdjectives;
+    return _single(argumentName, _durationDays(tokens, periodAdjectives));
   }
 
   Map<String, dynamic> _restock(List<Object> tokens) {

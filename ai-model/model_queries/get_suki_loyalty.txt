@@ -1,0 +1,49 @@
+@ {}
+which customers have spent the most money here || {"sort_by": "spend", "limit": 10}
+rank my customers by total purchases || {"sort_by": "spend", "limit": 10}
+who are my biggest spenders || {"sort_by": "spend", "limit": 10}
+I want to reward my best buyers, who are they || {"sort_by": "spend", "limit": 10}
+who's brought in the most money from their purchases || {"sort_by": "spend", "limit": 10}
+list my highest paying suki || {"sort_by": "spend", "limit": 10}
+which customer deserves a discount for spending so much || {"sort_by": "spend", "limit": 10}
+who contributes the most to my sales among customers || {"sort_by": "spend", "limit": 10}
+show me my VIPs || {"sort_by": "spend", "limit": 10}
+top customers by money spent || {"sort_by": "spend", "limit": 10}
+who pays me the most over time || {"sort_by": "spend", "limit": 10}
+which suki are worth keeping happy || {"sort_by": "spend", "limit": 10}
+my top ten customers by spending || {"sort_by": "spend", "limit": 10}
+who has the highest total purchases || {"sort_by": "spend", "limit": 10}
+who are the whales among my suki || {"sort_by": "spend", "limit": 10}
+sino ang pinaka-malaking bumili sa tindahan ko || {"sort_by": "spend", "limit": 10}
+sinong suki ang dapat kong bigyan ng freebie || {"sort_by": "spend", "limit": 10}
+sino sa kanila ang pinakamalaki magbayad kapag bumibili || {"sort_by": "spend", "limit": 10}
+pakilista ang mga suking pinakamalaki gumastos || {"sort_by": "spend", "limit": 10}
+hay, sino ba talaga ang bumubuhay sa tindahan ko || {"sort_by": "spend", "limit": 10}
+who shops here the most times || {"sort_by": "visits", "limit": 10}
+which customers visit my store the most || {"sort_by": "visits", "limit": 10}
+who's my most loyal customer by visits || {"sort_by": "visits", "limit": 10}
+rank customers by how many times they come || {"sort_by": "visits", "limit": 10}
+who drops by every day || {"sort_by": "visits", "limit": 10}
+list the people who keep coming to buy || {"sort_by": "visits", "limit": 10}
+who are the faithful ones visiting the shop || {"sort_by": "visits", "limit": 10}
+show me who has the most trips to my store || {"sort_by": "visits", "limit": 10}
+which suki never skips coming here || {"sort_by": "visits", "limit": 10}
+top customers by number of visits || {"sort_by": "visits", "limit": 10}
+who has the most purchases counted by visits || {"sort_by": "visits", "limit": 10}
+who walks into my store the most || {"sort_by": "visits", "limit": 10}
+sino ang pinakamadalas dumating sa shop || {"sort_by": "visits", "limit": 10}
+sino sa mga suki ang lagi kong nakikita || {"sort_by": "visits", "limit": 10}
+sino ang pinaka-madalas mamili dito || {"sort_by": "visits", "limit": 10}
+gaano kadalas bumabalik ang mga suki ko, sino ang nangunguna || {"sort_by": "visits", "limit": 10}
+mga suking halos araw-araw nandito || {"sort_by": "visits", "limit": 10}
+who are my five best customers by spending || {"sort_by": "spend", "limit": 5}
+show the top 5 customers who spent the most || {"sort_by": "spend", "limit": 5}
+sino ang lima kong pinakamalaking gumastos || {"sort_by": "spend", "limit": 5}
+who are the five customers who visit most || {"sort_by": "visits", "limit": 5}
+top 5 regulars by visits please || {"sort_by": "visits", "limit": 5}
+who are my 3 biggest spenders || {"sort_by": "spend", "limit": 3}
+top three buyers by amount spent || {"sort_by": "spend", "limit": 3}
+the three people who visit me most || {"sort_by": "visits", "limit": 3}
+sino ang tatlong pinakamadalas dumalaw sa tindahan || {"sort_by": "visits", "limit": 3}
+list my top 20 spenders || {"sort_by": "spend", "limit": 20}
+ilista ang 20 pinakamalaki gumastos || {"sort_by": "spend", "limit": 20}

@@ -1,0 +1,28 @@
+@ {}
+what are my most profitable goods || {"sort": "highest", "limit": 10}
+show me where the money is in my inventory || {"sort": "highest", "limit": 10}
+which items should I push because they pay well || {"sort": "highest", "limit": 10}
+list the products by margin, best first || {"sort": "highest", "limit": 10}
+what's my best earner on the shelf || {"sort": "highest", "limit": 10}
+which of my products have a fat markup || {"sort": "highest", "limit": 10}
+rank my items from most to least profit || {"sort": "highest", "limit": 10}
+what do I earn the most from || {"sort": "highest", "limit": 10}
+tell me my highest margin products please || {"sort": "highest", "limit": 10}
+which stuff makes me the most profit || {"sort": "highest", "limit": 10}
+pinakamalakas kumita sa mga paninda ko, alin || {"sort": "highest", "limit": 10}
+anong item ang may magandang tubo para ma-promote ko || {"sort": "highest", "limit": 10}
+which items am I making almost nothing on || {"sort": "lowest", "limit": 10}
+what products are barely worth selling || {"sort": "lowest", "limit": 10}
+show me the products with the smallest profit || {"sort": "lowest", "limit": 10}
+which goods should I raise the price on || {"sort": "lowest", "limit": 10}
+am I losing money on anything || {"sort": "lowest", "limit": 10}
+list my worst margin products || {"sort": "lowest", "limit": 10}
+what sells but earns the least || {"sort": "lowest", "limit": 10}
+ano ang mga paninda kong manipis ang kita || {"sort": "lowest", "limit": 10}
+what are my 5 best margin products || {"sort": "highest", "limit": 5}
+show me the five most profitable items || {"sort": "highest", "limit": 5}
+which 5 products make me the least money || {"sort": "lowest", "limit": 5}
+my top three earners by margin || {"sort": "highest", "limit": 3}
+give me the 3 products with the worst margin || {"sort": "lowest", "limit": 3}
+the 7 products with the best margins || {"sort": "highest", "limit": 7}
+seven lowest margin items please || {"sort": "lowest", "limit": 7}

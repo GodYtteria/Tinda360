@@ -1,0 +1,45 @@
+@ {}
+what should I stop restocking because it never sells || {"days": 14}
+show me my slowest items || {"days": 14}
+which products haven't moved in the last couple of weeks || {"days": 14}
+I think I'm overstocked on some things, which ones aren't selling || {"days": 14}
+list items nobody has bought lately || {"days": 14}
+any products I should put on discount to clear out || {"days": 14}
+what's been gathering dust in the store || {"days": 14}
+check what has zero sales recently || {"days": 14}
+which of my goods are just tying up my money || {"days": 14}
+which items should I mark down because they don't sell || {"days": 14}
+tell me what's dead weight on my shelves || {"days": 14}
+what haven't my customers touched in a while || {"days": 14}
+slow stock report please || {"days": 14}
+anything on my shelf that's about to expire without selling? || {"days": 14}
+what products barely sell || {"days": 14}
+find the items with the weakest sales || {"days": 14}
+which stocks are stuck || {"days": 14}
+which ones did I waste money on, nothing sells || {"days": 14}
+show products with little or no sales || {"days": 14}
+what do I have that nobody wants || {"days": 14}
+pls show unsold items || {"days": 14}
+anong mga tinda ko ang di binibili || {"days": 14}
+walang bumibili sa ilang paninda ko, alin yun || {"days": 14}
+naku, ano ang mga nabili ko na hindi naman nauubos || {"days": 14}
+which products do I keep but never sell || {"days": 14}
+mga paninda na dapat ko nang itigil dahil di nabebenta || {"days": 14}
+what's moving the slowest in my store || {"days": 14}
+any items I should clear out soon || {"days": 14}
+what isn't flying off the shelves || {"days": 14}
+which items are my slowest sellers this fortnight || {"days": 14}
+what didn't sell at all this past week || {"days": 7}
+anong mga item ang walang benta nitong linggo || {"days": 7}
+slow movers over the last 7 days || {"days": 7}
+ano ang walang bumili sa loob ng isang linggo || {"days": 7}
+which products had no sales for the whole month || {"days": 30}
+anong paninda ang buong buwan nang walang bumibili || {"days": 30}
+what hasn't sold in 30 days || {"days": 30}
+mga item na hindi nagalaw ngayong buwan || {"days": 30}
+which products have been dead for two months || {"days": 60}
+ano ang walang bumili sa loob ng 60 araw || {"days": 60}
+items that haven't sold in 90 days || {"days": 90}
+anong paninda ang tatlong buwan nang walang benta || {"days": 90}
+what hasn't sold in the last three days || {"days": 3}
+ano ang walang bumili nitong tatlong araw || {"days": 3}

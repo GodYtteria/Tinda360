@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import tool_results
 
 QUERIES_DIRECTORY = Path(__file__).parent / 'queries'
+MODEL_ONLY_QUERIES_DIRECTORY = Path(__file__).parent / 'model_queries'
 DATASET_PATH = Path(__file__).parent / 'tinda360_tool_calling.jsonl'
 PRODUCT_SECTION = 'product'
 NO_TOOL_FILE = 'no_tool'
@@ -142,7 +143,7 @@ def conversation_rows(held_out, curated_keys):
         rows.append(row)
     print(f'conversations: {len(rows)} kept, {dropped_entity} dropped for a name not in the question, '
           f'{dropped_held_out} dropped for resembling a held-out question, '
-          f'{dropped_curated} dropped because queries/ already has the question, '
+          f'{dropped_curated} dropped because queries/ or model_queries/ already has the question, '
           f'{dropped_conflict} dropped for conflicting labels')
     return rows
 
@@ -160,8 +161,9 @@ def held_out_queries():
 def build():
     header = DATASET_PATH.read_text(encoding='utf-8').splitlines()[0]
     rows = []
-    for path in sorted(QUERIES_DIRECTORY.glob('*.txt')):
-        rows.extend(rows_for_file(path))
+    for directory in (QUERIES_DIRECTORY, MODEL_ONLY_QUERIES_DIRECTORY):
+        for path in sorted(directory.glob('*.txt')):
+            rows.extend(rows_for_file(path))
     held_out = held_out_queries()
     rows.extend(conversation_rows(held_out, {row_key(row) for row in rows}))
     seen = {}

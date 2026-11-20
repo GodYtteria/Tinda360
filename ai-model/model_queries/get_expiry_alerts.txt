@@ -1,0 +1,53 @@
+@ {}
+what should i pull off the shelves this week || {"days_ahead": 7}
+any products that already passed their date || {"days_ahead": 7}
+which goods will go bad within the week || {"days_ahead": 7}
+show me anything expiring soon || {"days_ahead": 7}
+do i have expired stock in the store || {"days_ahead": 7}
+what needs to be sold fast before it expires || {"days_ahead": 7}
+list the items close to their best before date || {"days_ahead": 7}
+is there anything past expiry on my shelves || {"days_ahead": 7}
+which items should i discount because they're expiring || {"days_ahead": 7}
+check the shelves for expired items please || {"days_ahead": 7}
+what's going bad soon || {"days_ahead": 7}
+are there any expired goods i forgot about || {"days_ahead": 7}
+tell me which products have a short shelf life left || {"days_ahead": 7}
+quick check, anything expiring || {"days_ahead": 7}
+which of my goods are about to go stale || {"days_ahead": 7}
+short-dated products list || {"days_ahead": 7}
+anything i need to throw away || {"days_ahead": 7}
+ano ang mga paninda na malapit nang masira || {"days_ahead": 7}
+may nakalimutan ba akong paninda na paso na || {"days_ahead": 7}
+pakilista ang mga produktong malapit na ang expiry date || {"days_ahead": 7}
+ano ang dapat kong i-sale dahil mapapaso na || {"days_ahead": 7}
+naku, baka may expired na sa estante ko || {"days_ahead": 7}
+anong mga paninda ang hindi na pwedeng ibenta || {"days_ahead": 7}
+may mga de-lata ba na paso na || {"days_ahead": 7}
+ano ang mga tira na malapit nang mag-expire || {"days_ahead": 7}
+pakicheck po kung may paso na sa tindahan || {"days_ahead": 7}
+hay, ano na naman ang mapapaso ngayong linggo || {"days_ahead": 7}
+what will expire in the next two weeks || {"days_ahead": 14}
+which products go bad within fourteen days || {"days_ahead": 14}
+show me stock that expires before the end of next week || {"days_ahead": 14}
+anong mga produkto ang paso sa susunod na dalawang linggo || {"days_ahead": 14}
+ano ang mga mag-e-expire sa loob ng 14 days || {"days_ahead": 14}
+list everything that expires this month || {"days_ahead": 30}
+what goods will be past date within thirty days || {"days_ahead": 30}
+which items have less than a month left || {"days_ahead": 30}
+anong paninda ang mapapaso bago matapos ang buwan || {"days_ahead": 30}
+gusto kong makita ang mga mag-e-expire sa loob ng 30 days || {"days_ahead": 30}
+anything expiring in the next 3 days || {"days_ahead": 3}
+what has to go in the next few days || {"days_ahead": 3}
+which goods expire by the weekend || {"days_ahead": 3}
+ano ang mapapaso sa susunod na tatlong araw || {"days_ahead": 3}
+mga produkto na paso na sa loob ng 3 days || {"days_ahead": 3}
+what expires within the next two months || {"days_ahead": 60}
+show items that will go bad in 60 days || {"days_ahead": 60}
+ano ang mag-e-expire sa susunod na 60 araw || {"days_ahead": 60}
+what expires tomorrow || {"days_ahead": 1}
+anything expiring in the next day || {"days_ahead": 1}
+ano ang mapapaso bukas || {"days_ahead": 1}
+which products expire within 5 days || {"days_ahead": 5}
+ano ang mapapaso sa loob ng limang araw || {"days_ahead": 5}
+what will expire in the next three months || {"days_ahead": 90}
+ano ang mag-e-expire sa loob ng tatlong buwan || {"days_ahead": 90}

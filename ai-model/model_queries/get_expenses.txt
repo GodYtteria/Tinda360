@@ -1,0 +1,18 @@
+@ {}
+what did I pay out today || {"timeframe": "today"}
+any expenses recorded today || {"timeframe": "today"}
+how much cash left the shop today || {"timeframe": "today"}
+show me today's spending || {"timeframe": "today"}
+total costs for today please || {"timeframe": "today"}
+what are my expenses for the past week || {"timeframe": "week"}
+how much have I spent on the shop in the last seven days || {"timeframe": "week"}
+show me this week's costs || {"timeframe": "week"}
+what bills did I pay this week || {"timeframe": "week"}
+am I spending too much this week || {"timeframe": "week"}
+my weekly spending, how much is it || {"timeframe": "week"}
+how much did I spend this month || {"timeframe": "month"}
+show me my monthly costs || {"timeframe": "month"}
+what's the total of all my expenses for the month || {"timeframe": "month"}
+list what the store has paid out this month || {"timeframe": "month"}
+did I overspend this month || {"timeframe": "month"}
+how big are my monthly bills || {"timeframe": "month"}

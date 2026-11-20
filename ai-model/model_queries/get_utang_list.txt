@@ -1,0 +1,11 @@
+@ {}
+whose accounts are still open || {"min_balance": 0}
+how many people owe me and how much || {"min_balance": 0}
+let me see the debt list || {"min_balance": 0}
+any customers I need to collect from || {"min_balance": 0}
+who owes more than 300 pesos || {"min_balance": 300}
+show me balances above 300 || {"min_balance": 300}
+which customers owe over 2000 || {"min_balance": 2000}
+the big debts, anything above 2000 || {"min_balance": 2000}
+who has an unpaid balance of more than 250 || {"min_balance": 250}
+customers with utang higher than 1500 pesos || {"min_balance": 1500}

@@ -245,6 +245,13 @@ void main() {
       expect(parse('get_utang_list', 'utang na lampas dalawang libo'), {
         'min_balance': 2000,
       });
+      expect(
+        parse(
+          'get_utang_list',
+          'utang na lampas dalawang libo at lima na daan',
+        ),
+        {'min_balance': 2500},
+      );
     });
 
     test('spelled-out and whole-period durations become days', () {
@@ -272,6 +279,12 @@ void main() {
       expect(parse('get_expiry_alerts', 'what expires tomorrow'), {
         'days_ahead': 1,
       });
+      expect(parse('get_expiry_alerts', 'ano ang mapapaso bukas'), {
+        'days_ahead': 1,
+      });
+      expect(parse('get_utang_risk', 'utang na due tomorrow'), isNull);
+      expect(parse('get_slow_moving', 'hindi nabenta hanggang bukas'), isNull);
+      expect(parse('get_sales_trend', 'what will sell tomorrow'), isNull);
     });
 
     test('least and thin profit words sort by lowest margin', () {
@@ -284,6 +297,21 @@ void main() {
           'get_profit_margins',
           'ano ang mga paninda kong manipis ang kita',
         ),
+        {'sort': 'lowest'},
+      );
+      expect(
+        parse(
+          'get_profit_margins',
+          'products with at least 30 percent margin',
+        ),
+        isNull,
+      );
+      expect(
+        parse('get_profit_margins', 'rank my items from most to least profit'),
+        isNull,
+      );
+      expect(
+        parse('get_profit_margins', 'sort from lowest to highest margin'),
         {'sort': 'lowest'},
       );
       expect(parse('get_profit_margins', 'top 5 products by profit'), {
@@ -300,6 +328,14 @@ void main() {
         'sort_by': 'visits',
       });
       expect(parse('get_suki_loyalty', 'who are my biggest spenders'), isNull);
+      expect(
+        parse('get_suki_loyalty', 'sino ang lagi malaki gumastos'),
+        isNull,
+      );
+      expect(
+        parse('get_suki_loyalty', 'sino sa mga suki ang lagi kong nakikita'),
+        {'sort_by': 'visits'},
+      );
     });
 
     test('tools without numeric arguments yield nothing', () {
