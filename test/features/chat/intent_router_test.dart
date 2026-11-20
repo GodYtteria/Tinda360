@@ -46,22 +46,36 @@ Map<String, ChatIntent> _loadTrainingQueries() {
     for (final line in file.readAsLinesSync()) {
       final trimmed = line.trim();
       if (trimmed.isEmpty || trimmed.startsWith('@')) continue;
-      expected[trimmed.split(_separator).first.trim()] = toolNameToIntent(tool);
+      final query = trimmed.split(_separator).first.trim();
+      final intent = toolNameToIntent(tool);
+      final previous = expected[query];
+      if (previous != null && previous != intent) {
+        throw StateError('"$query" is labelled both $previous and $intent');
+      }
+      expected[query] = intent;
     }
   }
   return expected;
 }
 
-Map<String, ChatIntent> _loadHeldOutQueries() => <String, ChatIntent>{
-  for (final line in File(_novelCasesFile).readAsLinesSync())
-    if (line.trim().isNotEmpty)
-      line.split('|')[0]: toolNameToIntent(line.split('|')[1]),
-};
+Map<String, ChatIntent> _loadHeldOutQueries() {
+  final expected = <String, ChatIntent>{};
+  for (final line in File(_novelCasesFile).readAsLinesSync()) {
+    if (line.trim().isEmpty) continue;
+    final fields = line.split('|');
+    if (fields.length < 2) {
+      throw FormatException('held-out line has no tool name', line);
+    }
+    expected[fields[0].trim()] = toolNameToIntent(fields[1].trim());
+  }
+  return expected;
+}
 
 List<String> _loadChitChatQueries() =>
     File('$_queriesDirectory/$_noToolFile.txt')
         .readAsLinesSync()
-        .where((line) => line.trim().isNotEmpty)
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty && !line.startsWith('@'))
         .map((line) => line.split(_separator).first.trim())
         .toList();
 
@@ -78,6 +92,7 @@ _Tally _score(IntentRouter router, Map<String, ChatIntent> expected) {
       tally.wrong++;
     }
   }
+  if (tally.total == 0) throw StateError('no queries to score');
   return tally;
 }
 
@@ -111,7 +126,10 @@ void main() {
     });
 
     test('an off-topic question is refused, not answered with data', () {
-      for (final query in ['ano ang ulam mamaya', 'who is the president']) {
+      for (final query in [
+        'ano ang lulutuin ko mamaya',
+        'who is the president',
+      ]) {
         expect(router.route(query).kind, RouteKind.outOfScope, reason: query);
       }
     });
