@@ -661,6 +661,7 @@ class ChatNotifier extends Notifier<ChatState> {
         soldQuantities,
         isFilipino,
         localizations,
+        namesUnknownProduct: namesUnknownProduct(matched.normalizedText),
       );
     }
 

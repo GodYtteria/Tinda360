@@ -14,4 +14,11 @@ void main() {
     expect(namesUnknownProduct('presyo ng pancit canton'), isTrue);
     expect(namesUnknownProduct('magkano ₱ gatas'), isTrue);
   });
+
+  test('forecast question words do not count as a product name', () {
+    expect(namesUnknownProduct('kailan mauubos'), isFalse);
+    expect(namesUnknownProduct('how long will it last'), isFalse);
+    expect(namesUnknownProduct('kailan mauubos ang itlog'), isTrue);
+    expect(namesUnknownProduct('ilang araw bago maubos ang bigas'), isTrue);
+  });
 }

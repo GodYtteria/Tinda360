@@ -251,6 +251,9 @@ final class YumiEngine {
     List<YumiTurn> recentTurns = const <YumiTurn>[],
   }) {
     final tokenizer = _tokenizer!;
+    String stripSpecialTokens(String text) => tokenizer.specialTokens.keys
+        .fold(text, (cleaned, special) => cleaned.replaceAll(special, ''));
+    final safeQuery = stripSpecialTokens(userQuery);
     final baseParts = <String>[
       '<|im_start|>system\n$_systemPrompt<|im_end|>',
     ];
@@ -258,7 +261,7 @@ final class YumiEngine {
       baseParts.add('<|im_start|>system\nTools:\n$_toolDefsText<|im_end|>');
     }
     const tail = '<|im_start|>assistant\n';
-    final queryPart = '<|im_start|>user\n$userQuery<|im_end|>';
+    final queryPart = '<|im_start|>user\n$safeQuery<|im_end|>';
 
     String assemble(String summary, List<YumiTurn> turns) {
       final parts = <String>[...baseParts];
@@ -267,14 +270,16 @@ final class YumiEngine {
       }
       for (final turn in turns) {
         final role = turn.isUser ? 'user' : 'assistant';
-        parts.add('<|im_start|>$role\n${turn.text}<|im_end|>');
+        parts.add(
+          '<|im_start|>$role\n${stripSpecialTokens(turn.text)}<|im_end|>',
+        );
       }
       parts.add(queryPart);
       parts.add(tail);
       return parts.join('\n');
     }
 
-    var summary = contextSummary.trim();
+    var summary = stripSpecialTokens(contextSummary).trim();
     final turns = List<YumiTurn>.from(recentTurns);
     var prompt = assemble(summary, turns);
     var tokenCount = tokenizer.encode(prompt).length + 1;
@@ -290,7 +295,7 @@ final class YumiEngine {
     }
 
     if (tokenCount > _maxPromptTokens) {
-      var trimmedQuery = userQuery.trim();
+      var trimmedQuery = safeQuery.trim();
       while (tokenCount > _maxPromptTokens && trimmedQuery.length > 32) {
         trimmedQuery = trimmedQuery.substring(
           trimmedQuery.length - (trimmedQuery.length ~/ 2),

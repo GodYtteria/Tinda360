@@ -877,6 +877,7 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
       'limit': safeLimit,
       'total_cost_minor': spent,
       'remaining_budget_minor': budgetMinor > 0 ? budgetMinor - spent : 0,
+      'candidate_count': candidates.length,
       'suggestions': suggestions,
     };
   }

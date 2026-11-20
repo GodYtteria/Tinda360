@@ -350,10 +350,20 @@ AssistantReply _utangList(
       .toList();
   final total = _money(_asInt(result['total_balance_minor']), currency);
   if (customers.isEmpty) {
-    return AssistantReply(
-      text: isFilipino
+    final minimumMinor = _asInt(result['min_balance_minor']);
+    final minimum = _money(minimumMinor, currency);
+    final String emptyText;
+    if (minimumMinor > 0) {
+      emptyText = isFilipino
+          ? 'Walang utang na umabot sa $minimum.'
+          : 'No customers owe $minimum or more.';
+    } else {
+      emptyText = isFilipino
           ? 'Walang utang na may balanse ngayon.'
-          : 'No customers have an outstanding utang balance.',
+          : 'No customers have an outstanding utang balance.';
+    }
+    return AssistantReply(
+      text: emptyText,
       source: localizations.chatSourceUtang,
       mood: TindaAvatarMood.happy,
     );
@@ -809,10 +819,20 @@ AssistantReply _restockSuggestions(
       .toList();
   final totalCost = _money(_asInt(result['total_cost_minor']), currency);
   if (suggestions.isEmpty) {
-    return AssistantReply(
-      text: isFilipino
+    final budgetMinor = _asInt(result['budget_minor']);
+    final budget = _money(budgetMinor, currency);
+    final String emptyText;
+    if (budgetMinor > 0 && _asInt(result['candidate_count']) > 0) {
+      emptyText = isFilipino
+          ? 'Walang restock na kasya sa $budget na budget.'
+          : 'No restock suggestion fits a $budget budget.';
+    } else {
+      emptyText = isFilipino
           ? 'Walang restock suggestion ngayon.'
-          : 'No restock suggestions right now.',
+          : 'No restock suggestions right now.';
+    }
+    return AssistantReply(
+      text: emptyText,
       source: localizations.chatSourceInventory,
       mood: TindaAvatarMood.happy,
     );

@@ -9,6 +9,7 @@ const String _queriesDirectory = 'ai-model/queries';
 const String _novelCasesFile = 'ai-model/novel_eval.txt';
 const String _noToolFile = 'no_tool';
 const String _replySeparator = '||';
+const double _minimumKeywordAccuracy = 0.55;
 
 Map<String, ChatIntent> _loadExpectedIntents() {
   final expected = <String, ChatIntent>{};
@@ -66,6 +67,6 @@ void main() {
       );
     }
     stderr.writeln(report);
-    expect(accuracy, greaterThan(0.0));
+    expect(accuracy, greaterThanOrEqualTo(_minimumKeywordAccuracy));
   }, skip: hasData ? false : 'ai-model data not present');
 }

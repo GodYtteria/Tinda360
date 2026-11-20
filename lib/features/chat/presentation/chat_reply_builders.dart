@@ -127,7 +127,7 @@ AssistantReply buildSlowMovingReply(
   );
 }
 
-const Set<String> _priceQuestionFillerWords = <String>{
+const Set<String> _questionFillerWords = <String>{
   'magkano',
   'ang',
   'ng',
@@ -145,12 +145,33 @@ const Set<String> _priceQuestionFillerWords = <String>{
   'what',
   'whats',
   'cost',
+  'kailan',
+  'kelan',
+  'mauubos',
+  'maubos',
+  'ubos',
+  'ilang',
+  'araw',
+  'tatagal',
+  'bago',
+  'pa',
+  'long',
+  'will',
+  'last',
+  'run',
+  'out',
+  'when',
+  'days',
+  'left',
+  'stock',
+  'forecast',
+  'it',
 };
 
 bool namesUnknownProduct(String normalizedQuery) => normalizedQuery
     .split(' ')
     .any(
-      (word) => word.isNotEmpty && !_priceQuestionFillerWords.contains(word),
+      (word) => word.isNotEmpty && !_questionFillerWords.contains(word),
     );
 
 AssistantReply buildProductPromptReply(
@@ -182,31 +203,52 @@ DayRange rangeForTimeframe(QueryTimeframe timeframe, LocalDay today) =>
       QueryTimeframe.month => DayRange(today.plusDays(-29), today),
     };
 
+const int _minimumMentionedNameLength = 3;
+final RegExp _nonWordCharacters = RegExp(r'[^\w\s]');
+final RegExp _whitespaceRun = RegExp(r'\s+');
+
+String _normalizeForNameMatch(String text) => text
+    .toLowerCase()
+    .replaceAll(_nonWordCharacters, ' ')
+    .replaceAll(_whitespaceRun, ' ')
+    .trim();
+
+T? _longestMentionedName<T>(
+  String normalized,
+  Iterable<T> candidates,
+  String Function(T candidate) nameOf,
+) {
+  final paddedQuery = ' ${_normalizeForNameMatch(normalized)} ';
+  T? best;
+  var bestLength = 0;
+  for (final candidate in candidates) {
+    final name = _normalizeForNameMatch(nameOf(candidate));
+    if (name.length < _minimumMentionedNameLength) continue;
+    if (name.length > bestLength && paddedQuery.contains(' $name ')) {
+      best = candidate;
+      bestLength = name.length;
+    }
+  }
+  return best;
+}
+
 StockedProduct? findMentionedProduct(
   String normalized,
   List<StockedProduct> products,
-) {
-  for (final item in products) {
-    final name = item.product.name.toLowerCase().trim();
-    if (name.length >= 3 && normalized.contains(name)) {
-      return item;
-    }
-  }
-  return null;
-}
+) => _longestMentionedName(
+  normalized,
+  products,
+  (item) => item.product.name,
+);
 
 CustomerBalance? findMentionedCustomer(
   String normalized,
   List<CustomerBalance> balances,
-) {
-  for (final item in balances) {
-    final name = item.customer.name.toLowerCase().trim();
-    if (name.length >= 3 && normalized.contains(name)) {
-      return item;
-    }
-  }
-  return null;
-}
+) => _longestMentionedName(
+  normalized,
+  balances,
+  (item) => item.customer.name,
+);
 
 AssistantReply buildProductLookupReply(
   StockedProduct item,
@@ -703,7 +745,7 @@ AssistantReply buildPaymentBreakdownReply(
   for (final sale in sales) {
     counts[sale.method] = (counts[sale.method] ?? 0) + 1;
     totals[sale.method] =
-        (totals[sale.method] ?? Money.zero(currency)) + sale.total;
+        (totals[sale.method] ?? Money.zero(currency)) + sale.netTotal;
   }
   final parts = <String>[];
   for (final method in PaymentMethod.values) {
@@ -731,13 +773,19 @@ AssistantReply buildStockForecastReply(
   List<StockedProduct> products,
   Map<String, int> soldQuantities,
   bool isFilipino,
-  AppLocalizations localizations,
-) {
+  AppLocalizations localizations, {
+  required bool namesUnknownProduct,
+}) {
   if (mentionedProduct == null) {
+    final text = namesUnknownProduct
+        ? (isFilipino
+              ? 'Hindi ko nakita ang produktong iyon sa inventory. Subukan ang eksaktong pangalan.'
+              : 'I could not find that product in your inventory. Try its exact name.')
+        : (isFilipino
+              ? 'Pakilagay ang pangalan ng produkto (hal. "Kailan mauubos ang Bigas?").'
+              : 'Include the product name (e.g. "When will Rice run out?").');
     return AssistantReply(
-      text: isFilipino
-          ? 'Pakilagay ang pangalan ng produkto (hal. "Kailan mauubos ang Bigas?").'
-          : 'Include the product name (e.g. "When will Rice run out?").',
+      text: text,
       source: localizations.chatSourceInventory,
       mood: TindaAvatarMood.talking,
     );
