@@ -31,15 +31,12 @@ class TindaWordmark extends StatelessWidget {
   const new({
     super.key,
     this.fontSize = 20,
-    this.onDarkHeader = true,
   });
 
   static const FontWeight _weight = FontWeight.w800;
   static const double _letterSpacingPerPoint = -0.02;
 
   final double fontSize;
-
-  final bool onDarkHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +58,7 @@ class TindaWordmark extends StatelessWidget {
       maxLines: 1,
       semanticsLabel: title,
       style: TextStyle(
-        color: onDarkHeader ? palette.onHeader : palette.text,
+        color: palette.onHeader,
         fontSize: fontSize,
         fontWeight: _weight,
         letterSpacing: fontSize * _letterSpacingPerPoint,

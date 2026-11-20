@@ -255,9 +255,13 @@ class ChatNotifier extends Notifier<ChatState> {
       );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.answer', error, stack);
+      final replyLocalizations = _replyLocalizations(
+        queryText.trim(),
+        localizations,
+      );
       reply = AssistantReply(
-        text: localizations.chatErrorReply,
-        source: localizations.chatSourceSummary,
+        text: replyLocalizations.chatErrorReply,
+        source: replyLocalizations.chatSourceSummary,
         mood: TindaAvatarMood.talking,
       );
     }
@@ -669,6 +673,19 @@ class ChatNotifier extends Notifier<ChatState> {
     mood: storeReply.mood,
   );
 
+  AppLocalizations _replyLocalizations(
+    String query,
+    AppLocalizations appLocalizations,
+  ) {
+    final isFilipino = const QueryLanguage().isFilipino(
+      query,
+      appIsFilipino: appLocalizations.localeName.startsWith(_filipinoLocale),
+    );
+    return lookupAppLocalizations(
+      Locale(isFilipino ? _filipinoLocale : _englishLocale),
+    );
+  }
+
   Future<AssistantReply> _answerFromStoreData(
     String query,
     DateTime now,
@@ -680,13 +697,8 @@ class ChatNotifier extends Notifier<ChatState> {
       forcedToolName: forcedToolName,
     );
     final matched = classification.matched;
-    final isFilipino = const QueryLanguage().isFilipino(
-      query,
-      appIsFilipino: appLocalizations.localeName.startsWith(_filipinoLocale),
-    );
-    final localizations = lookupAppLocalizations(
-      Locale(isFilipino ? _filipinoLocale : _englishLocale),
-    );
+    final localizations = _replyLocalizations(query, appLocalizations);
+    final isFilipino = localizations.localeName.startsWith(_filipinoLocale);
     final clarificationOptions = buildClarificationOptions(
       classification.clarificationToolNames,
       isFilipino: isFilipino,

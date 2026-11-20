@@ -56,7 +56,6 @@ final class QueryLanguage {
     'ti',
     'ita',
     'kadi',
-    'pay',
     'aldaw',
     'presyo',
     'mauubos',
@@ -117,9 +116,19 @@ final class QueryLanguage {
   };
 
   bool isFilipino(String query, {required bool appIsFilipino}) {
-    final words = query.toLowerCase().split(_wordSeparators);
-    final filipinoCount = words.where(_filipinoWords.contains).length;
-    final englishCount = words.where(_englishWords.contains).length;
+    final words = query
+        .split(_wordSeparators)
+        .where((word) => word.isNotEmpty)
+        .toList(growable: false);
+    var filipinoCount = 0;
+    var englishCount = 0;
+    for (var index = 0; index < words.length; index++) {
+      final word = words[index];
+      final lower = word.toLowerCase();
+      if (_filipinoWords.contains(lower)) filipinoCount++;
+      final looksLikeName = index > 0 && word != lower;
+      if (!looksLikeName && _englishWords.contains(lower)) englishCount++;
+    }
     if (filipinoCount == englishCount) return appIsFilipino;
     return filipinoCount > englishCount;
   }

@@ -32,6 +32,13 @@ void main() {
     );
   });
 
+  test('the English word pay does not count as Filipino', () {
+    expect(
+      language.isFilipino('did Ana pay', appIsFilipino: true),
+      isFalse,
+    );
+  });
+
   test('Bisaya and Ilokano questions get a Filipino reply', () {
     expect(
       language.isFilipino('pila ang presyo sa bugas', appIsFilipino: false),
@@ -73,6 +80,21 @@ void main() {
         'how many items are left sa stock',
         appIsFilipino: true,
       ),
+      isFalse,
+    );
+  });
+
+  test('capitalized brand words do not count as English', () {
+    expect(
+      language.isFilipino('magkano Lucky Me', appIsFilipino: false),
+      isTrue,
+    );
+    expect(
+      language.isFilipino('may Best Choice pa ba', appIsFilipino: false),
+      isTrue,
+    );
+    expect(
+      language.isFilipino('How much is the coke', appIsFilipino: true),
       isFalse,
     );
   });
