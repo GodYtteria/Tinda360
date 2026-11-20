@@ -44,8 +44,8 @@ void main() {
 
     test('words shorter than three letters are not redacted alone', () {
       expect(
-        redact('si Jo ay nagbayad', customers: ['Jo Cruz']),
-        'si Jo ay nagbayad',
+        redact('Jo ay nagbayad', customers: ['Jo Cruz']),
+        'Jo ay nagbayad',
       );
     });
 
@@ -121,8 +121,8 @@ void main() {
 
     test('name followed by an accented letter does not match', () {
       expect(
-        redact('utang ni Bené', customers: ['Ben']),
-        'utang ni Bené',
+        redact('bayad na Bené', customers: ['Ben']),
+        'bayad na Bené',
       );
     });
   });
@@ -334,6 +334,66 @@ void main() {
         ),
         once,
       );
+    });
+  });
+
+  group('people who are not in the customer list', () {
+    test('a word after si, ni or kay is redacted', () {
+      expect(
+        redact('magkano utang ni Berto', customers: [], products: []),
+        'magkano utang ni <CUSTOMER>',
+      );
+      expect(
+        redact('pautangin ba si Lorna', customers: [], products: []),
+        'pautangin ba si <CUSTOMER>',
+      );
+      expect(
+        redact('singilin kay JUNJUN bukas', customers: [], products: []),
+        'singilin kay <CUSTOMER> bukas',
+      );
+    });
+
+    test('a word after a title is redacted, with or without a particle', () {
+      expect(
+        redact('utang ni aling nena', customers: [], products: []),
+        'utang ni aling <CUSTOMER>',
+      );
+      expect(
+        redact('may utang ba mang Kanor', customers: [], products: []),
+        'may utang ba mang <CUSTOMER>',
+      );
+    });
+
+    test('pronouns and question words after a particle are kept', () {
+      for (final text in [
+        'sino si yumi',
+        'utang ni siya',
+        'ate magkano benta',
+        'kuya ano ang paubos',
+        'kay lahat',
+        'ni aling',
+      ]) {
+        expect(
+          redact(text, customers: [], products: []),
+          text,
+          reason: text,
+        );
+      }
+    });
+
+    test('particles inside longer words do not trigger', () {
+      for (final text in ['benta ngayon', 'mani presyo', 'kasi mahal']) {
+        expect(
+          redact(text, customers: [], products: []),
+          text,
+          reason: text,
+        );
+      }
+    });
+
+    test('an already redacted name is left alone', () {
+      const text = 'utang ni <CUSTOMER> at kay aling <CUSTOMER>';
+      expect(redact(text, customers: [], products: []), text);
     });
   });
 

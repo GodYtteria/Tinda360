@@ -35,6 +35,83 @@ final class FeedbackRedactor {
     'pare',
   };
 
+  static const int _addressedWordGroup = 1;
+
+  static const String _personParticles = 'si|ni|kay|sina|nina|kina';
+
+  static const String _addressTitles =
+      'aling|mang|ate|kuya|nanay|tatay|lola|lolo|tita|tito|kap|kapitan';
+
+  static const Set<String> _wordsThatAreNotNames = <String>{
+    'ako',
+    'ko',
+    'mo',
+    'siya',
+    'niya',
+    'kanya',
+    'kaniya',
+    'sila',
+    'nila',
+    'kanila',
+    'lahat',
+    'sino',
+    'kanino',
+    'ano',
+    'magkano',
+    'ilan',
+    'ilang',
+    'kailan',
+    'kelan',
+    'saan',
+    'paano',
+    'bakit',
+    'may',
+    'meron',
+    'pwede',
+    'paki',
+    'yung',
+    'at',
+    'o',
+    'pero',
+    'kasi',
+    'daw',
+    'raw',
+    'din',
+    'rin',
+    'lang',
+    'naman',
+    'muna',
+    'ay',
+    'ang',
+    'ng',
+    'sa',
+    'na',
+    'po',
+    'ba',
+    'yumi',
+    'aling',
+    'mang',
+    'ate',
+    'kuya',
+    'nanay',
+    'tatay',
+    'lola',
+    'lolo',
+    'tita',
+    'tito',
+    'kap',
+    'kapitan',
+  };
+
+  static final RegExp _addressedPerson = RegExp(
+    '(?<![$_wordCharacter])'
+    '(?:(?:$_personParticles)(?:\\s+(?:$_addressTitles))?|(?:$_addressTitles))'
+    r'\s+'
+    '([\\p{L}][\\p{L}\\p{M}\'-]*)',
+    unicode: true,
+    caseSensitive: false,
+  );
+
   static final RegExp _nameSeparators = RegExp(
     '[^$_wordCharacter]+',
     unicode: true,
@@ -67,7 +144,20 @@ final class FeedbackRedactor {
       _fullPhrases(productNames),
       productPlaceholder,
     );
-    return _replaceNumbers(withoutProducts);
+    return _replaceNumbers(_replaceAddressedPeople(withoutProducts));
+  }
+
+  String _replaceAddressedPeople(String text) {
+    return text.replaceAllMapped(_addressedPerson, (match) {
+      final word = match.group(_addressedWordGroup)!;
+      if (_wordsThatAreNotNames.contains(word.toLowerCase())) {
+        return match.group(0)!;
+      }
+      final lead = match
+          .group(0)!
+          .substring(0, match.group(0)!.length - word.length);
+      return '$lead$customerPlaceholder';
+    });
   }
 
   List<String> _nameWords(String name) {
