@@ -8,6 +8,7 @@ import re
 import torch
 
 from model import ModelConfig, YtteriaDragon
+import build_dataset
 
 
 SYSTEM_PROMPT = (
@@ -81,7 +82,11 @@ def format_all_tools(tools):
     for tool_entry in tools:
         function_def = tool_entry["function"]
         params = function_def.get("parameters", {}).get("properties", {})
-        param_str = ", ".join(f"{key}: {val.get('type', '?')}" for key, val in params.items())
+        param_str = ", ".join(
+            f"{key}: {val.get('type', '?')}"
+            for key, val in params.items()
+            if key not in build_dataset.ENTITY_ARGUMENTS
+        )
         lines.append(f"{function_def['name']}({param_str})")
     return "\n".join(lines)
 

@@ -123,7 +123,7 @@ def conversation_rows(held_out, curated_keys):
     ]
     labels_by_key = {}
     for row in candidates:
-        labels_by_key.setdefault(row_key(row), set()).add(row_label(row))
+        labels_by_key.setdefault(row_key(row), set()).add(row_label(without_entity_arguments(row)))
     rows = []
     dropped_entity = dropped_held_out = dropped_curated = dropped_conflict = 0
     for row in candidates:

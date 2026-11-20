@@ -22,6 +22,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from model import PRESETS, ModelConfig, YtteriaDragon, muon_groups, MuonOptimizer
+import build_dataset
 
 
 def parse_args():
@@ -231,7 +232,11 @@ def format_tool_definitions(tools, called_names=None, max_decoys=3):
     for tool_entry in tools:
         function_def = tool_entry["function"]
         params = function_def.get("parameters", {}).get("properties", {})
-        param_str = ", ".join(f"{prop_key}: {prop_val.get('type', '?')}" for prop_key, prop_val in params.items())
+        param_str = ", ".join(
+            f"{prop_key}: {prop_val.get('type', '?')}"
+            for prop_key, prop_val in params.items()
+            if prop_key not in build_dataset.ENTITY_ARGUMENTS
+        )
         all_defs[function_def["name"]] = f"{function_def['name']}({param_str})"
     if called_names:
 

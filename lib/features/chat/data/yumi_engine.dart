@@ -8,6 +8,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:path_provider/path_provider.dart';
+import 'package:tinda360/features/chat/data/product_argument_grounding.dart';
 import 'package:tinda360/features/chat/data/yumi_tokenizer.dart';
 
 typedef _LoadNative = Int32 Function(Pointer<Char> path);
@@ -140,7 +141,7 @@ final class YumiEngine implements YumiInference {
     );
 
     final rawToolDefs = await rootBundle.loadString(toolsAsset);
-    _toolDefsText = _formatToolDefs(rawToolDefs);
+    _toolDefsText = formatToolDefinitions(rawToolDefs);
 
     final ggufPath = await _extractAsset(_ggufAsset, 'model.gguf');
 
@@ -345,7 +346,7 @@ final class YumiEngine implements YumiInference {
     return prompt;
   }
 
-  static String _formatToolDefs(String rawJson) {
+  static String formatToolDefinitions(String rawJson) {
     final tools = json.decode(rawJson) as List<dynamic>;
     final lines = <String>[];
     for (final toolEntry in tools) {
@@ -357,6 +358,7 @@ final class YumiEngine implements YumiInference {
               as Map<String, dynamic>? ??
           {};
       final paramStr = params.entries
+          .where((entry) => !appFilledArgumentNames.contains(entry.key))
           .map(
             (entry) =>
                 '${entry.key}: ${(entry.value as Map<String, dynamic>)['type'] ?? '?'}',
