@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--tokenizer", default="tokenizer.json")
     parser.add_argument("--output", default="tinda360.gguf")
-    parser.add_argument("--quantize", default=None, choices=[None, "f16", "q8_0", "q4_k_m", "q4_0"])
+    parser.add_argument("--quantize", default=None, choices=[None, "f16", "q8_0"])
     parser.add_argument("--description", default="YtteriaDragon Tinda360 intent classifier")
     return parser.parse_args()
 
@@ -166,6 +166,9 @@ def _write_gguf_tokenizer(writer, tokenizer_path):
     writer.add_pad_token_id(pad_id)
 
 
+Q8_0_BLOCK_ELEMENTS = 32
+
+
 def _write_gguf_tensors(writer, model, config, quantize):
     import gguf as gguf_module
     name_map = weight_name_map(config)
@@ -186,6 +189,10 @@ def _write_gguf_tensors(writer, model, config, quantize):
         if quantize == "f16":
             data = data.astype(np.float16)
             writer.add_tensor(gguf_name, data, raw_dtype=gguf_module.GGMLQuantizationType.F16)
+        elif quantize == "q8_0" and data.ndim >= 2 and data.shape[-1] % Q8_0_BLOCK_ELEMENTS == 0:
+            q8_type = gguf_module.GGMLQuantizationType.Q8_0
+            quantized = gguf_module.quants.quantize(data, q8_type)
+            writer.add_tensor(gguf_name, quantized, raw_shape=quantized.shape, raw_dtype=q8_type)
         else:
             writer.add_tensor(gguf_name, data)
 
@@ -222,10 +229,6 @@ def export_gguf(model, config, tokenizer_path, output_path, quantize=None, descr
     print(f"  GGUF written: {output_path} ({size_mb:.1f} MB)")
     print(f"  Quantization: {quantize or 'f32'}")
     print(f"  Architecture: {arch}")
-
-    if quantize in ("q4_k_m", "q4_0"):
-        print(f"\n  NOTE: {quantize} requires llama.cpp's quantize tool.")
-        print(f"    Run: llama-quantize {output_path} {output_path.replace('.gguf', f'-{quantize}.gguf')} {quantize}")
 
 
 def main():

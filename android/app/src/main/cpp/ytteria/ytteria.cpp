@@ -62,7 +62,9 @@ enum GgufType : uint32_t {
     GGUF_UINT32=4, GGUF_INT32=5, GGUF_FLOAT32=6, GGUF_BOOL=7,
     GGUF_STRING=8, GGUF_ARRAY=9, GGUF_UINT64=10, GGUF_INT64=11, GGUF_FLOAT64=12
 };
-enum GgmlType : uint32_t { GGML_F32=0, GGML_F16=1 };
+enum GgmlType : uint32_t { GGML_F32=0, GGML_F16=1, GGML_Q8_0=8 };
+static const uint64_t Q8_0_BLOCK_ELEMENTS = 32;
+static const uint64_t Q8_0_BLOCK_BYTES = 34;
 
 struct TensorInfo {
     std::string name;
@@ -200,15 +202,23 @@ static std::vector<float> gguf_load_tensor(GgufContext& ctx, const std::string& 
     auto it = ctx.tensors.find(name);
     if (it == ctx.tensors.end()) { YLOG("Tensor not found: %s\n", name.c_str()); return {}; }
     const TensorInfo& ti = it->second;
+    const bool is_q8 = ti.dtype == GGML_Q8_0;
     const uint64_t bytes_per_element = ti.dtype == GGML_F32 ? 4 : ti.dtype == GGML_F16 ? 2 : 0;
-    if (bytes_per_element == 0 || ti.offset > ctx.file_size || ctx.data_offset > ctx.file_size - ti.offset) {
+    if ((!is_q8 && bytes_per_element == 0) || ti.offset > ctx.file_size || ctx.data_offset > ctx.file_size - ti.offset) {
         YLOG("Bad tensor header for %s (dtype %u)\n", name.c_str(), ti.dtype);
         return {};
     }
     const uint64_t available = ctx.file_size - ctx.data_offset - ti.offset;
     uint64_t n = 0;
-    if (!element_count(ti, available / bytes_per_element, n)) {
+    const uint64_t element_limit = is_q8
+        ? available / Q8_0_BLOCK_BYTES * Q8_0_BLOCK_ELEMENTS
+        : available / bytes_per_element;
+    if (!element_count(ti, element_limit, n)) {
         YLOG("Tensor %s larger than the file\n", name.c_str());
+        return {};
+    }
+    if (is_q8 && n % Q8_0_BLOCK_ELEMENTS != 0) {
+        YLOG("Q8_0 tensor %s is not a whole number of blocks\n", name.c_str());
         return {};
     }
     std::vector<float> out(n);
@@ -221,6 +231,23 @@ static std::vector<float> gguf_load_tensor(GgufContext& ctx, const std::string& 
         if (fread(out.data(), 4, n, ctx.fp) != n) {
             YLOG("Short read for tensor %s\n", name.c_str());
             return {};
+        }
+    } else if (is_q8) {
+        const uint64_t blocks = n / Q8_0_BLOCK_ELEMENTS;
+        std::vector<uint8_t> raw(blocks * Q8_0_BLOCK_BYTES);
+        if (fread(raw.data(), 1, raw.size(), ctx.fp) != raw.size()) {
+            YLOG("Short read for tensor %s\n", name.c_str());
+            return {};
+        }
+        for (uint64_t block = 0; block < blocks; block++) {
+            const uint8_t* base = raw.data() + block * Q8_0_BLOCK_BYTES;
+            uint16_t scale_bits;
+            std::memcpy(&scale_bits, base, sizeof(scale_bits));
+            const float scale = f16_to_f32(scale_bits);
+            const int8_t* values = reinterpret_cast<const int8_t*>(base + sizeof(scale_bits));
+            for (uint64_t index = 0; index < Q8_0_BLOCK_ELEMENTS; index++) {
+                out[block * Q8_0_BLOCK_ELEMENTS + index] = scale * values[index];
+            }
         }
     } else {
         std::vector<uint16_t> raw(n);
