@@ -1,9 +1,6 @@
-// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations.dart';
-
-// ignore_for_file: type=lint
 
 class AppLocalizationsFil extends AppLocalizations {
   AppLocalizationsFil([String locale = 'fil']) : super(locale);
@@ -1145,6 +1142,23 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get settingsPrivacyDataSafety => 'Ligtas pa rin ang data sa phone.';
+
+  @override
+  String get settingsShareFeedbackTitle => 'Tulungang gumaling si Yumi';
+
+  @override
+  String get settingsShareFeedbackSubtitle =>
+      'Ibahagi ang mga tanong sa chat nang walang pangalan. Naka-off hangga\'t hindi mo binubuksan.';
+
+  @override
+  String get settingsShareFeedbackDetails =>
+      'Kapag naka-on, ipinapadala sa Tinda 360 ang mga tanong na tina-type mo kay Yumi at ang thumbs up o down mo para mapabuti ang assistant. Tinatanggal muna sa phone mo ang pangalan ng suki at produkto at ang mahahabang numero. Hindi kailanman ipinapadala ang benta, halaga ng utang, at pangalan ng tindahan. Pwede mo itong patayin anumang oras; buburahin ang anumang hindi pa naipapadala.';
+
+  @override
+  String get chatFeedbackHelpful => 'Nakatulong ang sagot';
+
+  @override
+  String get chatFeedbackNotHelpful => 'Hindi nakatulong';
 
   @override
   String get settingsVersion => 'Version 1.0.0';

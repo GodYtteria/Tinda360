@@ -8,8 +8,6 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_en.dart';
 import 'app_localizations_fil.dart';
 
-// ignore_for_file: type=lint
-
 abstract class AppLocalizations {
   AppLocalizations(String locale)
     : localeName = intl.Intl.canonicalizedLocale(locale.toString());
@@ -690,6 +688,16 @@ abstract class AppLocalizations {
   String get settingsPrivacyOfflineAi;
 
   String get settingsPrivacyDataSafety;
+
+  String get settingsShareFeedbackTitle;
+
+  String get settingsShareFeedbackSubtitle;
+
+  String get settingsShareFeedbackDetails;
+
+  String get chatFeedbackHelpful;
+
+  String get chatFeedbackNotHelpful;
 
   String get settingsVersion;
 

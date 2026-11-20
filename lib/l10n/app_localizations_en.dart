@@ -1,9 +1,6 @@
-// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations.dart';
-
-// ignore_for_file: type=lint
 
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
@@ -1151,6 +1148,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsPrivacyDataSafety =>
       'Your store data stays on your device.';
+
+  @override
+  String get settingsShareFeedbackTitle => 'Help improve Yumi';
+
+  @override
+  String get settingsShareFeedbackSubtitle =>
+      'Share chat questions with names removed. Off unless you turn it on.';
+
+  @override
+  String get settingsShareFeedbackDetails =>
+      'When on, the questions you type to Yumi and your thumbs up or down are sent to Tinda 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Sales, utang amounts and your store name are never sent. Turn it off anytime; anything not yet sent is deleted.';
+
+  @override
+  String get chatFeedbackHelpful => 'Helpful answer';
+
+  @override
+  String get chatFeedbackNotHelpful => 'Not helpful';
 
   @override
   String get settingsVersion => 'Version 1.0.0';
