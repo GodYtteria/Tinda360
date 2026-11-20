@@ -104,7 +104,7 @@ Runs 1 to 7 measured a split of the training data, which shares phrasings with t
 | 9 | 5M | 3,560 | 0.81 | 18/58 | 3/21 | Added 2,311 recovered conversations |
 | 10 | 5M | 3,710 | 0.79 | 24/58 | 2/21 | Product-name questions from every kind of grocery |
 | 11 | 5M | 4,409 | 0.65 | 24/58 | 3/21 | +699 English and Tagalog questions for thin tools; shipped as q8_0 (5.4 MB) |
-| 12 | 5M | 4,409 | running | | | Tool-only targets; args score numbers only (baseline 24/58, 3/13) |
+| 12 | 5M | 4,409 | 0.66 | 21/58 | 1/13 | Tool-only targets (run 11 rescored: 24/58, 3/13). Not better; run 11 stays in the app. Within noise for 58 questions |
 
 ## Lessons Learned
 
