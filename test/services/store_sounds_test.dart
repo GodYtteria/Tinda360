@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,6 +66,11 @@ final class _SlowReadStore implements StoreSoundSettingStore {
   Future<void> write({required bool enabled}) async => this.enabled = enabled;
 }
 
+final class _BrokenSettingNotifier extends StoreSoundsEnabledNotifier {
+  @override
+  Future<bool> build() async => throw StateError('setting unavailable');
+}
+
 void main() {
   late Directory scratch;
   late RecordingAppLog log;
@@ -121,7 +127,7 @@ void main() {
     expect(store.enabled, isFalse);
   });
 
-  test('a failed save puts the switch back and reports the error', () async {
+  test('a failed save puts the switch back and rethrows the error', () async {
     final container = containerWith(
       _RecordingSoundOutput(),
       _FailingWriteStore(true),
@@ -168,6 +174,29 @@ void main() {
     expect(store.enabled, isFalse);
     await container.read(storeSoundPlayerProvider).playNow(StoreSound.scanned);
     expect(output.played, isEmpty);
+  });
+
+  test('a sound played without waiting reports its error', () async {
+    final reported = <FlutterErrorDetails>[];
+    final previousHandler = FlutterError.onError;
+    FlutterError.onError = reported.add;
+    addTearDown(() => FlutterError.onError = previousHandler);
+    final output = _RecordingSoundOutput();
+    final container = ProviderContainer(
+      retry: (retryCount, error) => null,
+      overrides: [
+        storeSoundOutputProvider.overrideWithValue(output),
+        storeSoundsEnabledProvider.overrideWith(_BrokenSettingNotifier.new),
+        appLogProvider.overrideWithValue(log),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(storeSoundPlayerProvider).play(StoreSound.scanned);
+    await pumpEventQueue();
+    expect(output.played, isEmpty);
+    expect(reported, hasLength(1));
+    expect(reported.single.exception, isA<StateError>());
+    expect(reported.single.library, 'store sounds');
   });
 
   test('a sound that fails is logged, never thrown', () async {

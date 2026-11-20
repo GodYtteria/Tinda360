@@ -15,18 +15,21 @@ class StoreSoundsTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localizations = AppLocalizations.of(context);
+    final setting = ref.watch(storeSoundsEnabledProvider);
     final isEnabled =
-        ref.watch(storeSoundsEnabledProvider).value ??
-        FileStoreSoundSettingStore.enabledByDefault;
+        setting.value ?? FileStoreSoundSettingStore.enabledByDefault;
     return TindaListRow(
       title: localizations.settingsStoreSoundsTitle,
       subtitle: localizations.settingsStoreSoundsSubtitle,
-      trailing: TindaToggleSwitch(
-        value: isEnabled,
-        onChanged: (enabled) {
-          unawaited(HapticFeedback.selectionClick());
-          unawaited(_applyChoice(ref, enabled: enabled));
-        },
+      trailing: IgnorePointer(
+        ignoring: setting.isLoading,
+        child: TindaToggleSwitch(
+          value: isEnabled,
+          onChanged: (enabled) {
+            unawaited(HapticFeedback.selectionClick());
+            unawaited(_applyChoice(ref, enabled: enabled));
+          },
+        ),
       ),
     );
   }
@@ -41,6 +44,6 @@ class StoreSoundsTile extends ConsumerWidget {
       log.error('sound.setting', error, stack);
       return;
     }
-    if (enabled) await player.playNow(StoreSound.addedToCart);
+    if (enabled) player.play(StoreSound.addedToCart);
   }
 }
