@@ -44,5 +44,6 @@ tinda360_training_data.jsonl
 assets/ai/model.gguf
 assets/ai/tokenizer.json
 
-# Website lives in the private tinda360-website repository
-website/
+# Only screenshots stay here; site source lives in the private tinda360-website repository
+website/*
+!website/screenshots/
