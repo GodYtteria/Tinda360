@@ -79,7 +79,10 @@ final class ChatClassification {
     this.toolName,
     this.toolArgs,
     this.toolResult,
+    this.isOutOfScope = false,
   });
+
+  final bool isOutOfScope;
 
   final MatchedQuery matched;
   final String? toolName;

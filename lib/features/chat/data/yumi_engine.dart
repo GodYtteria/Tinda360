@@ -251,8 +251,10 @@ final class YumiEngine {
     List<YumiTurn> recentTurns = const <YumiTurn>[],
   }) {
     final tokenizer = _tokenizer!;
-    String stripSpecialTokens(String text) => tokenizer.specialTokens.keys
-        .fold(text, (cleaned, special) => cleaned.replaceAll(special, ''));
+    String stripSpecialTokens(String text) => tokenizer.specialTokens.keys.fold(
+      text,
+      (cleaned, special) => cleaned.replaceAll(special, ''),
+    );
     final safeQuery = stripSpecialTokens(userQuery);
     final baseParts = <String>[
       '<|im_start|>system\n$_systemPrompt<|im_end|>',

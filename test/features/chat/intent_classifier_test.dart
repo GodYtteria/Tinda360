@@ -37,4 +37,18 @@ void main() {
     final gibberish = classifier.classify('zzzz qqqq xxxx');
     expect(classifier.classes, contains(gibberish.toolName));
   });
+
+  test('probabilityFor matches the top prediction and sums to one', () {
+    const query = 'sino ang may utang sa akin';
+    final prediction = classifier.classify(query);
+    expect(
+      classifier.probabilityFor(query, prediction.toolName),
+      closeTo(prediction.confidence, 1e-9),
+    );
+    final total = classifier.classes
+        .map((toolName) => classifier.probabilityFor(query, toolName))
+        .reduce((first, second) => first + second);
+    expect(total, closeTo(1.0, 1e-6));
+    expect(classifier.probabilityFor(query, 'not_a_tool'), 0.0);
+  });
 }

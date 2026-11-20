@@ -69,6 +69,17 @@ AssistantReply buildHelpReply(
   mood: TindaAvatarMood.talking,
 );
 
+AssistantReply buildOutOfScopeReply(
+  bool isFilipino,
+  AppLocalizations localizations,
+) => AssistantReply(
+  text: isFilipino
+      ? 'Pasensya na po, tungkol lang sa tindahan ninyo ang kaya kong sagutin. Subukan ang "Magkano benta ngayon?", "Sino may utang?", o "Ano ang paubos na?".'
+      : 'Sorry, I can only answer questions about your store. Try "How are sales today?", "Who has utang?", or "What is low on stock?".',
+  source: localizations.chatSourceSummary,
+  mood: TindaAvatarMood.talking,
+);
+
 AssistantReply buildSalesCompareReply(
   SalesSummary todaySummary,
   SalesSummary yesterdaySummary,

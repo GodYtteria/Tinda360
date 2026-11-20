@@ -55,6 +55,20 @@ final class IntentClassifier {
       );
 
   IntentPrediction classify(String text) {
+    final probabilities = _probabilities(text);
+    final bestIndex = probabilities.indexOf(probabilities.reduce(math.max));
+    return IntentPrediction(
+      toolName: classes[bestIndex],
+      confidence: probabilities[bestIndex],
+    );
+  }
+
+  double probabilityFor(String text, String toolName) {
+    final index = classes.indexOf(toolName);
+    return index < 0 ? 0.0 : _probabilities(text)[index];
+  }
+
+  List<double> _probabilities(String text) {
     final features = _knownFeatures(text);
     final scale = features.isEmpty
         ? 1.0
@@ -71,11 +85,7 @@ final class IntentClassifier {
         .map((score) => math.exp(score - peak))
         .toList(growable: false);
     final total = exponentials.reduce((first, second) => first + second);
-    final bestIndex = exponentials.indexOf(exponentials.reduce(math.max));
-    return IntentPrediction(
-      toolName: classes[bestIndex],
-      confidence: exponentials[bestIndex] / total,
-    );
+    return exponentials.map((value) => value / total).toList(growable: false);
   }
 
   Set<String> _knownFeatures(String text) {

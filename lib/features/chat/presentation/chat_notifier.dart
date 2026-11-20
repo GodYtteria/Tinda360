@@ -27,6 +27,7 @@ enum ChatRole {
 }
 
 const double _minimumIntentConfidence = 0.45;
+const double _minimumModelAgreement = 0.1;
 const String _noToolClass = 'no_tool';
 
 final class ChatMessage {
@@ -250,79 +251,16 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<ChatClassification> _classifyQuery(String query) async {
     final keywordClassification = await _matchWithIntentMatcher(query);
-    final learnedClassification = await _classifyWithLearnedModel(
-      query,
-      keywordClassification,
-    );
-    if (learnedClassification != null) return learnedClassification;
-    if (keywordClassification.matched.intent != ChatIntent.overview) {
-      return keywordClassification;
+    final classifier = await _loadIntentClassifier();
+    final prediction = classifier?.classify(query);
+    final isConfident =
+        prediction != null && prediction.confidence >= _minimumIntentConfidence;
+    if (isConfident && prediction.toolName == _noToolClass) {
+      return keywordClassification.matched.intent == ChatIntent.overview
+          ? _outOfScopeClassification(keywordClassification)
+          : keywordClassification;
     }
-    final engine = ref.read(yumiEngineProvider);
-    if (!engine.isReady) {
-      try {
-        await ref.read(yumiWarmupProvider.future);
-      } on Object catch (error, stack) {
-        ref.read(appLogProvider).error('chat.engine_init', error, stack);
-      }
-    }
-    if (engine.isReady) {
-      try {
-        final recentTurns = _recentTurnsForModel(limit: 4);
-        final result = await engine.infer(
-          query,
-          contextSummary: _modelContextSummary,
-          recentTurns: recentTurns,
-        );
-        if (result.generatedTokens > 0) {
-          _lastTokensPerSecondLabel =
-              '${result.tokensPerSecond.toStringAsFixed(1)} tok/s';
-        }
-        if (result.hasToolCall) {
-          final classification = yumiResultToClassification(result, query);
-          Map<String, dynamic>? toolResult;
-          final toolName = classification.toolName;
-          if (toolName != null) {
-            try {
-              toolResult = await ref
-                  .read(yumiToolExecutorProvider)
-                  .execute(
-                    toolName,
-                    classification.toolArgs ?? const <String, dynamic>{},
-                  );
-            } on Object catch (error, stack) {
-              ref.read(appLogProvider).error('chat.tool_execute', error, stack);
-            }
-          }
-          if (toolResult?['error'] == 'unknown_tool') {
-            return keywordClassification;
-          }
-          return ChatClassification(
-            matched: classification.matched,
-            toolName: classification.toolName,
-            toolArgs: classification.toolArgs,
-            toolResult: toolResult,
-          );
-        }
-      } on Object catch (error, stack) {
-        ref.read(appLogProvider).error('chat.engine_infer', error, stack);
-      }
-    }
-    return keywordClassification;
-  }
-
-  Future<ChatClassification?> _classifyWithLearnedModel(
-    String query,
-    ChatClassification keywordClassification,
-  ) async {
-    try {
-      final classifier = _intentClassifier ??=
-          await IntentClassifier.loadFromAsset();
-      final prediction = classifier.classify(query);
-      final isConfident =
-          prediction.confidence >= _minimumIntentConfidence &&
-          prediction.toolName != _noToolClass;
-      if (!isConfident) return null;
+    if (isConfident) {
       final keywordMatch = keywordClassification.matched;
       return ChatClassification(
         matched: MatchedQuery(
@@ -331,8 +269,88 @@ class ChatNotifier extends Notifier<ChatState> {
           normalizedText: keywordMatch.normalizedText,
         ),
       );
+    }
+    if (keywordClassification.matched.intent != ChatIntent.overview) {
+      return keywordClassification;
+    }
+    final modelClassification = await _classifyWithModel(
+      query,
+      classifier,
+      keywordClassification,
+    );
+    return modelClassification ??
+        _outOfScopeClassification(keywordClassification);
+  }
+
+  ChatClassification _outOfScopeClassification(ChatClassification keyword) =>
+      ChatClassification(matched: keyword.matched, isOutOfScope: true);
+
+  Future<IntentClassifier?> _loadIntentClassifier() async {
+    try {
+      return _intentClassifier ??= await IntentClassifier.loadFromAsset();
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.intent_classifier', error, stack);
+      return null;
+    }
+  }
+
+  Future<ChatClassification?> _classifyWithModel(
+    String query,
+    IntentClassifier? classifier,
+    ChatClassification keywordClassification,
+  ) async {
+    final engine = ref.read(yumiEngineProvider);
+    if (!engine.isReady) {
+      try {
+        await ref.read(yumiWarmupProvider.future);
+      } on Object catch (error, stack) {
+        ref.read(appLogProvider).error('chat.engine_init', error, stack);
+      }
+    }
+    if (!engine.isReady) return null;
+    try {
+      final result = await engine.infer(
+        query,
+        contextSummary: _modelContextSummary,
+        recentTurns: _recentTurnsForModel(limit: 4),
+      );
+      if (result.generatedTokens > 0) {
+        _lastTokensPerSecondLabel =
+            '${result.tokensPerSecond.toStringAsFixed(1)} tok/s';
+      }
+      if (!result.hasToolCall) return null;
+      final toolName = result.toolName!;
+      final agreement = classifier?.probabilityFor(query, toolName) ?? 0.0;
+      if (agreement < _minimumModelAgreement) return null;
+      final classification = yumiResultToClassification(result, query);
+      final toolResult = await _executeModelTool(classification);
+      if (toolResult?['error'] == 'unknown_tool') return null;
+      return ChatClassification(
+        matched: classification.matched,
+        toolName: classification.toolName,
+        toolArgs: classification.toolArgs,
+        toolResult: toolResult,
+      );
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('chat.engine_infer', error, stack);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _executeModelTool(
+    ChatClassification classification,
+  ) async {
+    final toolName = classification.toolName;
+    if (toolName == null) return null;
+    try {
+      return await ref
+          .read(yumiToolExecutorProvider)
+          .execute(
+            toolName,
+            classification.toolArgs ?? const <String, dynamic>{},
+          );
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('chat.tool_execute', error, stack);
       return null;
     }
   }
@@ -451,6 +469,9 @@ class ChatNotifier extends Notifier<ChatState> {
     }
     if (matched.intent == ChatIntent.help) {
       return buildHelpReply(isFilipino, localizations);
+    }
+    if (classification.isOutOfScope) {
+      return buildOutOfScopeReply(isFilipino, localizations);
     }
 
     final currency = ref.read(storeCurrencyProvider);
