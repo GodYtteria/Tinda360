@@ -154,6 +154,27 @@ void main() {
       expect(await log.readAll(), isEmpty);
     });
 
+    test('a question longer than the server accepts is not recorded', () async {
+      final recorder = recorderWith(_MemoryConsentStore(granted: true));
+      final atLimit = await recorder.record(
+        query: 'a' * FeedbackRecorder.maximumQueryLength,
+        locale: 'en',
+        routeKind: 'askModel',
+        customerNames: const [],
+        productNames: const [],
+      );
+      final overLimit = await recorder.record(
+        query: 'a' * (FeedbackRecorder.maximumQueryLength + 1),
+        locale: 'en',
+        routeKind: 'askModel',
+        customerNames: const [],
+        productNames: const [],
+      );
+      expect(atLimit, isNotNull);
+      expect(overLimit, isNull);
+      expect((await log.readAll()).single.id, atLimit);
+    });
+
     test('rating and chosen tool update the stored event', () async {
       final recorder = recorderWith(_MemoryConsentStore(granted: true));
       final eventId = (await recordUtangQuestion(recorder))!;

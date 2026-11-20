@@ -1152,7 +1152,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get settingsShareFeedbackDetails =>
-      'Kapag naka-on, ipinapadala sa Tinda 360 ang mga tanong na tina-type mo kay Yumi at ang thumbs up o down mo para mapabuti ang assistant. Tinatanggal muna sa phone mo ang pangalan ng suki at produkto at ang mahahabang numero. Hindi kailanman ipinapadala ang benta, halaga ng utang, at pangalan ng tindahan. Pwede mo itong patayin anumang oras; buburahin ang anumang hindi pa naipapadala.';
+      'Kapag naka-on, ipinapadala sa Tinda 360 ang mga tanong na tina-type mo kay Yumi at ang thumbs up o down mo para mapabuti ang assistant. Tinatanggal muna sa phone mo ang pangalan ng suki at produkto at ang mahahabang numero. Hindi kailanman ipinapadala ang talaan ng benta, listahan ng utang, at detalye ng tindahan, pero maaaring maipadala ang halaga o pangalang tina-type mo sa tanong. Pwede mo itong patayin anumang oras; buburahin ang anumang hindi pa naipapadala.';
 
   @override
   String get chatFeedbackHelpful => 'Nakatulong ang sagot';

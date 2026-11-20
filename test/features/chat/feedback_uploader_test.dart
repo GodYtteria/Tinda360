@@ -193,6 +193,38 @@ void main() {
     expect(remaining.last.id, 'event_119');
   });
 
+  test('events cleared during an upload are not sent afterwards', () async {
+    await appendEvents(120);
+    var calls = 0;
+    final result = await uploaderWith((request) async {
+      calls += 1;
+      if (calls == 1) await log.clear();
+      return acceptAll(request);
+    }).uploadPending();
+    expect(calls, 1);
+    expect(result.failed, isFalse);
+    expect(await log.readAll(), isEmpty);
+  });
+
+  test('a rating saved during an upload is sent with its chunk', () async {
+    await appendEvents(60);
+    final sentRatings = <String?>[];
+    final result = await uploaderWith((request) async {
+      final body = jsonDecode(utf8.decode(request.bodyBytes)) as Map;
+      for (final entry in body['events'] as List) {
+        if ((entry as Map)['id'] == 'event_055') {
+          sentRatings.add(entry['rating'] as String?);
+        }
+      }
+      if (sentRatings.isEmpty) {
+        await log.setRating('event_055', FeedbackRating.up);
+      }
+      return acceptAll(request);
+    }).uploadPending();
+    expect(sentRatings, ['up']);
+    expect(result.sentCount, 60);
+  });
+
   test(
     'client exception reports failed, removes nothing, never throws',
     () async {

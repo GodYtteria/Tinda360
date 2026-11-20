@@ -9,6 +9,7 @@ import 'package:tinda360/core/sales/sales_summary.dart';
 import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/chat_history_storage.dart';
+import 'package:tinda360/features/chat/data/feedback_consent.dart';
 import 'package:tinda360/features/chat/data/feedback_log.dart';
 import 'package:tinda360/features/chat/data/feedback_recorder.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
@@ -367,30 +368,33 @@ class ChatNotifier extends Notifier<ChatState> {
     String locale,
   ) async {
     final recorder = ref.read(feedbackRecorderProvider);
-    final products = await ref
-        .read(productRepositoryProvider)
-        .watchActive()
-        .first;
-    final balances = await ref
-        .read(customerRepositoryProvider)
-        .watchBalances()
-        .first;
-    final candidates = decision.candidateToolNames;
-    final feedbackEventId = await recorder.record(
-      query: query,
-      locale: locale,
-      routeKind: decision.kind.name,
-      toolName:
-          decision.toolName ?? (candidates.isEmpty ? null : candidates.first),
-      confidence: decision.confidence,
-      customerNames: balances.map((balance) => balance.customer.name),
-      productNames: products.map((stocked) => stocked.product.name),
-    );
-    if (feedbackEventId == null || !ref.mounted) return;
-    _replaceMessage(
-      messageId,
-      (current) => current.withFeedback(feedbackEventId: feedbackEventId),
-    );
+    final appLog = ref.read(appLogProvider);
+    final productRepository = ref.read(productRepositoryProvider);
+    final customerRepository = ref.read(customerRepositoryProvider);
+    final consentStore = ref.read(feedbackConsentStoreProvider);
+    try {
+      if (!await consentStore.read()) return;
+      final products = await productRepository.watchActive().first;
+      final balances = await customerRepository.watchBalances().first;
+      final candidates = decision.candidateToolNames;
+      final feedbackEventId = await recorder.record(
+        query: query,
+        locale: locale,
+        routeKind: decision.kind.name,
+        toolName:
+            decision.toolName ?? (candidates.isEmpty ? null : candidates.first),
+        confidence: decision.confidence,
+        customerNames: balances.map((balance) => balance.customer.name),
+        productNames: products.map((stocked) => stocked.product.name),
+      );
+      if (feedbackEventId == null || !ref.mounted) return;
+      _replaceMessage(
+        messageId,
+        (current) => current.withFeedback(feedbackEventId: feedbackEventId),
+      );
+    } on Object catch (error, stack) {
+      appLog.error('chat.feedback_names', error, stack);
+    }
   }
 
   void _replaceMessage(

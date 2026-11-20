@@ -64,6 +64,7 @@ final class FeedbackRecorder {
     Random? random,
   }) : _random = random ?? Random.secure();
 
+  static const int maximumQueryLength = 300;
   static const int _identifierBytes = 16;
   static const int _byteRange = 256;
   static const int _hexRadix = 16;
@@ -96,7 +97,10 @@ final class FeedbackRecorder {
         customerNames: customerNames,
         productNames: productNames,
       );
-      if (redactedQuery.trim().isEmpty) return null;
+      if (redactedQuery.trim().isEmpty ||
+          redactedQuery.length > maximumQueryLength) {
+        return null;
+      }
       final event = FeedbackEvent(
         id: _newIdentifier(),
         createdDay: _today(),

@@ -51,7 +51,14 @@ final class FeedbackUploader {
         start += maximumEventsPerRequest
       ) {
         final end = math.min(start + maximumEventsPerRequest, events.length);
-        final chunk = events.sublist(start, end);
+        final queued = {
+          for (final event in await log.readAll()) event.id: event,
+        };
+        final chunk = [
+          for (final event in events.sublist(start, end))
+            if (queued[event.id] case final current?) current,
+        ];
+        if (chunk.isEmpty) continue;
         final response = await _post(target, chunk);
         if (response.statusCode != _successStatus) {
           return FeedbackUploadResult(sentCount: sentCount, failed: true);

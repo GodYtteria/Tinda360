@@ -6,6 +6,12 @@ workers_dev = true
 [observability]
 enabled = false
 
+[[unsafe.bindings]]
+name = "FEEDBACK_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "3601"
+simple = { limit = 20, period = 60 }
+
 [[r2_buckets]]
 binding = "FEEDBACK_BUCKET"
 bucket_name = "tinda360-feedback"

@@ -56,3 +56,7 @@ ai-model/tokenizer.json
 ai-model/train_run.log
 ai-model/tinda360_tool_calling_backup_*.jsonl
 ai-model/CLAUDE.md
+
+# Cloudflare Wrangler local cache (holds the account id) and Node modules
+cloudflare/**/.wrangler/
+cloudflare/**/node_modules/
