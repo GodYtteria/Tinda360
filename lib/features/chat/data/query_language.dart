@@ -3,6 +3,30 @@ final class QueryLanguage {
 
   static final RegExp _wordSeparators = RegExp(r'[^\p{L}]+', unicode: true);
 
+  static const Map<String, String> _accentFolds = <String, String>{
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ä': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'ö': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ñ': 'n',
+  };
+
   static const Set<String> _filipinoWords = <String>{
     'ang',
     'ng',
@@ -82,12 +106,7 @@ final class QueryLanguage {
     'does',
     'have',
     'has',
-    'today',
     'yesterday',
-    'sales',
-    'sell',
-    'sold',
-    'left',
     'week',
     'month',
     'did',
@@ -101,12 +120,6 @@ final class QueryLanguage {
     'there',
     'will',
     'when',
-    'best',
-    'low',
-    'price',
-    'customers',
-    'products',
-    'items',
     'owe',
     'run',
     'out',
@@ -124,12 +137,15 @@ final class QueryLanguage {
     var englishCount = 0;
     for (var index = 0; index < words.length; index++) {
       final word = words[index];
-      final lower = word.toLowerCase();
+      final lower = _foldAccents(word.toLowerCase());
       if (_filipinoWords.contains(lower)) filipinoCount++;
-      final looksLikeName = index > 0 && word != lower;
+      final looksLikeName = index > 0 && word != word.toLowerCase();
       if (!looksLikeName && _englishWords.contains(lower)) englishCount++;
     }
     if (filipinoCount == englishCount) return appIsFilipino;
     return filipinoCount > englishCount;
   }
+
+  String _foldAccents(String word) =>
+      word.split('').map((letter) => _accentFolds[letter] ?? letter).join();
 }

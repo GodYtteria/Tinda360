@@ -56,6 +56,7 @@ class TindaWordmark extends StatelessWidget {
         ],
       ),
       maxLines: 1,
+      textScaler: TextScaler.noScaling,
       semanticsLabel: title,
       style: TextStyle(
         color: palette.onHeader,

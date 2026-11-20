@@ -244,6 +244,10 @@ class ChatNotifier extends Notifier<ChatState> {
     );
 
     _lastTokensPerSecondLabel = null;
+    final replyLocalizations = _replyLocalizations(
+      queryText.trim(),
+      localizations,
+    );
     final thinkingStarted = DateTime.now();
     AssistantReply reply;
     try {
@@ -255,10 +259,6 @@ class ChatNotifier extends Notifier<ChatState> {
       );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.answer', error, stack);
-      final replyLocalizations = _replyLocalizations(
-        queryText.trim(),
-        localizations,
-      );
       reply = AssistantReply(
         text: replyLocalizations.chatErrorReply,
         source: replyLocalizations.chatSourceSummary,
@@ -302,7 +302,7 @@ class ChatNotifier extends Notifier<ChatState> {
         messageId,
         queryText.trim(),
         decision,
-        localizations.localeName,
+        replyLocalizations.localeName,
       );
       _feedbackRecordings[messageId] = recording;
       unawaited(

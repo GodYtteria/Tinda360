@@ -98,4 +98,30 @@ void main() {
       isFalse,
     );
   });
+
+  test('accented Filipino words still count as Filipino', () {
+    expect(
+      language.isFilipino('Magkanó ang bigás', appIsFilipino: false),
+      isTrue,
+    );
+    expect(language.isFilipino('Ilán pa', appIsFilipino: false), isTrue);
+  });
+
+  test('Taglish loanwords do not outvote Tagalog words', () {
+    expect(
+      language.isFilipino(
+        'ilan items left sa store today',
+        appIsFilipino: false,
+      ),
+      isTrue,
+    );
+    expect(
+      language.isFilipino('magkano sales ko today', appIsFilipino: false),
+      isTrue,
+    );
+    expect(
+      language.isFilipino('what are my sales today', appIsFilipino: true),
+      isFalse,
+    );
+  });
 }
