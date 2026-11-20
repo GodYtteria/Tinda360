@@ -190,6 +190,46 @@ void main() {
       });
     });
 
+    test('a phone number written in groups is not read as an amount', () {
+      for (final phone in <String>[
+        '0917 123 4567',
+        '0917-123-4567',
+        '+63 917 123 4567',
+        '+639171234567',
+        '917 123 4567',
+      ]) {
+        expect(
+          parse('get_utang_list', 'utang ni aling nena tawag $phone'),
+          isNull,
+          reason: phone,
+        );
+        expect(
+          parse('get_utang_list', 'utang lampas 500 tawag $phone'),
+          {'min_balance': 500},
+          reason: phone,
+        );
+      }
+      expect(parse('get_utang_list', 'utang na 1000-5000'), {
+        'min_balance': 1000,
+      });
+      expect(parse('get_utang_list', 'utang na 2 500'), {'min_balance': 2});
+    });
+
+    test('a percent or peso value is not read as a count', () {
+      expect(
+        parse('get_profit_margins', 'anong produkto may tubo na lampas 20%'),
+        isNull,
+      );
+      expect(parse('get_top_products', 'top products below ₱50'), isNull);
+      expect(parse('get_top_products', 'top 5 below ₱50'), {
+        'timeframe': 'week',
+        'limit': 5,
+      });
+      expect(parse('get_utang_list', 'utang na lampas ₱500'), {
+        'min_balance': 500,
+      });
+    });
+
     test('an article is not read as the number one', () {
       expect(parse('get_utang_list', 'may isang suki na may utang'), isNull);
     });

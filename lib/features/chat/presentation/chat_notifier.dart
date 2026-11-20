@@ -116,6 +116,8 @@ class ChatNotifier extends Notifier<ChatState> {
   int _compactedMessageCount = 0;
   String? _lastTokensPerSecondLabel;
   RouteDecision? _lastRouteDecision;
+  final Map<String, Future<void>> _feedbackRecordings =
+      <String, Future<void>>{};
   Future<void>? _historyRestore;
   String? _historyStoreId;
 
@@ -245,14 +247,7 @@ class ChatNotifier extends Notifier<ChatState> {
       (offered) => offered.toolName == option.toolName,
     );
     if (originalQuery == null || !isOfferedOption) return;
-    final feedbackEventId = clarification.feedbackEventId;
-    if (feedbackEventId != null) {
-      unawaited(
-        ref
-            .read(feedbackRecorderProvider)
-            .recordChosenTool(feedbackEventId, option.toolName),
-      );
-    }
+    unawaited(_recordChosenTool(clarification, option.toolName));
     return _send(
       option.label,
       localizations,
@@ -337,15 +332,35 @@ class ChatNotifier extends Notifier<ChatState> {
     unawaited(_persistHistory());
     final decision = _lastRouteDecision;
     if (forcedToolName == null && decision != null) {
+      final messageId = assistantMessage.id;
+      final recording = _recordFeedback(
+        messageId,
+        queryText.trim(),
+        decision,
+        localizations.localeName,
+      );
+      _feedbackRecordings[messageId] = recording;
       unawaited(
-        _recordFeedback(
-          assistantMessage.id,
-          queryText.trim(),
-          decision,
-          localizations.localeName,
-        ),
+        recording.whenComplete(() => _feedbackRecordings.remove(messageId)),
       );
     }
+  }
+
+  Future<void> _recordChosenTool(
+    ChatMessage clarification,
+    String toolName,
+  ) async {
+    final recorder = ref.read(feedbackRecorderProvider);
+    await _feedbackRecordings[clarification.id];
+    if (!ref.mounted) return;
+    final current = state.messages.where(
+      (message) => message.id == clarification.id,
+    );
+    final feedbackEventId = current.isEmpty
+        ? clarification.feedbackEventId
+        : current.first.feedbackEventId;
+    if (feedbackEventId == null) return;
+    await recorder.recordChosenTool(feedbackEventId, toolName);
   }
 
   Future<void> rateMessage(ChatMessage message, FeedbackRating rating) async {

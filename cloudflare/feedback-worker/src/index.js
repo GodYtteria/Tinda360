@@ -11,8 +11,26 @@ function jsonResponse(status, body) {
 async function readLimitedText(request) {
   const declaredLength = Number(request.headers.get('content-length') ?? '0');
   if (declaredLength > MAXIMUM_BODY_BYTES) return null;
-  const buffer = await request.arrayBuffer();
-  if (buffer.byteLength > MAXIMUM_BODY_BYTES) return null;
+  if (request.body === null) return '';
+  const reader = request.body.getReader();
+  const chunks = [];
+  let totalBytes = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.byteLength;
+    if (totalBytes > MAXIMUM_BODY_BYTES) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const buffer = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
   return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
 }
 

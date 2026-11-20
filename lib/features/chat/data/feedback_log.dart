@@ -145,11 +145,16 @@ final class FeedbackLog {
 
   Future<List<FeedbackEvent>> readAll() async => _load(await _resolveFile());
 
-  Future<void> append(FeedbackEvent event) => _enqueue(() async {
+  Future<bool> append(
+    FeedbackEvent event, {
+    Future<bool> Function()? isStillAllowed,
+  }) => _enqueue(() async {
+    if (isStillAllowed != null && !await isStillAllowed()) return false;
     final file = await _resolveFile();
     final events = [...await _load(file), event];
     final overflow = events.length - maximumStoredEvents;
     await _save(file, overflow > 0 ? events.sublist(overflow) : events);
+    return true;
   });
 
   Future<void> setRating(String eventId, FeedbackRating rating) =>
@@ -187,7 +192,7 @@ final class FeedbackLog {
     await _save(file, events);
   });
 
-  Future<void> _enqueue(Future<void> Function() action) {
+  Future<T> _enqueue<T>(Future<T> Function() action) {
     final current = _lastWrite.catchError((Object _) {}).then((_) => action());
     _lastWrite = current;
     return current;

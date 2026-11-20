@@ -4,6 +4,8 @@ final class ToolArgumentParser {
   static const int _largestLimit = 50;
   static const int _smallestBudget = 100;
   static const int _smallestPhoneLikeNumber = 10000000;
+  static const int _fewestGroupedPhoneDigits = 7;
+  static const int _fewestPhoneGroupsWithoutPrefix = 3;
   static const int _daysPerWeek = 7;
   static const int _daysPerMonth = 30;
 
@@ -14,6 +16,13 @@ final class ToolArgumentParser {
   static final RegExp _thousandsSeparator = RegExp(r'(?<=\d),(?=\d{3}(?!\d))');
   static final RegExp _thousandsSuffix = RegExp(r'\b(\d+)(?:\.(\d+))?k\b');
   static final RegExp _decimalFraction = RegExp(r'(\d)\.\d+');
+  static final RegExp _groupedDigitRun = RegExp(r'\+?\d+(?:[ \-]\d+)+');
+  static final RegExp _digitGroupSeparator = RegExp(r'[ \-]');
+  static const String _percentSign = '%';
+  static const String _percentWord = ' percent ';
+  static const String _pesoSign = '₱';
+  static const String _pesoWord = ' php ';
+  static const Set<String> _currencyPrefixes = <String>{'php'};
 
   static const Set<String> _numberConnectors = <String>{'t', 'at', 'and'};
 
@@ -190,13 +199,27 @@ final class ToolArgumentParser {
 
   String _normalizeDigits(String query) => query
       .toLowerCase()
+      .replaceAll(_percentSign, _percentWord)
+      .replaceAll(_pesoSign, _pesoWord)
       .replaceAll(_thousandsSeparator, '')
+      .replaceAllMapped(
+        _groupedDigitRun,
+        (match) => _isGroupedPhoneNumber(match[0]!) ? ' ' : match[0]!,
+      )
       .replaceAllMapped(_thousandsSuffix, (match) {
         final fraction = match.group(2) ?? '';
         final scaled = num.parse('${match.group(1)}.${fraction}0') * _thousand;
         return '${scaled.round()}';
       })
       .replaceAllMapped(_decimalFraction, (match) => match.group(1)!);
+
+  bool _isGroupedPhoneNumber(String run) {
+    final groups = run.split(_digitGroupSeparator);
+    final digitCount = groups.fold<int>(0, (sum, group) => sum + group.length);
+    if (digitCount < _fewestGroupedPhoneDigits) return false;
+    final hasPhonePrefix = run.startsWith('+') || run.startsWith('0');
+    return hasPhonePrefix || groups.length >= _fewestPhoneGroupsWithoutPrefix;
+  }
 
   List<Object> _numericTokens(String query) {
     final words = _normalizeDigits(
@@ -278,6 +301,7 @@ final class ToolArgumentParser {
       final token = tokens[index];
       if (token is! int || token > _largestLimit) continue;
       if (_isFollowedBy(tokens, index, _nonCountUnits)) continue;
+      if (index > 0 && _currencyPrefixes.contains(tokens[index - 1])) continue;
       final followsTop = index > 0 && tokens[index - 1] == 'top';
       final isDuration = _isFollowedBy(tokens, index, _durationUnits.keys);
       if (followsTop || (token > 1 && !isDuration)) return token;

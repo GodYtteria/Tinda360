@@ -7,10 +7,17 @@ import 'package:http/http.dart' as http;
 import 'package:tinda360/features/chat/data/feedback_log.dart';
 
 final class FeedbackUploadResult {
-  const new({required this.sentCount, required this.failed});
+  const new({
+    required this.sentCount,
+    required this.failed,
+    this.error,
+    this.stackTrace,
+  });
 
   final int sentCount;
   final bool failed;
+  final Object? error;
+  final StackTrace? stackTrace;
 }
 
 final class FeedbackUploader {
@@ -66,8 +73,13 @@ final class FeedbackUploader {
         sentCount += _countAccepted(response, chunk);
         await log.removeAll([for (final event in chunk) event.id]);
       }
-    } on Object {
-      return FeedbackUploadResult(sentCount: sentCount, failed: true);
+    } on Object catch (error, stack) {
+      return FeedbackUploadResult(
+        sentCount: sentCount,
+        failed: true,
+        error: error,
+        stackTrace: stack,
+      );
     }
     return FeedbackUploadResult(sentCount: sentCount, failed: false);
   }

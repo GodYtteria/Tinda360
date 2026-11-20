@@ -25,6 +25,16 @@ final class _MemoryConsentStore implements FeedbackConsentStore {
   Future<void> write({required bool granted}) async => this.granted = granted;
 }
 
+final class _RevokedAfterFirstReadConsentStore implements FeedbackConsentStore {
+  int reads = 0;
+
+  @override
+  Future<bool> read() async => ++reads == 1;
+
+  @override
+  Future<void> write({required bool granted}) async {}
+}
+
 final class _ThrowingConsentStore implements FeedbackConsentStore {
   @override
   Future<bool> read() async => throw const FileSystemException('unreadable');
@@ -50,21 +60,27 @@ void main() {
 
   tearDown(() => directory.deleteSync(recursive: true));
 
-  FeedbackRecorder recorderWith(FeedbackConsentStore consentStore) {
-    final client = MockClient((request) async {
-      requests.add(request);
-      final events =
-          (jsonDecode(request.body) as Map<String, dynamic>)['events']
-              as List<dynamic>;
-      return http.Response(
-        jsonEncode({
-          'accepted': [
-            for (final event in events) (event as Map<String, dynamic>)['id'],
-          ],
-        }),
-        200,
-      );
-    });
+  FeedbackRecorder recorderWith(
+    FeedbackConsentStore consentStore, {
+    http.Client? httpClient,
+  }) {
+    final client =
+        httpClient ??
+        MockClient((request) async {
+          requests.add(request);
+          final events =
+              (jsonDecode(request.body) as Map<String, dynamic>)['events']
+                  as List<dynamic>;
+          return http.Response(
+            jsonEncode({
+              'accepted': [
+                for (final event in events)
+                  (event as Map<String, dynamic>)['id'],
+              ],
+            }),
+            200,
+          );
+        });
     return FeedbackRecorder(
       log: log,
       uploader: FeedbackUploader(log: log, client: client, endpoint: endpoint),
@@ -95,6 +111,14 @@ void main() {
       expect(await recorder.rate('anything', FeedbackRating.down), isFalse);
       await recorder.uploadPending();
       expect(requests, isEmpty);
+    });
+
+    test('consent turned off while recording leaves nothing stored', () async {
+      final consentStore = _RevokedAfterFirstReadConsentStore();
+      final recorder = recorderWith(consentStore);
+      expect(await recordUtangQuestion(recorder), isNull);
+      expect(consentStore.reads, 2);
+      expect(await log.readAll(), isEmpty);
     });
 
     test(
@@ -198,6 +222,19 @@ void main() {
       expect(requests.single.body, isNot(contains('Nena')));
       expect(await log.readAll(), isEmpty);
     });
+  });
+
+  test('a failed upload keeps the queue and logs the error', () async {
+    final recorder = recorderWith(
+      _MemoryConsentStore(granted: true),
+      httpClient: MockClient(
+        (request) async => throw const SocketException('offline'),
+      ),
+    );
+    await recordUtangQuestion(recorder);
+    await recorder.uploadPending();
+    expect(await log.readAll(), hasLength(1));
+    expect(appLog.events, ['chat.feedback_upload']);
   });
 
   test('a failing consent store records nothing and logs the error', () async {

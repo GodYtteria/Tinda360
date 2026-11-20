@@ -111,8 +111,11 @@ final class FeedbackRecorder {
         toolName: toolName,
         confidence: confidence,
       );
-      await log.append(event);
-      return event.id;
+      final appended = await log.append(
+        event,
+        isStillAllowed: consentStore.read,
+      );
+      return appended ? event.id : null;
     } on Object catch (error, stack) {
       appLog.error('chat.feedback_record', error, stack);
       return null;
@@ -130,7 +133,15 @@ final class FeedbackRecorder {
   Future<void> uploadPending() async {
     try {
       if (!await consentStore.read()) return;
-      await uploader.uploadPending();
+      final result = await uploader.uploadPending();
+      final uploadError = result.error;
+      if (uploadError != null) {
+        appLog.error(
+          'chat.feedback_upload',
+          uploadError,
+          result.stackTrace ?? StackTrace.current,
+        );
+      }
     } on Object catch (error, stack) {
       appLog.error('chat.feedback_upload', error, stack);
     }
