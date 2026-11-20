@@ -35,3 +35,11 @@ nagkano ti nagasto ko iti bulan a daytoy
 ano ang expenses ko nitong nakaraang 30 araw
 hay, magkano na ba ang gastos ko sa kuryente at iba pa ngayong buwan
 kabuuang gastos ng tindahan ngayong buwan po
+@ {"timeframe":"week"}
+how much did running the store cost me this week
+magkano ang ibinayad ko sa kuryente at tubig ngayong linggo
+what did i spend on the store this week
+@ {"timeframe":"month"}
+total of my store costs this month
+how much money went out of the store this month
+magkano ang lahat ng binayaran ko para sa tindahan ngayong buwan

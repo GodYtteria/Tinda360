@@ -70,7 +70,7 @@ final class IntentRouter {
     final keywordFoundIntent = keywordMatch.intent != ChatIntent.overview;
     if (isConfident && prediction.toolName == noToolClass) {
       return RouteDecision(
-        kind: keywordFoundIntent
+        kind: conversationalIntents.contains(keywordMatch.intent)
             ? RouteKind.answerIntent
             : RouteKind.outOfScope,
         matched: keywordMatch,

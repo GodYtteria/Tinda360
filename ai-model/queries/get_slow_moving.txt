@@ -64,3 +64,10 @@ ano ang mga hindi patok sa mga suki
 worst selling products
 mga paninda na walang nagtatanong
 anong mga produkto ang sayang lang sa puhunan dahil walang benta
+@ {"days":14}
+which products are collecting dust
+what items have nobody picked up in a while
+ano ang mga paninda na parang nakalimutan na ng mga mamimili
+which goods are stuck on my shelves
+anong mga item ang ilang linggo nang hindi nababawasan
+products that just won't sell

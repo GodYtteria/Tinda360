@@ -74,3 +74,11 @@ may nangutang ba ngayon
 utang ledger summary
 kanino ako may sisingilin
 lahat ng hindi pa nababayarang utang
+@ {"min_balance":0}
+list everyone with an open tab
+who has an outstanding balance with me
+which customers have not settled their account
+sino-sino ang may hindi pa bayad na kuha
+who bought on credit and has not paid yet
+show me the credit list
+sino ang naka-lista pa sa kuwaderno ng utang

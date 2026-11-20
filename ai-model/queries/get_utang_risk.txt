@@ -68,3 +68,11 @@ may mga utang bang nanganganib na hindi mabayaran
 utang na delikado
 sino ang pinakamatagal nang may utang
 high risk na may utang
+@ {"days_overdue":30}
+who is slow to pay back
+which customers always pay late
+sino ang hindi dapat bigyan ng bagong utang
+whose debts are getting too old
+sino ang paulit-ulit na lumalampas sa usapang bayad
+who should i stop giving credit to for now
+which accounts are long overdue

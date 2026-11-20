@@ -44,3 +44,10 @@ oras ng pinakamaraming transaksyon
 anong oras kailangan ko ng katulong sa tindahan
 when should I have extra help at the counter
 anong oras pwede akong magpahinga dahil walang bumibili
+@ {"timeframe":"week"}
+what time of day is busiest
+when do customers usually come in
+at what hour do i sell the most
+anong oras pinakamaraming dumadayo sa tindahan
+when is the store most crowded
+which hours bring in the most sales

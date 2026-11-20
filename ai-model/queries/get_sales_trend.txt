@@ -37,3 +37,10 @@ sales for the last five days
 @ {"days":10}
 benta bawat araw nitong huling sampung araw
 daily sales for the last ten days
+@ {"days":7}
+show my sales for each day this week
+how did my sales go each day
+ipakita ang benta ko kada araw
+is business picking up or slowing this week
+give me sales broken down by day
+day by day sales please

@@ -37,3 +37,11 @@ tatlong pinakamalaki ang margin
 @ {"sort":"lowest","limit":3}
 tatlong pinakamaliit ang tubo
 bottom three by margin
+@ {"sort":"highest","limit":10}
+which items earn me the most per piece
+where do i make the most money per sale
+which products have the best markup
+saan ako pinakamalaki kumita sa bawat benta
+@ {"sort":"lowest","limit":10}
+which items barely make me any money
+saan ako halos walang kita bawat piraso

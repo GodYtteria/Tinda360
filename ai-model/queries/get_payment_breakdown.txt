@@ -31,3 +31,9 @@ hati ng bayad ngayong buwan
 magkano ang galing sa utang ngayong buwan
 ilan ang cash at ilan ang online sa isang buwan
 unsa ang paagi sa bayad karong bulan
+@ {"timeframe":"today"}
+how many paid by gcash versus cash today
+cash or digital, how did people pay today
+@ {"timeframe":"week"}
+break down my payments by method this week
+ilan ang nagbayad ng gcash at ilan ang cash nitong linggo

@@ -44,3 +44,7 @@ what is my shop called
 ano ang nakarehistrong pangalan at address
 info ng store ko
 pangalan at lokasyon ng tindahan
+@ {}
+what details do you have about my store
+show the name and address saved for my shop
+ano ang nakalagay na detalye ng negosyo ko

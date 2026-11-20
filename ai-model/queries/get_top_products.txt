@@ -63,3 +63,11 @@ sampung pinakamabenta this month
 @ {"timeframe":"today","limit":3}
 top 3 ngayong araw lang
 tatlong pinakamabenta today po
+@ {"timeframe":"week"}
+what are people buying the most from me
+which items sell out the fastest
+ano ang pinakapatok sa mga mamimili
+anong produkto ang pinag-aagawan ng mga customer
+which goods move the quickest in my store
+what's the crowd favorite in my store
+saan ako pinakamaraming nabebentahan na item

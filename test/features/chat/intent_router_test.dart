@@ -117,9 +117,7 @@ void main() {
 
   group('clarification', () {
     test('an ambiguous question offers the plausible tools as choices', () {
-      final decision = router.route(
-        'ano ang pinakamataas ang patong sa paninda ko',
-      );
+      final decision = router.route('gaano kalaki ang kita ko sa paninda');
       expect(decision.kind, RouteKind.clarify);
       expect(decision.candidateToolNames, contains('get_profit_margins'));
       expect(

@@ -38,3 +38,11 @@ my top three customers
 @ {"sort_by":"visits","limit":3}
 top 3 na madalas bumisita
 tatlong pinakamadalas na suki
+@ {"sort_by":"visits","limit":10}
+who are my regulars
+which customers keep coming back
+sino ang mga laging bumabalik na mamimili
+@ {"sort_by":"spend","limit":10}
+who has bought the most from me overall
+which customer is my biggest buyer
+sino ang pinakamalakas bumili sa akin sa lahat

@@ -44,3 +44,8 @@ ilan na ang laman ng inventory list ko
 may ilang produkto na akong nailagay
 how big is my product list
 ilang produkto ba ang binebenta ko
+@ {}
+how long is my product list
+how many products are saved in the app
+gaano karami na ang nailagay kong produkto
+how many different items do i carry

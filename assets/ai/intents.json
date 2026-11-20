@@ -287,7 +287,11 @@
         "nangunguna",
         "nangunguna sa benta",
         "ranking",
-        "buy most"
+        "buy most",
+        "sell out",
+        "patok",
+        "pinakapatok",
+        "most from me"
       ]
     },
     {
@@ -360,7 +364,10 @@
         "natengga",
         "hindi gumagalaw",
         "unmoving",
-        "hindi umaalis"
+        "hindi umaalis",
+        "dust",
+        "alikabok",
+        "stuck"
       ]
     },
     {
@@ -390,7 +397,11 @@
         "hindi pa nagbabayad",
         "hindi nagbabayad",
         "hindi pa bayad",
-        "di pa bayad"
+        "di pa bayad",
+        "owing",
+        "credit list",
+        "kuwaderno",
+        "not paid"
       ]
     },
     {
@@ -506,7 +517,9 @@
         "ilan lahat ng produkto",
         "ilan lahat ng item",
         "count ng products",
-        "ilang item"
+        "ilang item",
+        "product list",
+        "nailagay"
       ]
     },
     {
@@ -526,14 +539,15 @@
         "pagkatapos gastos",
         "after gastos",
         "minus gastos",
-        "spend",
-        "spent",
         "spending",
         "lumabas",
         "cash out",
         "operating",
         "bills",
-        "take home"
+        "take home",
+        "costs",
+        "gastusin",
+        "binayaran"
       ]
     },
     {
@@ -610,7 +624,11 @@
         "profit margin",
         "tubo bawat",
         "malaki tubo",
-        "pinakamalaki ang kita"
+        "pinakamalaki ang kita",
+        "markup",
+        "patong",
+        "per piece",
+        "bawat piraso"
       ]
     },
     {
@@ -632,7 +650,12 @@
         "decreasing",
         "improving",
         "direction ng benta",
-        "papunta saan benta"
+        "papunta saan benta",
+        "each day",
+        "per day",
+        "kada araw",
+        "day by day",
+        "araw-araw"
       ]
     },
     {
@@ -654,7 +677,9 @@
         "pinaka maraming benta",
         "kailan maraming benta",
         "matao",
-        "pinaka matao"
+        "pinaka matao",
+        "crowded",
+        "dumadayo"
       ]
     },
     {
@@ -678,7 +703,11 @@
         "regular na suki",
         "top suki",
         "top customer",
-        "top buyer"
+        "top buyer",
+        "regulars",
+        "bumabalik",
+        "coming back",
+        "biggest buyer"
       ]
     },
     {
@@ -702,7 +731,10 @@
         "mode of payment",
         "cash count",
         "breakdown ng bayad",
-        "breakdown ng benta"
+        "breakdown ng benta",
+        "gcash",
+        "cash or",
+        "maya"
       ]
     },
     {
