@@ -158,6 +158,29 @@ def held_out_queries():
     }
 
 
+def without_entity_arguments(row):
+    messages = []
+    for message in row['messages']:
+        calls = message.get('tool_calls')
+        if calls:
+            message = {
+                **message,
+                'tool_calls': [
+                    {
+                        **call,
+                        'arguments': {
+                            key: value
+                            for key, value in call['arguments'].items()
+                            if key not in ENTITY_ARGUMENTS
+                        },
+                    }
+                    for call in calls
+                ],
+            }
+        messages.append(message)
+    return {**row, 'messages': messages}
+
+
 def build():
     header = DATASET_PATH.read_text(encoding='utf-8').splitlines()[0]
     rows = []
@@ -186,7 +209,7 @@ def build():
     with temporary_path.open('w', encoding='utf-8') as handle:
         handle.write(header + '\n')
         for row in unique:
-            handle.write(json.dumps(row, ensure_ascii=False) + '\n')
+            handle.write(json.dumps(without_entity_arguments(row), ensure_ascii=False) + '\n')
     os.replace(temporary_path, DATASET_PATH)
     print(f'rows: {len(unique)} (dropped duplicates: {len(rows) - len(unique)})')
 

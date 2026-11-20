@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import build_dataset
+
 HERE = Path(__file__).parent
 
 
@@ -34,6 +36,14 @@ def values_match(expected, actual):
         except (TypeError, ValueError):
             return False
     return str(actual).strip().lower() == str(expected).strip().lower()
+
+
+def model_arguments(expected):
+    return {
+        key: value
+        for key, value in expected.items()
+        if key not in build_dataset.ENTITY_ARGUMENTS
+    }
 
 
 def arguments_match(expected, actual):
@@ -72,9 +82,10 @@ def main():
         tool_ok = predicted == tool
         tool_hits += tool_ok
         arguments_ok = True
-        if expected:
+        model_expected = model_arguments(expected)
+        if model_expected:
             argument_total += 1
-            arguments_ok = arguments_match(expected, output.get('args'))
+            arguments_ok = arguments_match(model_expected, output.get('args'))
             argument_hits += arguments_ok
         status = 'OK ' if tool_ok and arguments_ok else 'BAD'
         print(status, query, '->', predicted, output.get('args') or {})

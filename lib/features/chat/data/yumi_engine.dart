@@ -98,7 +98,7 @@ final class YumiEngine implements YumiInference {
 
   static const String _ggufAsset = 'assets/ai/model.gguf';
   static const String _tokenizerAsset = 'assets/ai/tokenizer.json';
-  static const String _toolsAsset = 'assets/ai/tools.json';
+  static const String toolsAsset = 'assets/ai/tools.json';
   static const int _maxNewTokens = 256;
   static const int _maxPromptTokens = 760;
   static const int maximumQueryCharacters = 300;
@@ -139,7 +139,7 @@ final class YumiEngine implements YumiInference {
       json.decode(tokJson) as Map<String, dynamic>,
     );
 
-    final rawToolDefs = await rootBundle.loadString(_toolsAsset);
+    final rawToolDefs = await rootBundle.loadString(toolsAsset);
     _toolDefsText = _formatToolDefs(rawToolDefs);
 
     final ggufPath = await _extractAsset(_ggufAsset, 'model.gguf');

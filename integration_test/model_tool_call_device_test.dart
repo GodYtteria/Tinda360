@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +14,9 @@ import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
 import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
+import 'package:tinda360/features/chat/data/chat_history_storage.dart';
+import 'package:tinda360/features/chat/data/feedback_consent.dart';
+import 'package:tinda360/features/chat/data/feedback_log.dart';
 import 'package:tinda360/features/chat/data/product_argument_grounding.dart';
 import 'package:tinda360/features/chat/data/tool_call_validator.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
@@ -43,12 +48,16 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   late TestRepositories repos;
   late List<StockedProduct> inventory;
+  late Directory scratch;
 
   setUpAll(() async {
     await YumiEngine.instance.init();
   });
 
+  tearDownAll(YumiEngine.instance.dispose);
+
   setUp(() async {
+    scratch = await Directory.systemTemp.createTemp('model_device_test');
     repos = TestRepositories();
     for (final (name, _) in _productNames) {
       final created = await repos.products.create(
@@ -65,7 +74,10 @@ void main() {
     inventory = await repos.products.watchActive().first;
   });
 
-  tearDown(() => repos.close());
+  tearDown(() async {
+    await repos.close();
+    await scratch.delete(recursive: true);
+  });
 
   testWidgets('the real model on the phone answers inside the time limit', (
     tester,
@@ -88,7 +100,7 @@ void main() {
       tester,
     ) async {
       final validator = ToolCallValidator.fromToolsJson(
-        await rootBundle.loadString('assets/ai/tools.json'),
+        await rootBundle.loadString(YumiEngine.toolsAsset),
       );
       var productCalls = 0;
       for (final (question, askedProduct) in _questions) {
@@ -119,7 +131,10 @@ void main() {
       debugPrint(
         'DEVICE product tool calls: $productCalls of ${_questions.length}',
       );
-      expect(productCalls, greaterThan(0));
+      expect(
+        productCalls,
+        greaterThanOrEqualTo(_questions.length ~/ 2),
+      );
     },
   );
 
@@ -133,6 +148,11 @@ void main() {
           appDatabaseProvider.overrideWithValue(repos.db),
           clockProvider.overrideWithValue(repos.clock),
           appLogProvider.overrideWithValue(repos.log),
+          chatDirectoryProvider.overrideWithValue(() async => scratch),
+          chatFeedbackDirectoryProvider.overrideWithValue(() async => scratch),
+          feedbackConsentStoreProvider.overrideWithValue(
+            FileFeedbackConsentStore(directoryProvider: () async => scratch),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -145,11 +165,18 @@ void main() {
             .sendMessage(question, localizations);
         final reply = container.read(chatNotifierProvider).messages.last.text;
         debugPrint('DEVICE reply: "$question" -> $reply');
+        expect(repos.log.events, isNot(contains('chat.answer')));
+        expect(reply, isNot(localizations.chatErrorReply), reason: question);
+        expect(
+          reply,
+          isNot(lookupAppLocalizations(const Locale('fil')).chatErrorReply),
+          reason: question,
+        );
         for (final (name, mention) in _productNames) {
           if (mention == askedProduct) continue;
           expect(
             reply.toLowerCase(),
-            isNot(contains(name.toLowerCase())),
+            isNot(contains(name.split(' ').first.toLowerCase())),
             reason: question,
           );
         }

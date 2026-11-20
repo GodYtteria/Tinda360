@@ -123,7 +123,6 @@ class ChatNotifier extends Notifier<ChatState> with _ModelToolCalls {
   IntentMatcher? _matcher;
   IntentClassifier? _intentClassifier;
   ToolCallValidator? _toolCallValidator;
-  static const String _toolsAssetPath = 'assets/ai/tools.json';
   int _sequence = 0;
   @override
   String _modelContextSummary = '';
@@ -480,7 +479,7 @@ class ChatNotifier extends Notifier<ChatState> with _ModelToolCalls {
   Future<ToolCallValidator?> _loadToolCallValidator() async {
     try {
       return _toolCallValidator ??= ToolCallValidator.fromToolsJson(
-        await rootBundle.loadString(_toolsAssetPath),
+        await rootBundle.loadString(YumiEngine.toolsAsset),
       );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('chat.tool_validator', error, stack);
