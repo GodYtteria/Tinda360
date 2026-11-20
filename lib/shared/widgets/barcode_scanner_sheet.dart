@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -10,6 +11,7 @@ import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
+import 'package:tinda360/services/store_sounds.dart';
 
 class BarcodeScannerSheet extends StatefulWidget {
   const new({super.key, this.continuous = false, this.onCode});
@@ -68,6 +70,10 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
       return;
     }
     _hasPopped = true;
+    ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(storeSoundPlayerProvider).play(StoreSound.scanned);
     Navigator.of(context).pop(trimmed);
   }
 

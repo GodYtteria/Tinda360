@@ -75,7 +75,9 @@ python benchmark.py --checkpoint checkpoints/best.pt
 # Export (q8_0 is half the size of f16 with the same blind-test score)
 python export_gguf.py --checkpoint checkpoints/best.pt --output tinda360.gguf --quantize q8_0
 
-# On the phone, with the real engine and model
+# On the phone, with the real engine and model.
+# WARNING: flutter test uninstalls the app when it finishes, which deletes the
+# shop's data on that phone. Back up first, or use a phone with no real data.
 flutter test integration_test -d <device> --dart-define-from-file=dart_defines.json
 
 # Charts

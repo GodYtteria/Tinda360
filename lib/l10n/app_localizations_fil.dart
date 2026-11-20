@@ -1144,6 +1144,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String get settingsPrivacyDataSafety => 'Ligtas pa rin ang data sa phone.';
 
   @override
+  String get settingsStoreSoundsTitle => 'Tunog ng tindahan';
+
+  @override
+  String get settingsStoreSoundsSubtitle =>
+      'Beep sa pag-scan, pagdagdag sa cart at tapos na benta';
+
+  @override
   String get settingsShareFeedbackTitle => 'Tulungang gumaling si Yumi';
 
   @override

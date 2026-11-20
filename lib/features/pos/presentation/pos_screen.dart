@@ -28,6 +28,7 @@ import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/adaptive_layout.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
+import 'package:tinda360/services/store_sounds.dart';
 
 final StreamProvider<StoreProfile> posStoreProfileProvider =
     StreamProvider.autoDispose<StoreProfile>(
@@ -137,6 +138,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           }
           return true;
         }
+        ref.read(storeSoundPlayerProvider).play(StoreSound.notFound);
         unawaited(HapticFeedback.heavyImpact());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

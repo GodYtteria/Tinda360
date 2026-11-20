@@ -390,6 +390,8 @@
   "settingsPrivacyTracking": "No tracking or ads",
   "settingsPrivacyOfflineAi": "AI runs offline on your phone",
   "settingsPrivacyDataSafety": "Your store data stays on your device.",
+  "settingsStoreSoundsTitle": "Store sounds",
+  "settingsStoreSoundsSubtitle": "Beep on scan, add to cart and finished sale",
   "settingsShareFeedbackTitle": "Help improve Yumi",
   "settingsShareFeedbackSubtitle": "Share chat questions with names removed. Off unless you turn it on.",
   "settingsShareFeedbackDetails": "When on, the questions you type to Yumi and your thumbs up or down are sent to Shop 360 to improve the assistant. Names of suki and products and long numbers are removed on your phone first. Your sales records, utang ledger and store details are never sent, but amounts or names you type in a question may be. Turn it off anytime; anything not yet sent is deleted.",

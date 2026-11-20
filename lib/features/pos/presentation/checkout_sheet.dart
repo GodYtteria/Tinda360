@@ -40,15 +40,22 @@ import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
+import 'package:tinda360/services/store_sounds.dart';
 
 bool addToCartOrWarn(
   BuildContext context,
   PosCartNotifier cartNotifier,
   StockedProduct item,
 ) {
+  final sounds = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(storeSoundPlayerProvider);
   if (cartNotifier.increment(item.product.id, available: item.sellCap)) {
+    sounds.play(StoreSound.addedToCart);
     return true;
   }
+  sounds.play(StoreSound.notFound);
   unawaited(HapticFeedback.heavyImpact());
   ScaffoldMessenger.of(context)
     ..clearSnackBars()

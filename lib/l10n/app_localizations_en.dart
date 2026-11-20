@@ -1150,6 +1150,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your store data stays on your device.';
 
   @override
+  String get settingsStoreSoundsTitle => 'Store sounds';
+
+  @override
+  String get settingsStoreSoundsSubtitle =>
+      'Beep on scan, add to cart and finished sale';
+
+  @override
   String get settingsShareFeedbackTitle => 'Help improve Yumi';
 
   @override

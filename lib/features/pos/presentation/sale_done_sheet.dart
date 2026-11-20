@@ -18,6 +18,8 @@ import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_surfaces.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
+import 'package:tinda360/services/service_providers.dart';
+import 'package:tinda360/services/store_sounds.dart';
 
 class SaleDoneSheet extends ConsumerStatefulWidget {
   const new({
@@ -69,11 +71,11 @@ class _SaleDoneSheetState extends ConsumerState<SaleDoneSheet> {
   }
 
   Future<void> _playSaleCelebrationFeedback() async {
+    ref.read(storeSoundPlayerProvider).play(StoreSound.saleComplete);
     try {
       await HapticFeedback.mediumImpact();
-      await SystemSound.play(SystemSoundType.click);
-    } on Exception {
-      return;
+    } on PlatformException catch (error, stack) {
+      ref.read(appLogProvider).error('sale.haptic', error, stack);
     }
   }
 

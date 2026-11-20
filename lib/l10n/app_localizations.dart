@@ -689,6 +689,10 @@ abstract class AppLocalizations {
 
   String get settingsPrivacyDataSafety;
 
+  String get settingsStoreSoundsTitle;
+
+  String get settingsStoreSoundsSubtitle;
+
   String get settingsShareFeedbackTitle;
 
   String get settingsShareFeedbackSubtitle;
