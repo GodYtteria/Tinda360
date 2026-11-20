@@ -15,9 +15,11 @@ Future<void> bootstrap() async {
   final crashLog = await CrashLog.open();
   _installErrorHandlers(crashLog);
 
-  unawaited(YumiEngine.instance.init().catchError((Object error, StackTrace stack) {
-    debugPrint('[YumiEngine] init failed: $error\n$stack');
-  }));
+  unawaited(
+    YumiEngine.instance.init().catchError((Object error, StackTrace stack) {
+      crashLog.error('yumi.engine_init', error, stack);
+    }),
+  );
 
   runApp(
     ProviderScope(

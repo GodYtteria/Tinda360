@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tinda360/core/catalog/product_draft.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
+import 'package:tinda360/core/failures/product_failure.dart';
 import 'package:tinda360/core/money/currency.dart';
 import 'package:tinda360/core/money/money.dart';
+import 'package:tinda360/core/result.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
@@ -55,7 +57,7 @@ void main() {
       ('Bingo biscuit', 1000),
       ('Datu Puti suka', 2500),
     ]) {
-      await repos.products.create(
+      final created = await repos.products.create(
         ProductDraft(
           name: name,
           unit: ProductUnit.piece,
@@ -64,6 +66,7 @@ void main() {
           initialStock: const Quantity.whole(7),
         ),
       );
+      expect(created, isA<Ok<String, ProductFailure>>());
     }
   });
 
@@ -111,13 +114,14 @@ void main() {
   test(
     'a product tool call with no name still answers the asked product',
     () async {
-      final (reply, _) = await ask(
+      final (reply, inferCalls) = await ask(
         const YumiInferResult(
           rawText: '',
           toolName: 'get_product_info',
           toolArgs: {},
         ),
       );
+      expect(inferCalls, 1);
       expect(reply, contains('Bingo biscuit'));
     },
   );
