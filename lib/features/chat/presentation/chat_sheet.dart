@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/calendar/time_greeting.dart';
 import 'package:tinda360/features/chat/presentation/chat_notifier.dart';
+import 'package:tinda360/features/chat/presentation/clarification_reply.dart';
 import 'package:tinda360/features/chat/presentation/yumi_screen.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
 import 'package:tinda360/shared/widgets/tinda_ai_avatar.dart';
@@ -12,6 +13,8 @@ import 'package:tinda360/shared/widgets/tinda_buttons.dart';
 import 'package:tinda360/shared/widgets/tinda_inputs.dart';
 import 'package:tinda360/theme/app_palette.dart';
 import 'package:tinda360/theme/app_tokens.dart';
+
+const double _clarificationChipMinHeight = 48;
 
 class ChatSheet extends ConsumerStatefulWidget {
   const new({
@@ -98,6 +101,20 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
       ref
           .read(chatNotifierProvider.notifier)
           .sendMessage(suggestion, localizations),
+    );
+    _scrollToBottom(force: true);
+  }
+
+  void _answerClarification(
+    ClarificationOption option,
+    AppLocalizations localizations,
+  ) {
+    if (ref.read(chatNotifierProvider).isThinking) return;
+    unawaited(HapticFeedback.selectionClick());
+    unawaited(
+      ref
+          .read(chatNotifierProvider.notifier)
+          .answerClarification(option, localizations),
     );
     _scrollToBottom(force: true);
   }
@@ -216,6 +233,8 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                         }
                       });
                     },
+                    onSelectOption: (option) =>
+                        _answerClarification(option, localizations),
                     onOpenTab: widget.onOpenTab == null
                         ? null
                         : (index) {
@@ -345,6 +364,7 @@ class _MessageList extends StatelessWidget {
     required this.yumiScreen,
     required this.isThinking,
     required this.scrollController,
+    required this.onSelectOption,
     this.revealingMessageId,
     this.onRevealComplete,
     this.onOpenTab,
@@ -354,6 +374,7 @@ class _MessageList extends StatelessWidget {
   final YumiScreen yumiScreen;
   final bool isThinking;
   final ScrollController scrollController;
+  final ValueChanged<ClarificationOption> onSelectOption;
   final String? revealingMessageId;
   final ValueChanged<String>? onRevealComplete;
   final ValueChanged<int>? onOpenTab;
@@ -398,6 +419,9 @@ class _MessageList extends StatelessWidget {
                 onRevealComplete: onRevealComplete == null
                     ? null
                     : () => onRevealComplete!(message.id),
+                onSelectOption: index == messages.length - 1 && !isThinking
+                    ? onSelectOption
+                    : null,
                 onOpenTab: onOpenTab,
               );
       },
@@ -445,12 +469,14 @@ class _AssistantBubble extends StatelessWidget {
     required this.message,
     this.animate = false,
     this.onRevealComplete,
+    this.onSelectOption,
     this.onOpenTab,
   });
 
   final ChatMessage message;
   final bool animate;
   final VoidCallback? onRevealComplete;
+  final ValueChanged<ClarificationOption>? onSelectOption;
   final ValueChanged<int>? onOpenTab;
 
   @override
@@ -499,7 +525,33 @@ class _AssistantBubble extends StatelessWidget {
                   style: AppTypography.meta(palette.textMuted),
                 ),
               ],
-              if (onOpenTab != null) ...[
+              if (message.options.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.s8),
+                Wrap(
+                  spacing: AppSpacing.s8,
+                  runSpacing: AppSpacing.s8,
+                  children: [
+                    for (final option in message.options)
+                      Semantics(
+                        button: true,
+                        enabled: onSelectOption != null,
+                        label: option.label,
+                        excludeSemantics: true,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: _clarificationChipMinHeight,
+                          ),
+                          child: ActionChip(
+                            label: Text(option.label),
+                            onPressed: onSelectOption == null
+                                ? null
+                                : () => onSelectOption!(option),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ] else if (onOpenTab != null) ...[
                 for (final action in _suggestedActions(message, localizations))
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.s8),
