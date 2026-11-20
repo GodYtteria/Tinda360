@@ -1,0 +1,50 @@
+@ {"limit":10}
+ano ang dapat kong bilhin sa palengke
+anong mga produkto ang dapat i-restock
+what should I restock
+restock suggestions po
+ano ang dapat kong dagdagan ng stock
+listahan ng bibilhin ko para sa tindahan
+ano ang kailangan kong bilhin ngayong linggo
+shopping list para sa paninda
+what do I need to buy for the store
+anong produkto ang ubos at dapat bilhan
+ano ang uunahin kong bilhin
+unsa ang angay nako paliton para sa tindahan
+ania ti rumbeng a gatangek para iti tindahan
+hay, ano na naman ba ang kailangan kong bilhin
+ano ang suggested kong i-restock
+@ {"budget":1000,"limit":10}
+ano ang mabibili ko sa 1000 pesos na restock
+restock plan para sa isang libong budget
+what can I restock with 1000 pesos
+may budget akong 1000, ano ang bibilhin ko
+sa isang libo, ano ang unahin kong i-restock
+@ {"budget":2000,"limit":10}
+ano ang mabibili ko sa 2000 pesos na restock
+restock plan para sa dalawang libong budget
+what can I restock with 2000 pesos
+may budget akong 2000, ano ang bibilhin ko
+@ {"budget":5000,"limit":10}
+ano ang mabibili ko sa 5000 pesos na restock
+restock plan para sa limang libong budget
+what can I restock with 5000 pesos
+may puhunan akong 5000, ano ang bibilhin ko
+sa limang libo, ano ang unahin kong i-restock
+@ {"budget":500,"limit":10}
+ano ang mabibili ko sa 500 pesos na restock
+restock plan para sa limandaang budget
+what can I restock with 500 pesos
+limang daan lang ang budget ko, ano ang bibilhin
+@ {"budget":3000,"limit":10}
+ano ang mabibili ko sa 3000 pesos na restock
+what can I restock with 3000 pesos
+tatlong libo ang budget ko, ano ang bibilhin
+@ {"budget":10000,"limit":10}
+ano ang mabibili ko sa 10000 pesos na restock
+what can I restock with 10000 pesos
+sampung libo ang puhunan ko, ano ang uunahin kong bilhin
+@ {"limit":5}
+top 5 na dapat kong i-restock
+limang produkto na dapat kong bilhin
+five items I should restock first

@@ -1,0 +1,47 @@
+@ {"threshold":5}
+anong mga produkto ang paubos na
+ano ang low stock natin
+what items are running low
+may mga paubos na ba akong paninda
+listahan ng mga malapit nang maubos
+ano ang kailangan kong i-restock agad
+low stock items po
+mga produktong konti na lang ang stock
+pakitingnan kung ano ang kulang sa tindahan
+ano na ang halos wala nang stock
+which products are almost out of stock
+show me what needs restocking
+ano ang mga ubos na o malapit nang ubos
+unsa nga produkto ang halos ubos na
+ania kadi ti agpukaw nga awan stock
+low stck ba meron
+hay naku, ano na ba ang paubos sa paninda ko
+grabe, baka may ubos na naman, ano ang mga iyon
+pwede bang ilista ang mga nauubusan na
+ano ang kailangan kong bilhin sa palengke base sa stock
+anong mga item ang konti na lang
+items with very low inventory
+mga nasa 5 pataas na lang ang stock
+ano ang halos zero na ang stock
+@ {"threshold":10}
+anong produkto ang wala pang 10 ang stock
+mga items na mas mababa sa sampu
+which products have fewer than 10 left
+ilista ang stock na below 10
+mga produktong 10 piraso na lang pababa
+yung mga hindi aabot ng 10 ang stock
+@ {"threshold":3}
+mga produktong tatlo na lang ang natitira
+ano ang may 3 or less na lang stock
+which items have only 3 left or fewer
+ilista ang halos wala na, 3 pababa
+@ {"threshold":20}
+anong produkto ang mas mababa sa 20 ang stock
+products with fewer than 20 in stock
+mga item na wala pang bente ang stock
+@ {"threshold":2}
+yung mga isa o dalawa na lang ang natitira
+items with only 1 or 2 left
+@ {"threshold":15}
+mga produktong wala pang 15 ang stock
+stock below 15 anong mga item

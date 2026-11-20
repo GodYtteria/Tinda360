@@ -1,0 +1,43 @@
+@ {"days_overdue":30}
+sino ang delikado sa utang
+mga customer na matagal nang hindi nagbabayad
+sino ang dapat kong singilin na
+who are my risky debtors
+which customers are overdue
+sino ang mga lampas na sa due ng utang
+mga suking hindi na nagbabayad ng matagal
+sino ang dapat kong i-follow up sa utang
+overdue accounts po
+sinong suki ang malaki ang utang at matagal na
+credit risk ng mga customer ko
+sino ang hindi dapat pautangin ulit
+sino ang pinakamatagal nang hindi nagbabayad
+hay, sino ba ang mga tamad magbayad
+sino ang mga bad payer
+list of customers with late payments
+sino ang naiwan ng bayad na matagal na
+mga suki na dapat singilin ngayong linggo
+unsa nga mga suki ang taas na ang utang ug dugay na
+sinno ti nabayag nga saan agbayad
+sino sino ang may overdue
+mga nangutang pa noong nakaraang buwan na hindi pa bayad
+who should I stop lending to
+alin sa mga suki ang may pinakamalaking risk
+@ {"days_overdue":14}
+sino ang dalawang linggo nang hindi nagbabayad
+customers overdue by two weeks or more
+mga utang na lampas 14 na araw na
+sino ang 2 weeks late na
+@ {"days_overdue":60}
+sino ang dalawang buwan nang hindi nagbabayad
+customers overdue for two months
+mga utang na lampas 60 araw na
+sino ang 60 days late na
+@ {"days_overdue":7}
+sino ang isang linggo nang hindi nagbabayad
+customers overdue by a week or more
+mga utang na lampas 7 araw na
+@ {"days_overdue":90}
+sino ang tatlong buwan nang hindi nagbabayad
+customers overdue for three months
+mga utang na lampas 90 araw na

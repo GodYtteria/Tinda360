@@ -1,0 +1,39 @@
+@ {"days":14}
+anong mga produkto ang hindi gumagalaw
+ano ang matumal sa tindahan
+slow moving items po
+what products aren't selling
+anong paninda ang walang bumibili
+listahan ng mga hindi nabebenta
+ano ang dead stock ko
+hindi nabili sa nakaraang dalawang linggo
+which items haven't sold recently
+mga produktong matagal nang nakatengga
+ano ang dapat kong i-promo dahil walang bumibili
+unsa nga produkto ang walay namalit
+ania kadi ti saan a maibaligya
+hay, ano na naman ang hindi nabebenta
+grabe, may nakatambak na naman, ano ang mga iyon
+items na zero sales lately
+mga paninda na hindi gumalaw
+anong item ang walang benta nitong mga nakaraang araw
+@ {"days":7}
+anong produkto ang walang nabenta this week
+mga hindi nabili sa nakaraang 7 araw
+items with no sales in the past week
+ano ang hindi nagalaw sa isang linggo
+@ {"days":30}
+anong produkto ang walang nabenta this month
+mga hindi nabili sa nakaraang 30 araw
+items with no sales in the past month
+ano ang hindi nagalaw sa isang buwan
+@ {"days":60}
+anong produkto ang hindi nabenta sa loob ng dalawang buwan
+items not sold in two months
+mga nakatengga na ng 60 araw
+@ {"days":3}
+anong produkto ang hindi nabenta nitong 3 araw
+items with no sales in the last three days
+@ {"days":90}
+anong produkto ang hindi nabenta sa loob ng tatlong buwan
+items not sold in three months

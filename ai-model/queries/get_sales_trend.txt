@@ -1,0 +1,39 @@
+@ {"days":7}
+kumusta ang takbo ng benta nitong nakaraang linggo
+daily sales trend po
+ipakita ang benta bawat araw
+sales per day for the past week
+tumataas ba o bumababa ang benta ko
+how are my daily sales doing
+benta araw-araw ng nakaraang 7 araw
+trend ng benta ngayong linggo
+may pagbabago ba sa benta ko nitong mga huling araw
+is my business growing or slowing down
+graph ng benta bawat araw
+paano ang takbo ng benta ko araw-araw
+gaano kalaki ang benta bawat araw nitong linggo
+unsa ang trend sa akong benta
+kasano ti trend ti benta ko
+hay, bumabagal ba ang benta ko
+grabe, tumataas ba talaga ang benta ko
+@ {"days":14}
+trend ng benta sa nakaraang dalawang linggo
+sales per day for the last two weeks
+ipakita ang benta bawat araw sa loob ng 14 araw
+daily sales for the past 14 days
+@ {"days":30}
+trend ng benta sa loob ng isang buwan
+sales per day for the last month
+ipakita ang benta bawat araw sa loob ng 30 araw
+daily sales for the past 30 days
+monthly sales trend araw-araw
+@ {"days":3}
+benta bawat araw nitong huling tatlong araw
+sales for the last three days
+trend ng benta sa nakalipas na 3 araw
+@ {"days":5}
+benta bawat araw nitong huling limang araw
+sales for the last five days
+@ {"days":10}
+benta bawat araw nitong huling sampung araw
+daily sales for the last ten days

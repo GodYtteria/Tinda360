@@ -1,0 +1,39 @@
+@ {"sort":"highest","limit":10}
+anong produkto ang pinakamalaki ang tubo
+ano ang highest margin kong paninda
+which products give the best profit margin
+ano ang pinaka-profitable na item
+ranking ng tubo bawat produkto
+anong paninda ang malaki ang patong
+mga produktong may pinakamataas na margin
+best margin items po
+anong item ang pinakamalaking kita bawat piraso
+unsa nga produkto ang pinaka dako ang tubo
+ania ti kaaduan ti tubo nga produkto
+hay, ano ba ang mga paninda na talagang kumikita
+anong produkto ang worth i-push dahil malaki ang margin
+profit margin per product
+@ {"sort":"lowest","limit":10}
+anong produkto ang pinakamaliit ang tubo
+ano ang lowest margin kong paninda
+which products have the worst profit margin
+ano ang pinakakaunting tubo na item
+mga paninda na halos walang tubo
+anong item ang halos lugi na
+products with thin margins
+hay, ano ba ang mga paninda na walang kita
+mga produktong may pinakamababang margin
+unsa nga produkto ang gamay ra ang tubo
+@ {"sort":"highest","limit":5}
+top 5 na pinakamalaki ang tubo
+limang produktong may pinakamataas na margin
+top five by profit margin
+@ {"sort":"lowest","limit":5}
+lima na pinakamaliit ang tubo
+five products with the lowest margins
+@ {"sort":"highest","limit":3}
+top 3 sa tubo
+tatlong pinakamalaki ang margin
+@ {"sort":"lowest","limit":3}
+tatlong pinakamaliit ang tubo
+bottom three by margin

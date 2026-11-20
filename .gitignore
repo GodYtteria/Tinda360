@@ -47,3 +47,12 @@ assets/ai/tokenizer.json
 # Only screenshots stay here; site source lives in the private tinda360-website repository
 website/*
 !website/screenshots/
+
+# AI model training artifacts (derived, large, or private)
+ai-model/checkpoints/
+ai-model/__pycache__/
+ai-model/*.gguf
+ai-model/tokenizer.json
+ai-model/train_run.log
+ai-model/tinda360_tool_calling_backup_*.jsonl
+ai-model/CLAUDE.md

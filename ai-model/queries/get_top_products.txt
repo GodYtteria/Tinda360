@@ -1,0 +1,65 @@
+@ {"timeframe":"today"}
+ano ang pinakamabenta ngayong araw
+anong produkto ang top seller today
+sino ang bida sa benta ngayon, anong item
+best seller ngayong araw po
+what sells the most today
+anong item ang laging binibili ngayon
+ano ang madaming nabenta ngayong araw
+top products today
+pinakamabili ngayon anong produkto
+unsa ang pinaka mabaligya karon
+ano ti kaaduan a naibaligya ita
+top 3 ngayong araw
+ano pinakamabenta ko today
+hay, ano ba ang hit na paninda ngayon
+pakisabi po kung ano ang pinaka-nabenta ngayong araw
+anong paninda ang nauubos agad ngayon
+@ {"timeframe":"week"}
+ano ang pinakamabenta ngayong linggo
+anong produkto ang top seller this week
+best sellers ngayong linggo po
+what sold the most this week
+anong item ang pinaka-binili sa isang linggo
+ano ang madaming nabenta nitong linggo
+top products this week
+pinakamabili ngayong linggo, anong produkto
+unsa ang pinaka mabaligya karong semana
+ano ti kaaduan a naibaligya daytoy a lawas
+top 5 ngayong linggo
+ano ang hit na paninda this week
+pakilista po ang mga bestseller ngayong linggo
+anong paninda ang nauubos agad nitong linggo
+ranking ng mga produkto ko ngayong linggo
+ano ang nangunguna sa benta nitong nakaraang 7 araw
+sikat na produkto this week anong item
+@ {"timeframe":"month"}
+ano ang pinakamabenta ngayong buwan
+anong produkto ang top seller this month
+best sellers ngayong buwan po
+what sold the most this month
+anong item ang pinaka-binili sa isang buwan
+top products this month
+pinakamabili ngayong buwan, anong produkto
+unsa ang pinaka mabaligya karong bulan
+ano ti kaaduan a naibaligya iti bulan a daytoy
+ano ang hit na paninda this month
+pakilista po ang mga bestseller ngayong buwan
+ranking ng produkto ko sa isang buwan
+ano ang nangunguna sa benta nitong nakaraang 30 araw
+sikat na produkto this month anong item
+@ {"timeframe":"week","limit":3}
+top 3 products ngayong linggo
+ibigay mo ang 3 pinakamabenta this week
+tatlong best seller lang po ngayong linggo
+just give me the top three sellers this week
+@ {"timeframe":"week","limit":10}
+top 10 pinakamabenta ngayong linggo
+sampung best seller this week po
+list the top ten products this week
+@ {"timeframe":"month","limit":10}
+top 10 ngayong buwan po
+sampung pinakamabenta this month
+@ {"timeframe":"today","limit":3}
+top 3 ngayong araw lang
+tatlong pinakamabenta today po

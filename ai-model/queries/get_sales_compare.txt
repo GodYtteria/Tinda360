@@ -1,0 +1,35 @@
+@ {"period":"day"}
+mas malaki ba ang benta ngayon kaysa kahapon
+how does today compare to yesterday
+ihambing ang benta ngayon at kahapon
+benta ngayon vs kahapon
+mas mataas ba ang kita ko ngayon kumpara kahapon
+today versus yesterday sales
+tumaas ba o bumaba ang benta ko kumpara kahapon
+nalamangan ba ng benta ngayon ang kahapon
+mas maganda ba ang araw na ito kaysa kahapon
+daig ba ng benta ngayon ang kahapon
+mas dako ba ang benta karon kaysa kagahapon
+nasaan ang benta ngayon kung ikukumpara sa kahapon
+@ {"period":"week"}
+mas malaki ba ang benta ngayong linggo kaysa noong nakaraang linggo
+how does this week compare to last week
+ihambing ang benta ngayong linggo at nakaraang linggo
+this week vs last week sales
+mas mataas ba ang kita ko ngayong linggo kumpara sa nakaraan
+tumaas ba o bumaba ang benta ko kumpara sa last week
+mas maganda ba ang linggong ito kaysa noong nakaraan
+weekly comparison po ng benta
+mas dako ba ang benta karong semana kaysa naglabay
+ano ang lamang ng linggong ito sa nakaraang linggo
+@ {"period":"month"}
+mas malaki ba ang benta ngayong buwan kaysa noong nakaraang buwan
+how does this month compare to last month
+ihambing ang benta ngayong buwan at nakaraang buwan
+this month vs last month sales
+mas mataas ba ang kita ko ngayong buwan kumpara sa nakaraan
+tumaas ba o bumaba ang benta ko kumpara noong last month
+mas maganda ba ang buwang ito kaysa noong nakaraan
+monthly comparison po ng benta
+mas dako ba ang benta karong bulan kaysa naglabay
+hay, mas lumaki ba ang kita ko ngayong buwan kaysa dati

@@ -1,0 +1,41 @@
+ano ang pinakamabenta ngayon|get_top_products|
+sino ang may utang|get_utang_list|
+magkano ang benta ko ngayon|get_sales_summary|
+anong produkto ang paubos na|get_low_stock|
+magkano ang presyo ng coke|get_product_info|coke
+how many products do i have|get_product_count|
+what is my store name|get_store_info|
+ano ang matumal na paninda|get_slow_moving|
+magkano gastos ko ngayong linggo|get_expenses|
+anong oras pinakamaraming bumibili|get_busiest_hours|
+sino ang pinaka suki ko|get_suki_loyalty|
+sino ang delikadong pautangin|get_utang_risk|
+kamusta ang benta ngayon kumpara kahapon|get_sales_compare|
+ano ang malapit nang ma-expire|get_expiry_alerts|
+gaano kalaki ang tubo ko sa bawat produkto|get_profit_margins|
+how is my sales trend this week|get_sales_trend|
+cash ba o gcash mas marami|get_payment_breakdown|
+ilang araw tatagal ang stock ng bigas|get_stock_forecast|bigas
+magkano ang dapat kong ibudget sa palengke|get_restock_suggestions|
+overview ng tindahan ko|get_overview|
+may stock pa ba ng gatas|get_product_info|gatas
+saan ako dapat magtipid, ano ang gastos ko ngayong buwan|get_expenses|
+gaano kabilis mauubos ang Lucky Me|get_stock_forecast|Lucky Me
+sinong suki ang bumibili araw-araw|get_suki_loyalty|
+paano ang kita ko compared sa last week|get_sales_compare|
+what are my top sellers this month|get_top_products|
+pakitingnan kung ano ang hindi nabili nitong buwan|get_slow_moving|
+may mga produkto bang paso na|get_expiry_alerts|
+anong oras dapat may bantay sa tindahan|get_busiest_hours|
+mga umutang na malaki ang balance|get_utang_list|
+ilan na ang benta namin sa buong linggo|get_sales_summary|
+nagkano na ba ang Safeguard|get_product_info|Safeguard
+saan nagmula ang bayad ngayong araw, cash o gcash|get_payment_breakdown|
+how many items are in my inventory|get_product_count|
+anong pangalan ng store ko|get_store_info|
+anong paninda ang halos ubos na|get_low_stock|
+tumataas ba ang benta ko nitong dalawang linggo|get_sales_trend|
+kailan mauubos ang itlog|get_stock_forecast|itlog
+ano ang pinakamataas ang patong sa paninda ko|get_profit_margins|
+buod ng negosyo ko ngayon|get_overview|
+may babayaran ba akong dapat bilhin para sa tindahan, 2000 ang budget|get_restock_suggestions|

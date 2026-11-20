@@ -1,0 +1,80 @@
+@ {"timeframe":"today"}
+magkano na benta ko ngayon
+ilan na ang kinita natin ngayong araw po
+how much have we sold today
+benta ngayon?
+pila na ang sales ko today
+kumusta ang kita ngayong araw
+total sales namin ngayon po
+nakabenta na ba ako ng malaki ngayon
+how's business so far today
+magkano na ang pumasok na pera ngayon
+sales today pls
+ilang customer na ang bumili ngayon
+ano na ang total ng benta hanggang ngayon
+pwede ko bang malaman ang kabuuang benta ngayong araw
+pila na kita ko karon
+nagkano ti naaramid ko nga benta ita
+bnta ko ngaun mgkano na
+grabe ang init, may bumibili ba? magkano na benta ngayon
+hay naku, kumusta kaya ang benta ko ngayon
+what's my revenue for today
+ilang piraso na ang nabenta natin ngayong araw
+tally ng benta ngayong araw po
+gaano na kalaki ang benta ko ngayong umaga
+patingin ng benta ngayon
+how many transactions did we make today
+ano ang kabuuang kita ng tindahan ngayon
+benta today magkano
+pakisabi po ang total sales ngayon
+ilang order na ang nailabas ko ngayong araw
+kamusta ang takbo ng tindahan ngayon, magkano na ang benta
+nakaka-ilang libo na ba ako ngayon
+@ {"timeframe":"week"}
+magkano benta ko this week
+ilan ang nabenta ko ngayong linggo
+benta ngayong linggo po magkano
+how much did we sell this week
+total sales for the week please
+kumusta ang linggo ko, magkano ang kita
+weekly sales ko magkano na
+ano ang kabuuang benta sa nakaraang pitong araw
+pila ang kita ko ning semana
+nagkano ti benta ko iti daytoy a lawas
+bnta ko ngayong linggo mgkano
+gaano kalaki ang kinita namin sa isang linggo
+ilang transaction ang nangyari this week
+week sales summary
+pakitingnan po ang benta ngayong linggo
+sa isang linggo, ilan ang naibenta ko
+hay, kumusta ang benta this week
+ano ang weekly revenue natin
+magkano na pumasok mula lunes
+total ng linggong ito po
+7 days sales ko magkano
+nakabenta ba ako ng maganda this week
+ano ang kita ko sa loob ng isang linggo
+@ {"timeframe":"month"}
+magkano benta ko this month
+ilan ang kinita namin ngayong buwan
+total sales ngayong buwan po
+how much did we make this month
+monthly sales summary please
+kumusta ang buwan ko, ilan ang benta
+benta ngayong buwan magkano na
+ano ang kabuuang kita sa nakaraang 30 araw
+pila ang benta ko karong bulan
+nagkano ti benta ko iti bulan a daytoy
+bnta ko ngayong buwan mgkano
+gaano kalaki ang kinita namin sa isang buwan
+ilang transaction this month
+month to date sales
+pakitingnan po ang benta ngayong buwan
+sa isang buwan, ilan ang naibenta ko
+naku, kumusta ang monthly sales ko
+ano ang buwanang revenue natin
+magkano ang pumasok simula umpisa ng buwan
+total ng buwang ito po
+30 days sales ko magkano
+nakabenta ba ako ng maganda this month
+ano ang kita ko sa loob ng isang buwan

@@ -1,0 +1,27 @@
+@ {"timeframe":"week"}
+anong oras ang pinakamaraming customer
+kailan ang rush hour ng tindahan
+what time are we busiest
+anong oras pinaka-busy
+busiest hours po
+anong oras madalas bumili ang mga tao
+kailan ang peak ng benta sa araw
+sa anong oras ako dapat magbukas ng mas maaga
+which hours get the most customers
+oras na maraming bumibili
+anong oras ang matumal at anong oras ang masigla
+unsa nga oras ang daghang namalit
+anya nga oras ti kaaduan ti bumili
+hay, anong oras ba talaga sila dumadating
+rush hours ngayong linggo
+@ {"timeframe":"today"}
+anong oras ang pinakamaraming bumili ngayon
+busiest hour today
+anong oras ang rush ngayong araw
+which hours were busy today
+@ {"timeframe":"month"}
+anong oras ang pinakamaraming bumili ngayong buwan
+busiest hour this month
+anong oras ang rush nitong buwan
+which hours were busy this month
+peak hours buwan na ito

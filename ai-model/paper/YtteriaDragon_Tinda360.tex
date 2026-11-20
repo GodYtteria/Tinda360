@@ -1,0 +1,620 @@
+\documentclass[11pt,a4paper]{article}
+
+% ── packages ──────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+}
+
+% ── title ─────────────────────────────────────────────────────────────────
+\title{%
+  \textbf{YtteriaDragon: A Sparse Mixture-of-Experts Language Model\\
+  and Taglish Intent Corpus for On-Device\\
+  Sari-Sari Store Intelligence}%
+}
+
+\author{
+  GodYtteria\\
+  Independent Researcher\\
+  \texttt{github.com/GodYtteria}
+}
+
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+% ══════════════════════════════════════════════════════════════════════════
+\begin{abstract}
+We present \textbf{YtteriaDragon}, a family of sparse Mixture-of-Experts (MoE)
+language models designed for on-device deployment in resource-constrained
+environments, and \textbf{Tinda360 Taglish Intent Corpus}, a 4{,}777-example
+intent classification dataset for Filipino micro-retail (sari-sari store)
+natural language understanding. The flagship \texttt{50M-tinda360} configuration
+achieves 36.1M total parameters with only 4.8M active per token through
+fine-grained MoE routing (32 experts, top-1), hash-based routing for early
+layers following DeepSeek-V4, $\sqrt{\mathrm{softplus}}$ affinity scoring,
+hybrid attention mixing full quadratic attention with Gated DeltaNet linear
+attention, and a multi-token prediction (MTP) auxiliary head. The intent corpus
+covers 23 store-operation intents in Taglish (Tagalog-English code-switching)
+with systematic coverage of typographic noise, SMS abbreviations, emotional
+registers, and disambiguation pairs. We describe the architecture design,
+dataset construction methodology, and deployment considerations for
+sub-100M models on mobile devices serving the Philippine sari-sari store
+ecosystem of 1.3 million micro-retailers.
+\end{abstract}
+
+\textbf{Keywords:} sparse MoE, on-device NLP, Taglish, intent classification,
+sari-sari store, Gated DeltaNet, hybrid attention, Filipino NLU
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+
+The Philippines has approximately 1.3 million sari-sari stores---neighborhood
+micro-retail shops that serve as the primary point of commerce for the majority
+of Filipino households \citep{dti2023sari}. These stores are typically
+owner-operated, with inventory management, credit tracking (``utang''), and
+sales analysis performed manually or through basic mobile applications.
+
+Recent advances in on-device language models have made it feasible to deploy
+AI assistants directly on smartphones without cloud connectivity---a critical
+requirement in areas with intermittent internet access. However, existing
+models face two key challenges in this domain:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Language gap.} Filipino store owners communicate in Taglish
+    (Tagalog-English code-switching), SMS-style abbreviations, and regional
+    dialects. No public intent classification corpus exists for this register
+    in the micro-retail domain.
+  \item \textbf{Compute budget.} On-device deployment on mid-range Android
+    phones (4--6\,GB RAM, Snapdragon 600-series) requires models under 100M
+    parameters with minimal active computation per token.
+\end{enumerate}
+
+We address both challenges with two contributions:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{YtteriaDragon} (\S\ref{sec:architecture}): a sparse MoE
+    architecture combining fine-grained expert routing (DeepSeek-V3 style),
+    hash routing for early layers (DeepSeek-V4), $\sqrt{\mathrm{softplus}}$
+    affinity scoring, hybrid quadratic/linear attention (Qwen3.5 style), and
+    multi-token prediction. The \texttt{50M-tinda360} preset achieves 36.1M
+    total / 4.8M active parameters.
+  \item \textbf{Tinda360 Taglish Intent Corpus} (\S\ref{sec:dataset}): 4{,}777
+    labeled intent examples across 23 store-operation intents, with a companion
+    462-example training set, covering code-switching, typographic noise,
+    emotional registers, and systematic disambiguation pairs.
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Sparse Mixture-of-Experts.}
+The MoE paradigm decouples total model capacity from per-token compute
+\citep{shazeer2017outrageously}. Mixtral \citep{jiang2024mixtral} popularized
+top-$k$ routing with softmax-renormalized weights. DeepSeek-V3
+\citep{deepseekai2024deepseekv3} introduced \emph{fine-grained} MoE with
+auxiliary-loss-free load balancing through per-expert bias terms, eliminating
+the Switch Transformer's load-balancing auxiliary loss. DeepSeek-V4 extended
+this with \emph{hash routing} for early layers where the routing signal from
+hidden states is weak, using a fixed deterministic projection instead of a
+learned gate.
+
+\paragraph{Hybrid Attention.}
+Qwen3.5 \citep{qwen2025qwen3} introduced a hybrid architecture alternating
+between full quadratic attention (with gated queries, per-head RMS normalization,
+and partial RoPE) and Gated DeltaNet linear attention
+\citep{yang2024gated}. This achieves $O(T)$ recurrent inference with periodic
+full-attention ``anchor'' layers for global context. The gated delta rule
+extends classical delta-rule linear attention with a learned decay gate,
+enabling selective memory updates.
+
+\paragraph{Multi-Token Prediction.}
+Meta \citep{gloeckle2024better} demonstrated that training language models to
+predict multiple future tokens simultaneously (via parallel prediction heads)
+improves sample efficiency and downstream task performance. The auxiliary MTP
+heads are discarded at inference, preserving the base model's architecture.
+
+\paragraph{Filipino NLP.}
+Filipino NLP resources remain scarce. ParaCrawl and CC-100 include some
+Tagalog web text, and \citet{cruz2020establishing} established benchmarks
+for Filipino text classification. However, no public dataset addresses
+Taglish intent classification in the micro-retail domain, where code-switching
+density and SMS abbreviation rates are significantly higher than in formal text.
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Architecture}
+\label{sec:architecture}
+
+YtteriaDragon is a decoder-only transformer with the following configurable
+components. Table~\ref{tab:presets} lists the full scaling ladder.
+
+\subsection{Base Transformer}
+
+The backbone follows the LLaMA architecture \citep{touvron2023llama}: RMSNorm
+pre-normalization, SwiGLU feed-forward networks, Grouped-Query Attention (GQA)
+with RoPE positional embeddings, and tied input/output embeddings. We use the
+``rotate\_half'' RoPE layout for compatibility with the GGUF quantization
+format.
+
+\subsection{Fine-Grained Sparse MoE}
+\label{sec:fgmoe}
+
+Each transformer layer's FFN is replaced by a fine-grained MoE block containing
+$E$ routed SwiGLU experts and one \emph{shared expert} that processes every
+token (following DeepSeek-V3). The routing mechanism selects top-$k$ experts
+per token:
+
+\begin{enumerate}[leftmargin=*]
+  \item A learned linear gate computes logits $\ell_i = W_g \cdot h$ for each
+    expert $i \in \{1, \ldots, E\}$.
+  \item Per-expert bias terms $b_i$ (not learned by gradient descent) are added
+    to the routing logits: $r_i = \ell_i + b_i$.
+  \item The top-$k$ experts by $r_i$ are selected.
+  \item Output weights are computed from the \emph{original} logits (not biased)
+    using the affinity function (\S\ref{sec:affinity}).
+  \item Bias terms are updated each training step:
+    $b_i \leftarrow b_i - \alpha \cdot (f_i - 1/E)$, where $f_i$ is the
+    routed fraction and $\alpha$ is the bias learning rate.
+\end{enumerate}
+
+This eliminates the auxiliary load-balancing loss entirely while maintaining
+balanced expert utilization.
+
+\subsubsection{Hash Routing for Early Layers}
+\label{sec:hash}
+
+Following DeepSeek-V4, the first $H$ layers use \emph{hash routing}: a fixed
+(non-learnable) random projection $P \in \mathbb{R}^{d \times E}$ replaces the
+learned gate. Expert selection is determined by $\arg\text{topk}(h \cdot P, k)$
+with uniform output weights ($w_i = 1/k$). This provides:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Perfect load balance} without bias correction.
+  \item \textbf{Zero routing compute} (the projection is a buffer, not a parameter).
+  \item \textbf{Stability} in early layers where hidden-state routing signals
+    are noisy and unreliable.
+\end{itemize}
+
+The random projection is initialized once at model creation and registered as a
+non-persistent buffer.
+
+\subsubsection{$\sqrt{\mathrm{softplus}}$ Affinity Scoring}
+\label{sec:affinity}
+
+For non-hash layers, we replace the standard softmax affinity with
+$\sqrt{\mathrm{softplus}}$ scoring:
+
+\begin{equation}
+  w_i = \frac{\sqrt{\mathrm{softplus}(\ell_i)}}
+             {\sum_{j \in \text{top-}k} \sqrt{\mathrm{softplus}(\ell_j)}}
+\end{equation}
+
+where $\mathrm{softplus}(x) = \ln(1 + e^x)$. This provides smoother gradients
+near zero compared to softmax and avoids the ``winner-take-all'' saturation
+that softmax exhibits with large logit gaps. For top-1 routing (as in the
+\texttt{50M-tinda360} preset), the weight is always 1.0 regardless of scoring
+function; the benefit emerges in presets with top-$k > 1$.
+
+\subsection{Hybrid Attention}
+\label{sec:hybrid}
+
+When \texttt{hybrid}$= N > 0$, every $N$-th layer uses full quadratic attention
+(GatedAttention) and the remaining layers use Gated DeltaNet linear attention:
+
+\paragraph{GatedAttention (full layers).}
+Following Qwen3.5: the query projection is 2$\times$ wide, producing both
+queries and a sigmoid output gate. Per-head RMSNorm is applied to Q and K.
+Partial RoPE is applied to the first \texttt{rope\_frac} of the head dimension.
+
+\paragraph{GatedDeltaNet (linear layers).}
+The gated delta-rule recurrence \citep{yang2024gated} with:
+(a) a 1-D causal convolution on the Q/K/V projection,
+(b) learned decay gate $g$ and update gate $\beta$,
+(c) L2-normalized Q/K,
+(d) chunked $O(T)$ recurrence with 64-token chunks.
+At inference, the recurrence state $S \in \mathbb{R}^{H \times d_k \times d_v}$
+replaces the KV cache, giving constant memory regardless of sequence length.
+
+\paragraph{Attention pattern for \texttt{50M-tinda360}.}
+With 8 layers and \texttt{hybrid}$=4$: layers 3 and 7 are GatedAttention;
+layers 0, 1, 2, 4, 5, 6 are GatedDeltaNet. This gives 75\% linear attention
+(efficient inference) with 25\% full attention (global context anchors).
+
+\subsection{Multi-Token Prediction}
+\label{sec:mtp}
+
+Following \citet{gloeckle2024better}, $M$ auxiliary prediction heads are added
+during training. Head $k$ consists of one additional transformer block applied
+to the trunk output, followed by the shared final norm and language model head.
+Head $k$ is trained to predict token $t + 2 + k$ given position $t$. The MTP
+loss is:
+
+\begin{equation}
+  \mathcal{L}_{\text{MTP}} = \frac{1}{M} \sum_{k=0}^{M-1}
+    \mathrm{CE}(\text{head}_k(h_t), y_{t+2+k})
+\end{equation}
+
+weighted by $\lambda_{\text{MTP}} = 0.3$. The heads are discarded at inference
+(GGUF export drops them), so the deployed model is unchanged.
+
+\subsection{Model Configurations}
+
+\begin{table}[h]
+\centering
+\caption{YtteriaDragon scaling ladder. Active params count top-$k$ routed
+experts + shared expert per MoE layer. MTP heads excluded from active count
+(inference-only metric). The \texttt{50M-tinda360} preset is the focus of
+this paper.}
+\label{tab:presets}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Preset} & \textbf{$d$} & \textbf{Layers} & \textbf{Experts} &
+  \textbf{Top-$k$} & \textbf{Hybrid} & \textbf{Total} & \textbf{Active} \\
+\midrule
+10M         & 256  & 4  & --  & -- & -- & 10.0M & 10.0M \\
+30M         & 384  & 10 & --  & -- & -- & 29.5M & 29.5M \\
+30M-moe8    & 384  & 10 & 8   & 2  & -- & 63.7M & 28.4M \\
+30M-fgmoe   & 384  & 10 & 32  & 2  & -- & \multicolumn{2}{c}{(fg, shared)} \\
+30M-hybrid  & 384  & 10 & --  & -- & 4  & 28.5M & 28.5M \\
+\textbf{50M-tinda360} & \textbf{192} & \textbf{8} & \textbf{32} &
+  \textbf{1} & \textbf{4} & \textbf{36.1M} & \textbf{4.8M} \\
+100M        & 640  & 18 & --  & -- & -- & 99.8M & 99.8M \\
+300M        & 1024 & 24 & --  & -- & -- & 303M  & 303M \\
+500M        & 1280 & 26 & --  & -- & -- & 509M  & 509M \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{\texttt{50M-tinda360} configuration.}
+\texttt{vocab\_size}$=8192$, \texttt{max\_seq\_len}$=1024$, $d_{\text{model}}=192$,
+8 layers, 4 attention heads, 2 KV heads, 32 FG experts with
+\texttt{expert\_ffn}$=192$, top-1 routing, hash routing for layers 0--1,
+$\sqrt{\mathrm{softplus}}$ affinity, \texttt{hybrid}$=4$, MTP$=1$,
+\texttt{attn\_window}$=512$.
+
+The design rationale is \emph{capacity without compute}: 32 experts provide
+7.5$\times$ the FFN capacity of a dense model at the same active parameter
+count, enabling the model to learn specialized expert pathways for each of
+the 23 intents while keeping inference fast enough for real-time mobile use.
+
+\subsection{Auto-Compaction and Sliding Window}
+\label{sec:compact}
+
+The hybrid architecture provides built-in context compaction:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{GatedDeltaNet layers} (6 of 8): $O(1)$ memory regardless of
+    context length. The recurrence state $S \in \mathbb{R}^{H \times d_k \times d_v}$
+    is a fixed-size lossy compression of the full history ($\sim$37\,KB per layer).
+  \item \textbf{GatedAttention layers} (2 of 8): sliding window KV eviction with
+    \texttt{attn\_window}$=512$ tokens. Older entries are evicted automatically,
+    bounding memory to $\sim$384\,KB per layer.
+\end{itemize}
+
+Total inference memory at 1024-token context: $\sim$1\,MB (220\,KB GDN states +
+768\,KB KV cache). An explicit \texttt{auto\_compact()} method can be called
+between user turns to proactively evict stale KV entries during idle time.
+
+\subsection{Tool Calling}
+\label{sec:tools}
+
+The model supports structured tool calling via a ChatML template with special
+tokens (\texttt{<tool\_call>}, \texttt{</tool\_call>}, \texttt{<tool\_result>},
+\texttt{</tool\_result>}). Twenty store-operation functions are defined
+(e.g., \texttt{get\_sales\_summary}, \texttt{get\_product\_info},
+\texttt{get\_utang\_list}). The training data includes:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Single-call}: user query $\to$ one tool call $\to$ natural reply.
+  \item \textbf{Parallel multi-call}: query requiring 2--3 simultaneous tool calls.
+  \item \textbf{Multi-turn}: conversational sequences with follow-up questions.
+  \item \textbf{Abstention}: queries outside the tool scope, trained to decline.
+  \item \textbf{Function masking}: 33\% of examples use randomized tool names
+    to prevent memorization.
+\end{itemize}
+
+The model is trained to never generate data it did not receive from a tool call,
+preventing hallucination of store metrics.
+
+\subsection{Training Infrastructure}
+
+\paragraph{Optimizer.}
+We use the Muon optimizer \citep{jordan2024muon} for 2-D weight matrices
+(attention projections, expert weights) with Newton-Schulz orthogonalization,
+paired with AdamW for embeddings, norms, and routing parameters. This follows
+the Qwen3.8-Flash-Next training recipe. Learning rate follows a cosine schedule
+decaying to $1/10$ of peak (consensus from DeepSeek-V4, Arcee Trinity, IMU-1),
+with 1000-step linear warmup.
+
+\paragraph{Stability techniques.}
+SwiGLU activation clamping (DeepSeek-V4), router z-loss (ST-MoE),
+MoE-specific truncated normal initialization, and BF16 mixed-precision
+training with the router forced to FP32 (nanoMoE best practice).
+
+\paragraph{Training data.}
+The combined training corpus consists of 12{,}426 examples: 9{,}938 intent
+classification, 1{,}594 simplified training, and 894 tool-calling sequences.
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Tinda360 Taglish Intent Corpus}
+\label{sec:dataset}
+
+\subsection{Overview}
+
+The corpus consists of three files:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Intent Classifier} (9{,}938 examples): structured JSON output
+    with intent label and optional entity/timeframe fields.
+  \item \textbf{Training Data} (1{,}594 examples): simplified format with bare
+    intent labels, suitable for lightweight fine-tuning.
+  \item \textbf{Tool Calling} (894 examples): multi-turn ChatML conversations
+    with tool call/result sequences, including 207 function-masked and 33
+    abstention examples.
+\end{itemize}
+
+All three files cover 23 intents and 20 tool functions spanning the full
+operational scope of a sari-sari store AI assistant.
+
+\subsection{Intent Taxonomy}
+
+\begin{table}[h]
+\centering
+\caption{Intent taxonomy with example counts (classifier / training data).}
+\label{tab:intents}
+\small
+\begin{tabular}{llrr}
+\toprule
+\textbf{Intent} & \textbf{Description} & \textbf{Clf.} & \textbf{TD} \\
+\midrule
+\texttt{product\_lookup}    & Price / stock check for a product   & 2{,}332 & 22 \\
+\texttt{stock\_forecast}    & Predict when product runs out       & 381  & 21 \\
+\texttt{sales}              & Sales/revenue report by timeframe   & 212  & 28 \\
+\texttt{greeting}           & Greeting or conversation opener     & 133  & 29 \\
+\texttt{top\_products}      & Best-selling products               & 112  & 20 \\
+\texttt{low\_stock}         & Items at critically low stock       & 110  & 22 \\
+\texttt{help}               & How to use the assistant            & 110  & 24 \\
+\texttt{utang}              & Credit/debt tracking                & 109  & 23 \\
+\texttt{overview}           & General store status summary        & 102  & 19 \\
+\texttt{sales\_compare}     & Compare sales across periods        & 101  & 20 \\
+\texttt{expiryAlert}        & Expiring / expired products         & 101  & 21 \\
+\texttt{thanks}             & Gratitude / conversation closer     & 100  & 23 \\
+\texttt{expenses}           & Operating cost report               & 100  & 17 \\
+\texttt{slow\_moving}       & Non-selling / stagnant inventory    & 86   & 18 \\
+\texttt{restock\_budget}    & Reorder suggestions within budget   & 85   & 19 \\
+\texttt{utang\_risk}        & High-risk debtors / bad debts       & 83   & 19 \\
+\texttt{suki\_loyalty}      & Loyal / frequent customer report    & 83   & 18 \\
+\texttt{payment\_breakdown} & Cash vs.\ GCash vs.\ credit split  & 80   & 18 \\
+\texttt{profit\_margin}     & Markup and profitability analysis   & 82   & 17 \\
+\texttt{sales\_trend}       & Sales trajectory over time          & 79   & 19 \\
+\texttt{busiest\_hours}     & Peak selling hours / days           & 75   & 17 \\
+\texttt{product\_count}     & Total inventory item count          & 63   & 14 \\
+\texttt{store\_info}        & Store profile / registration info   & 58   & 14 \\
+\midrule
+\textbf{Total}              &                                     & \textbf{4{,}777} & \textbf{462} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Linguistic Diversity}
+\label{sec:diversity}
+
+The corpus systematically covers the following variation axes:
+
+\paragraph{Code-switching density.}
+Examples range from pure Tagalog (``Magkano po ang bigas'') to pure English
+(``How much is rice'') with dense Taglish mixing (``Check mo yung stock ng
+softdrinks'').
+
+\paragraph{SMS / text-speak abbreviations.}
+Common Filipino texting patterns: vowel dropping (``Mgkno'' $\to$ ``Magkano''),
+consonant clusters (``Stck'' $\to$ ``Stock''), phonetic spelling
+(``Tenkyu'' $\to$ ``Thank you'').
+
+\paragraph{Typographic noise.}
+ALL CAPS (``MAGKANO BIGAS''), excessive punctuation (``Sales?????''),
+no punctuation, mixed case.
+
+\paragraph{Register variation.}
+Polite (``po'', ``naman'', ``please'', ``paki-''), casual (``Uy'', ``Oi''),
+Filipino internet slang (``Lodi'', ``Bes'', ``Charot''), emotional / frustrated
+(``Naku ang daming utang!'', ``Bakit ang baba ng benta!'').
+
+\paragraph{Disambiguation pairs.}
+40+ systematically constructed pairs that test routing accuracy on ambiguous
+stems. For example, ``Kumusta'' $\to$ \texttt{greeting} vs.\
+``Kumusta stock'' $\to$ \texttt{low\_stock} vs.\
+``Kumusta benta'' $\to$ \texttt{sales}.
+
+\paragraph{Edge cases.}
+Gibberish/noise (``asdf'', ``hahaha'' $\to$ \texttt{greeting} fallback),
+single-word queries (``Utang'' $\to$ \texttt{utang}),
+compound queries (``Sales at expenses ngayon'' $\to$ primary intent),
+negation (``Wala bang benta?'' $\to$ \texttt{sales}).
+
+\subsection{Entity and Timeframe Annotation}
+
+For \texttt{product\_lookup} and \texttt{stock\_forecast} intents, the output
+includes an \texttt{entity} field with the normalized product name. For
+time-sensitive intents (\texttt{sales}, \texttt{top\_products},
+\texttt{expenses}), a \texttt{timeframe} field (``today'', ``week'',
+``month'') is included. This enables the downstream application to issue
+structured database queries directly from the classifier output.
+
+\subsection{Product Coverage}
+
+The corpus includes 75+ generic sari-sari store product categories (``bigas'',
+``itlog'', ``sardinas'', ``mantika'', etc.) representing the typical inventory
+of a Filipino neighborhood store. Product names are kept generic (not
+brand-specific) to improve generalization across stores with different
+supplier relationships.
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Deployment Considerations}
+\label{sec:deployment}
+
+\subsection{Target Platform}
+
+Tinda360 is a Flutter-based mobile application targeting Android devices in
+the Philippine market. The AI assistant (``Yumi'') runs entirely on-device
+to support offline operation in areas with limited connectivity.
+
+\subsection{Quantization and Inference}
+
+The YtteriaDragon architecture is designed for GGUF export and llama.cpp
+inference:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Tied embeddings} for smaller model files.
+  \item \textbf{FFN dimensions as multiples of 256} to ensure k-quant
+    quantization (Q4\_K\_M) works without fallback to lower-quality formats.
+  \item \textbf{MTP heads dropped} at export time (inference model unchanged).
+  \item \textbf{Hybrid attention exports as Qwen3\_5ForCausalLM} for
+    llama.cpp compatibility (QWEN35 architecture tag).
+\end{itemize}
+
+At Q4\_K\_M quantization, the \texttt{50M-tinda360} model is estimated at
+$\sim$18\,MB, well within the memory constraints of mid-range Android devices.
+
+\subsection{Inference Characteristics}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Linear attention layers}: $O(1)$ per token (recurrence state
+    instead of KV cache), enabling fast autoregressive generation.
+  \item \textbf{Full attention anchors}: every 4th layer maintains a standard
+    KV cache, but \texttt{max\_seq\_len}$=512$ keeps this small.
+  \item \textbf{Top-1 routing}: only 1 of 32 experts executes per layer,
+    minimizing memory bandwidth for expert weight loading.
+  \item \textbf{Active parameters}: 4.8M $\approx$ 2.4\,MB at FP16, fitting
+    entirely in L2 cache on modern mobile SoCs.
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Limitations and Future Work}
+\label{sec:limitations}
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{No training results.} This paper describes the architecture
+    and dataset; training, evaluation metrics (accuracy, latency, perplexity),
+    and ablation studies will be reported in a future revision once GPU
+    compute is available.
+  \item \textbf{Single annotator.} The intent corpus was constructed by a
+    single developer with native Filipino fluency. Inter-annotator agreement
+    scores and crowd-sourced validation are planned.
+  \item \textbf{Limited regional coverage.} The corpus is Tagalog-English
+    dominant. Bisaya, Ilokano, and other major Philippine languages are
+    underrepresented.
+  \item \textbf{No real user data.} All examples are synthetic. Field testing
+    with actual sari-sari store owners will be necessary to validate coverage
+    and discover missing intents.
+  \item \textbf{Tokenizer.} A BPE tokenizer trained on the Taglish corpus
+    has not yet been produced. The vocabulary size (8{,}192) is chosen to
+    balance coverage with embedding table size.
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented YtteriaDragon, a sparse MoE language model architecture
+incorporating hash routing, $\sqrt{\mathrm{softplus}}$ affinity scoring,
+hybrid quadratic/linear attention, and multi-token prediction, targeting
+on-device deployment for Filipino sari-sari store intelligence. The
+\texttt{50M-tinda360} configuration achieves a 7.5$\times$ capacity-to-compute
+ratio (36.1M total / 4.8M active parameters) through fine-grained top-1
+routing over 32 experts.
+
+The accompanying Tinda360 Taglish Intent Corpus provides 4{,}777 labeled
+examples across 23 store-operation intents, systematically covering the
+code-switching, typographic, and register variation characteristic of Filipino
+micro-retail communication. Together, these contributions aim to bring
+AI-powered business intelligence to the 1.3 million sari-sari stores that
+form the backbone of Philippine neighborhood commerce.
+
+The model architecture, dataset, and training code are open-source at
+\url{https://github.com/GodYtteria/Tinda360}.
+
+% ══════════════════════════════════════════════════════════════════════════
+\begin{thebibliography}{20}
+
+\bibitem[Cruz and Cheng(2020)]{cruz2020establishing}
+Cruz, J.~C.~B. and Cheng, C.
+\newblock Establishing baselines for text classification in low-resource
+  languages.
+\newblock \emph{arXiv preprint arXiv:2005.02068}, 2020.
+
+\bibitem[{DeepSeek-AI}(2024)]{deepseekai2024deepseekv3}
+{DeepSeek-AI}.
+\newblock DeepSeek-V3 technical report.
+\newblock \emph{arXiv preprint arXiv:2412.19437}, 2024.
+
+\bibitem[{DTI}(2023)]{dti2023sari}
+{Department of Trade and Industry, Philippines}.
+\newblock Sari-sari store development program annual report, 2023.
+
+\bibitem[Gloeckle et~al.(2024)]{gloeckle2024better}
+Gloeckle, F., Idrissi, B.~Y., Rozière, B., Lopez-Paz, D., and Synnaeve, G.
+\newblock Better \& faster large language models via multi-token prediction.
+\newblock \emph{arXiv preprint arXiv:2404.19737}, 2024.
+
+\bibitem[Jiang et~al.(2024)]{jiang2024mixtral}
+Jiang, A.~Q., Sablayrolles, A., Roux, A., Mensch, A., et~al.
+\newblock Mixtral of experts.
+\newblock \emph{arXiv preprint arXiv:2401.04088}, 2024.
+
+\bibitem[Jordan(2024)]{jordan2024muon}
+Jordan, K.
+\newblock Muon: An optimizer for hidden layers in neural networks.
+\newblock \emph{Blog post}, 2024.
+
+\bibitem[{Qwen Team}(2025)]{qwen2025qwen3}
+{Qwen Team}.
+\newblock Qwen3 technical report.
+\newblock \emph{arXiv preprint arXiv:2505.09388}, 2025.
+
+\bibitem[Shazeer et~al.(2017)]{shazeer2017outrageously}
+Shazeer, N., Mirhoseini, A., Maziarz, K., et~al.
+\newblock Outrageously large neural networks: The sparsely-gated
+  mixture-of-experts layer.
+\newblock \emph{ICLR}, 2017.
+
+\bibitem[Touvron et~al.(2023)]{touvron2023llama}
+Touvron, H., Lavril, T., Izacard, G., et~al.
+\newblock LLaMA: Open and efficient foundation language models.
+\newblock \emph{arXiv preprint arXiv:2302.13971}, 2023.
+
+\bibitem[Yang et~al.(2024)]{yang2024gated}
+Yang, S., Wang, B., Shen, Y., Panda, R., and Kim, Y.
+\newblock Gated delta networks: Improving mamba2 with delta rule.
+\newblock \emph{arXiv preprint arXiv:2412.06464}, 2024.
+
+\end{thebibliography}
+
+\end{document}

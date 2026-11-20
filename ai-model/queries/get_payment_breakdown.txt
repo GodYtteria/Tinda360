@@ -1,0 +1,33 @@
+@ {"timeframe":"today"}
+magkano ang cash at magkano ang gcash ngayon
+paano nagbayad ang mga customer ngayong araw
+payment methods today
+cash vs gcash today
+ilan ang binayaran ng cash ngayon
+how did customers pay today
+hati ng bayad ngayong araw
+magkano ang galing sa utang ngayon
+ilan ang cash at ilan ang online ngayong araw
+unsa ang paagi sa bayad karon
+@ {"timeframe":"week"}
+magkano ang cash at magkano ang gcash ngayong linggo
+paano nagbayad ang mga customer this week
+payment methods this week
+cash vs gcash this week
+ilan ang binayaran ng cash nitong linggo
+how did customers pay this week
+hati ng bayad ngayong linggo
+magkano ang galing sa utang nitong linggo
+ilan ang cash at ilan ang online sa isang linggo
+unsa ang paagi sa bayad karong semana
+@ {"timeframe":"month"}
+magkano ang cash at magkano ang gcash ngayong buwan
+paano nagbayad ang mga customer this month
+payment methods this month
+cash vs gcash this month
+ilan ang binayaran ng cash nitong buwan
+how did customers pay this month
+hati ng bayad ngayong buwan
+magkano ang galing sa utang ngayong buwan
+ilan ang cash at ilan ang online sa isang buwan
+unsa ang paagi sa bayad karong bulan

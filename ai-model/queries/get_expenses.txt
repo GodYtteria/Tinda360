@@ -1,0 +1,37 @@
+@ {"timeframe":"today"}
+magkano ang gastos ko ngayong araw
+ano ang mga gastusin natin today
+how much did we spend today
+expenses ngayon po
+ilan na ang nagastos ko ngayong araw
+ano ang lumabas na pera ngayon
+gastos today magkano
+ilan ang binayaran kong bills ngayon
+pila ang gastos ko karon
+nagkano ti nagasto ko ita
+anong pinamili ko ngayon sa gastos
+@ {"timeframe":"week"}
+magkano ang gastos ko ngayong linggo
+ano ang mga gastusin natin this week
+how much did we spend this week
+weekly expenses po
+ilan ang nagastos ko sa isang linggo
+ano ang lumabas na pera nitong linggo
+gastos this week magkano
+pila ang gastos ko karong semana
+nagkano ti nagasto ko daytoy a lawas
+ano ang expenses ko nitong nakaraang 7 araw
+grabe, magkano na pala ang nagastos ko sa isang linggo
+@ {"timeframe":"month"}
+magkano ang gastos ko ngayong buwan
+ano ang mga gastusin natin this month
+how much did we spend this month
+monthly expenses po
+ilan ang nagastos ko sa isang buwan
+ano ang lumabas na pera nitong buwan
+gastos this month magkano
+pila ang gastos ko karong bulan
+nagkano ti nagasto ko iti bulan a daytoy
+ano ang expenses ko nitong nakaraang 30 araw
+hay, magkano na ba ang gastos ko sa kuryente at iba pa ngayong buwan
+kabuuang gastos ng tindahan ngayong buwan po

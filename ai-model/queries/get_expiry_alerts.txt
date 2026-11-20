@@ -1,0 +1,36 @@
+@ {"days_ahead":7}
+anong mga produkto ang malapit nang mag-expire
+may mga paso na ba na paninda
+expiring products po
+what items are about to expire
+anong produkto ang mapapaso ngayong linggo
+may expired ba tayong paninda
+listahan ng mga malapit nang masira
+which products are past or near expiry
+ano ang dapat ko nang ibenta bago mapaso
+check expiry po ng mga paninda
+may nag-expire na ba sa tindahan
+unsa nga produkto ang hapit na mapaso
+ania kadi ti agpaso a produkto
+hay naku, may paso na ba akong paninda
+grabe baka may expired na naman, ano ang mga iyon
+mga produktong 1 week na lang bago mapaso
+expiry check please
+anong mga item ang maaalis na dahil sa petsa
+near expiry list
+pakitingnan ang petsa ng mga paninda kung may paso
+@ {"days_ahead":14}
+anong produkto ang mapapaso sa loob ng dalawang linggo
+items expiring within two weeks
+mga paninda na mapapaso sa susunod na 14 araw
+@ {"days_ahead":30}
+anong produkto ang mapapaso sa loob ng isang buwan
+items expiring within a month
+mga paninda na mapapaso sa susunod na 30 araw
+@ {"days_ahead":3}
+anong produkto ang mapapaso sa loob ng 3 araw
+items expiring in the next three days
+mga paninda na mapapaso ngayong 3 araw
+@ {"days_ahead":60}
+anong produkto ang mapapaso sa loob ng dalawang buwan
+items expiring within 60 days

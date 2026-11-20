@@ -1,0 +1,49 @@
+@ {"min_balance":0}
+sino ang may utang sa akin
+sino sino ang mga umutang
+listahan ng mga may utang po
+who owes me money
+show me all unpaid balances
+ilan ang utang ng mga suki ko
+sino ang hindi pa nagbabayad
+pakita ang utang ledger
+mga customer na may balance pa
+sino ang mga may bayarin sa tindahan
+list of debtors please
+sinu-sino ang may pautang pa sa akin
+sino ang may atraso sa akin
+ano ang kabuuang utang ng mga tao
+sino ang may pagkakautang sa atin
+sino ang nag-utang ngayong linggo na hindi pa bayad
+hay, sino na naman ang may utang
+naku baka madami nang hindi nagbabayad, sino sila
+unsa nga mga suki ang naay utang
+sino ti adda utang kenka
+cno ang may utng pa
+unpaid tabs pls
+magkano ang total ng utang sa tindahan
+utang list po
+nasa listahan ba ang mga umutang kahapon
+@ {"min_balance":100}
+sino ang may utang na higit sa 100 pesos
+mga umutang ng lampas 100
+who owes more than 100
+ilista ang utang na lampas isang daan
+@ {"min_balance":500}
+sino ang may utang na higit 500
+mga customer na may balance na over 500
+who has an unpaid balance above 500
+ilista ang utang na lampas limang daan
+@ {"min_balance":1000}
+sino ang may utang na higit isang libo
+mga umutang ng lampas 1000
+who owes over a thousand pesos
+malalaking utang na lampas libo lang
+@ {"min_balance":50}
+sino ang may utang na mahigit 50 pesos
+mga umutang ng lampas singkwenta
+who owes more than 50 pesos
+@ {"min_balance":200}
+sino ang may utang na higit sa 200
+who owes over 200 pesos
+mga balance na lampas dalawang daan

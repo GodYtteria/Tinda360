@@ -1,0 +1,40 @@
+@ {"sort_by":"spend","limit":10}
+sino ang pinakamalaki gumastos sa tindahan
+sino ang top suki ko
+who are my best customers
+mga suking pinakamaraming nabili
+top spenders po
+sino ang pinakamagandang suki ko
+sino ang mga loyal customers
+ranking ng mga suki ayon sa gastos
+sino ang pinaka-malakas bumili
+who spends the most in my store
+sino ang number one suki
+unsa nga suki ang pinaka daghan nagastos
+sinno ti kaaduan ti nagastos nga suki
+hay, sino ba ang mga totoong suki ko
+@ {"sort_by":"visits","limit":10}
+sino ang pinakamadalas bumisita
+sino ang pinakamadalas na bumibili
+who visits the most often
+mga suking laging bumabalik
+most frequent customers po
+sino ang araw-araw dumadaan sa tindahan
+sino ang may pinakamaraming visit
+ranking ng mga suki ayon sa dalas ng bili
+who comes in the most
+@ {"sort_by":"spend","limit":5}
+top 5 na suki ayon sa gastos
+limang pinakamalaking gumastos
+my top five spenders
+@ {"sort_by":"visits","limit":5}
+top 5 na pinakamadalas bumisita
+limang pinakamadalas na suki
+my five most frequent visitors
+@ {"sort_by":"spend","limit":3}
+top 3 suki ko
+tatlong pinakamalaking gumastos
+my top three customers
+@ {"sort_by":"visits","limit":3}
+top 3 na madalas bumisita
+tatlong pinakamadalas na suki

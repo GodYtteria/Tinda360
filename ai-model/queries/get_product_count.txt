@@ -1,0 +1,18 @@
+@ {}
+ilan ang produkto sa inventory ko
+ilang item ang naka-lista sa tindahan
+how many products do we have
+total products po
+ilan lahat ng paninda ko
+gaano karami ang items ko sa sistema
+ilang klase ng produkto meron ako
+count of products in inventory
+ilan ang nakarehistro na produkto
+ilang paninda na ang nai-encode ko
+pila ang produkto sa akong tindahan
+mga ilang produkto ang meron ako
+size ng inventory ko
+how many items are in my catalog
+ilan ba lahat ng nabebenta ko
+bilang ng aktibong produkto
+total ng mga item sa listahan
