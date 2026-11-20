@@ -10,6 +10,7 @@ import 'package:tinda360/core/sales/top_product.dart';
 import 'package:tinda360/data/data_providers.dart';
 import 'package:tinda360/features/chat/data/chat_history_storage.dart';
 import 'package:tinda360/features/chat/data/intent_classifier.dart';
+import 'package:tinda360/features/chat/data/tool_argument_parser.dart';
 import 'package:tinda360/features/chat/data/yumi_engine.dart';
 import 'package:tinda360/features/chat/data/yumi_intent_mapper.dart';
 import 'package:tinda360/features/chat/presentation/chat_reply_builders.dart';
@@ -254,10 +255,38 @@ class ChatNotifier extends Notifier<ChatState> {
     final decision = router.route(query);
     final routed = ChatClassification(matched: decision.matched);
     return switch (decision.kind) {
-      RouteKind.answerIntent => routed,
+      RouteKind.answerIntent => _withExplicitArguments(query, decision, routed),
       RouteKind.outOfScope => _outOfScopeClassification(routed),
       RouteKind.askModel => _classifyWithModel(query, router, routed),
     };
+  }
+
+  Future<ChatClassification> _withExplicitArguments(
+    String query,
+    RouteDecision decision,
+    ChatClassification routed,
+  ) async {
+    final toolName = decision.toolName;
+    if (toolName == null) return routed;
+    final arguments = const ToolArgumentParser().parse(
+      toolName,
+      query,
+      timeframe: decision.matched.timeframe.name,
+    );
+    if (arguments == null) return routed;
+    final withTool = ChatClassification(
+      matched: decision.matched,
+      toolName: toolName,
+      toolArgs: arguments,
+    );
+    final toolResult = await _executeModelTool(withTool);
+    if (toolResult == null || toolResult['error'] != null) return routed;
+    return ChatClassification(
+      matched: decision.matched,
+      toolName: toolName,
+      toolArgs: arguments,
+      toolResult: toolResult,
+    );
   }
 
   ChatClassification _outOfScopeClassification(ChatClassification keyword) =>

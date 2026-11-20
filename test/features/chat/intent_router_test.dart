@@ -119,6 +119,15 @@ void main() {
       expect(decision.matched.intent, ChatIntent.stockForecast);
     });
 
+    test('the tool name is exposed only when the classifier decided', () {
+      expect(
+        router.route('sino ang may utang sa akin').toolName,
+        'get_utang_list',
+      );
+      expect(keywordOnlyRouter.route('benta ngayon').toolName, isNull);
+      expect(router.route('hello').toolName, isNull);
+    });
+
     test('the timeframe from the keyword matcher is kept', () {
       final decision = router.route('magkano benta ko ngayong linggo');
       expect(decision.matched.intent, ChatIntent.sales);

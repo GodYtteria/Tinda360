@@ -11,9 +11,11 @@ enum RouteKind {
 }
 
 final class RouteDecision {
-  const new({required this.kind, required this.matched});
+  const new({required this.kind, required this.matched, this.toolName});
 
   final RouteKind kind;
+
+  final String? toolName;
 
   final MatchedQuery matched;
 }
@@ -46,6 +48,7 @@ final class IntentRouter {
     if (isConfident) {
       return RouteDecision(
         kind: RouteKind.answerIntent,
+        toolName: prediction.toolName,
         matched: MatchedQuery(
           intent: toolNameToIntent(prediction.toolName),
           timeframe: keywordMatch.timeframe,

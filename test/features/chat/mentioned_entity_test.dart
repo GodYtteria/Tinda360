@@ -56,8 +56,9 @@ void main() {
 
   test('names with punctuation or ñ match the normalized query', () {
     expect(
-      findMentionedProduct('magkano pi a colada', [_product('Piña Colada')])
-          ?.product.name,
+      findMentionedProduct('magkano pi a colada', [
+        _product('Piña Colada'),
+      ])?.product.name,
       'Piña Colada',
     );
     expect(

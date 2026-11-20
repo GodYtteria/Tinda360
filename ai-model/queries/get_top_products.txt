@@ -10,7 +10,7 @@ top products today
 pinakamabili ngayon anong produkto
 unsa ang pinaka mabaligya karon
 ano ti kaaduan a naibaligya ita
-top 3 ngayong araw
+top 3 ngayong araw || {"timeframe":"today","limit":3}
 ano pinakamabenta ko today
 hay, ano ba ang hit na paninda ngayon
 pakisabi po kung ano ang pinaka-nabenta ngayong araw
