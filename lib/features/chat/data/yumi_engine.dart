@@ -77,7 +77,21 @@ final class YumiTurn {
   final bool isUser;
 }
 
-final class YumiEngine {
+abstract interface class YumiInference {
+  bool get isReady;
+
+  Future<void> init();
+
+  Future<YumiInferResult> infer(
+    String userQuery, {
+    String contextSummary,
+    List<YumiTurn> recentTurns,
+  });
+
+  String compactTurns(List<YumiTurn> turns, {int maxCharsPerTurn});
+}
+
+final class YumiEngine implements YumiInference {
   new _();
 
   static final YumiEngine instance = YumiEngine._();
@@ -104,8 +118,10 @@ final class YumiEngine {
   bool _ready = false;
   Future<void>? _initFuture;
 
+  @override
   bool get isReady => _ready;
 
+  @override
   Future<void> init() {
     if (_ready) return Future<void>.value();
     return _initFuture ??= _doInit().catchError((
@@ -158,6 +174,7 @@ final class YumiEngine {
     _initFuture = null;
   }
 
+  @override
   Future<YumiInferResult> infer(
     String userQuery, {
     String contextSummary = '',
@@ -214,6 +231,7 @@ final class YumiEngine {
     );
   }
 
+  @override
   String compactTurns(List<YumiTurn> turns, {int maxCharsPerTurn = 96}) {
     if (turns.isEmpty) return '';
     final lines = <String>[];

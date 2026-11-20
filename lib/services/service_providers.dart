@@ -34,7 +34,7 @@ final biometricAuthServiceProvider = Provider<BiometricAuthService>(
   (ref) => BiometricAuthService(),
 );
 
-final yumiEngineProvider = Provider<YumiEngine>(
+final yumiEngineProvider = Provider<YumiInference>(
   (ref) => YumiEngine.instance,
 );
 
