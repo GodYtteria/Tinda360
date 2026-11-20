@@ -6,6 +6,7 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:path_provider/path_provider.dart';
 import 'package:tinda360/features/chat/data/yumi_tokenizer.dart';
 
@@ -265,9 +266,9 @@ final class YumiEngine {
       return cleaned;
     }
 
-    final limitedQuery = userQuery.length > maximumQueryCharacters
-        ? userQuery.substring(0, maximumQueryCharacters)
-        : userQuery;
+    final limitedQuery = userQuery.characters
+        .take(maximumQueryCharacters)
+        .toString();
     final safeQuery = stripSpecialTokens(limitedQuery);
     final baseParts = <String>[
       '<|im_start|>system\n$_systemPrompt<|im_end|>',

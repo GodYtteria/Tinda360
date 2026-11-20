@@ -11,6 +11,7 @@
 #include <climits>
 #include <mutex>
 #include <exception>
+#include <memory>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -146,24 +147,24 @@ static bool skip_kv_value(GgufContext& ctx, uint32_t type, int depth) {
 static bool gguf_open(GgufContext& ctx, const char* path) {
     ctx.fp = fopen(path, "rb");
     if (!ctx.fp) { YLOG("Cannot open: %s\n", path); return false; }
-    if (fseek(ctx.fp, 0, SEEK_END) != 0) return false;
-    const long end = ftell(ctx.fp);
-    if (end <= 0 || fseek(ctx.fp, 0, SEEK_SET) != 0) return false;
+    const long end = fseek(ctx.fp, 0, SEEK_END) == 0 ? ftell(ctx.fp) : -1;
+    if (end <= 0 || fseek(ctx.fp, 0, SEEK_SET) != 0) { YLOG("Cannot measure GGUF file: %s\n", path); return false; }
     ctx.file_size = (uint64_t)end;
     uint32_t magic = 0, version = 0;
     if (!read_value(ctx.fp, magic) || magic != 0x46554747u) { YLOG("Not a GGUF file: %s\n", path); return false; }
-    if (!read_value(ctx.fp, version) || version < 2) { YLOG("GGUF version %u not supported\n", version); return false; }
+    if (!read_value(ctx.fp, version)) { YLOG("GGUF header truncated: %s\n", path); return false; }
+    if (version < 2) { YLOG("GGUF version %u not supported\n", version); return false; }
     uint64_t n_tensors = 0, n_kv = 0;
-    if (!read_value(ctx.fp, n_tensors) || !read_value(ctx.fp, n_kv)) return false;
+    if (!read_value(ctx.fp, n_tensors) || !read_value(ctx.fp, n_kv)) { YLOG("GGUF header truncated: %s\n", path); return false; }
     if (n_tensors > GGUF_MAX_TENSORS || n_kv > GGUF_MAX_KV_PAIRS) { YLOG("GGUF header counts out of range\n"); return false; }
     for (uint64_t i = 0; i < n_kv; i++) {
         std::string key;
         uint32_t vtype = 0;
-        if (!read_string(ctx, key) || !read_value(ctx.fp, vtype)) return false;
+        if (!read_string(ctx, key) || !read_value(ctx.fp, vtype)) { YLOG("Malformed GGUF metadata key\n"); return false; }
         const bool is_vocab = key.size() >= 10 && key.compare(key.size() - 10, 10, "vocab_size") == 0;
         if (is_vocab && vtype == GGUF_UINT32) {
             uint32_t vsz = 0;
-            if (!read_value(ctx.fp, vsz) || vsz == 0 || vsz > GGUF_MAX_VOCAB) return false;
+            if (!read_value(ctx.fp, vsz) || vsz == 0 || vsz > GGUF_MAX_VOCAB) { YLOG("GGUF vocab_size out of range\n"); return false; }
             ctx.vocab_size = static_cast<int>(vsz);
         } else if (!skip_kv_value(ctx, vtype, 0)) {
             YLOG("Malformed GGUF metadata\n");
@@ -173,16 +174,15 @@ static bool gguf_open(GgufContext& ctx, const char* path) {
     for (uint64_t i = 0; i < n_tensors; i++) {
         TensorInfo ti;
         uint32_t ndim = 0;
-        if (!read_string(ctx, ti.name) || !read_value(ctx.fp, ndim) || ndim > GGUF_MAX_DIMENSIONS) return false;
-        ti.shape.resize(ndim);
-        for (uint32_t d = 0; d < ndim; d++) {
-            if (!read_value(ctx.fp, ti.shape[d])) return false;
-        }
-        if (!read_value(ctx.fp, ti.dtype) || !read_value(ctx.fp, ti.offset)) return false;
+        bool valid = read_string(ctx, ti.name) && read_value(ctx.fp, ndim) && ndim <= GGUF_MAX_DIMENSIONS;
+        if (valid) ti.shape.resize(ndim);
+        for (uint32_t d = 0; valid && d < ndim; d++) valid = read_value(ctx.fp, ti.shape[d]);
+        valid = valid && read_value(ctx.fp, ti.dtype) && read_value(ctx.fp, ti.offset);
+        if (!valid) { YLOG("Malformed GGUF tensor header\n"); return false; }
         ctx.tensors[ti.name] = ti;
     }
     const long pos = ftell(ctx.fp);
-    if (pos < 0) return false;
+    if (pos < 0) { YLOG("Cannot read GGUF position\n"); return false; }
     ctx.data_offset = (uint64_t)(((pos + 31) / 32) * 32);
     return true;
 }
@@ -202,7 +202,7 @@ static std::vector<float> gguf_load_tensor(GgufContext& ctx, const std::string& 
     const TensorInfo& ti = it->second;
     const uint64_t bytes_per_element = ti.dtype == GGML_F32 ? 4 : ti.dtype == GGML_F16 ? 2 : 0;
     if (bytes_per_element == 0 || ti.offset > ctx.file_size || ctx.data_offset > ctx.file_size - ti.offset) {
-        YLOG("Bad tensor header for %s\n", name.c_str());
+        YLOG("Bad tensor header for %s (dtype %u)\n", name.c_str(), ti.dtype);
         return {};
     }
     const uint64_t available = ctx.file_size - ctx.data_offset - ti.offset;
@@ -222,16 +222,13 @@ static std::vector<float> gguf_load_tensor(GgufContext& ctx, const std::string& 
             YLOG("Short read for tensor %s\n", name.c_str());
             return {};
         }
-    } else if (ti.dtype == GGML_F16) {
+    } else {
         std::vector<uint16_t> raw(n);
         if (fread(raw.data(), 2, n, ctx.fp) != n) {
             YLOG("Short read for tensor %s\n", name.c_str());
             return {};
         }
         for (uint64_t i = 0; i < n; i++) out[i] = f16_to_f32(raw[i]);
-    } else {
-        YLOG("Unsupported dtype %u for %s\n", ti.dtype, name.c_str());
-        return {};
     }
     return out;
 }
@@ -364,9 +361,10 @@ static bool load_model(const char* path) {
     GgufContext ctx;
     if (!gguf_open(ctx, path)) return false;
     if (ctx.vocab_size <= 0) { YLOG("vocab_size not found in GGUF metadata\n"); return false; }
-    Model* m = new Model();
+    std::unique_ptr<Model> model(new Model());
+    Model* m = model.get();
     m->vocab_size = ctx.vocab_size;
-    if (!load_weights(ctx, m)) { delete m; return false; }
+    if (!load_weights(ctx, m)) return false;
     int max_seq = ROPE_MAX; float theta = 10000.0f;
     m->rope_cos.resize(max_seq * ROPE_HALF);
     m->rope_sin.resize(max_seq * ROPE_HALF);
@@ -378,7 +376,7 @@ static bool load_model(const char* path) {
             m->rope_sin[pos * ROPE_HALF + i] = std::sin(angle);
         }
     }
-    g_model = m;
+    g_model = model.release();
     YLOG("Model loaded (vocab=%d)\n", m->vocab_size);
     return true;
 }
@@ -723,6 +721,9 @@ int ytteria_load(const char* gguf_path) {
     } catch (const std::exception& error) {
         YLOG("ytteria_load failed: %s\n", error.what());
         return 0;
+    } catch (...) {
+        YLOG("ytteria_load failed with an unknown error\n");
+        return 0;
     }
 }
 
@@ -731,6 +732,9 @@ int ytteria_generate(const int* input_ids, int n_input, int* output_ids, int max
         return ytteria_generate_unchecked(input_ids, n_input, output_ids, max_new, eos_id, stop_id2, prefix_len);
     } catch (const std::exception& error) {
         YLOG("ytteria_generate failed: %s\n", error.what());
+        return -1;
+    } catch (...) {
+        YLOG("ytteria_generate failed with an unknown error\n");
         return -1;
     }
 }
