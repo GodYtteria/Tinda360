@@ -257,6 +257,34 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
     return net < 0 ? 0 : net;
   }
 
+  Future<Map<String, int>> _netSoldMilliByProduct(DayRange range) async {
+    final sold = await _sales.soldProductQuantitiesInRange(range);
+    final returnRows = await _db
+        .customSelect(
+          '''
+SELECT r.product_id, SUM(r.qty_milli) AS returned_milli
+FROM sale_returns r
+JOIN sales s ON s.id = r.sale_id
+WHERE r.is_deleted = 0 AND s.is_deleted = 0
+  AND r.created_at >= ? AND r.created_at < ?
+GROUP BY r.product_id
+''',
+          variables: [
+            Variable.withInt(_startOfLocalDayMs(range.first)),
+            Variable.withInt(_startOfLocalDayMs(range.last.plusDays(1))),
+          ],
+          readsFrom: {_db.saleReturns, _db.sales},
+        )
+        .get();
+    final net = <String, int>{...sold};
+    for (final row in returnRows) {
+      final productId = row.read<String>('product_id');
+      final remaining = (net[productId] ?? 0) - row.read<int>('returned_milli');
+      net[productId] = remaining < 0 ? 0 : remaining;
+    }
+    return net;
+  }
+
   Future<Map<String, dynamic>> _topProducts(String timeframe, int limit) async {
     final range = _rangeFor(timeframe);
     final safeLimit = limit <= 0 ? 5 : limit;
@@ -364,7 +392,7 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
     const windowDays = 14;
     final today = _today;
     final range = DayRange(today.plusDays(-(windowDays - 1)), today);
-    final soldById = await _sales.soldProductQuantitiesInRange(range);
+    final soldById = await _netSoldMilliByProduct(range);
     final soldMilli = soldById[match.product.id] ?? 0;
     final currentMilli = match.stock.milli;
     final avgDailyUnits = soldMilli / (windowDays * Quantity.milliPerUnit);
@@ -533,7 +561,7 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
     final window = days <= 0 ? 14 : days;
     final range = DayRange(today.plusDays(-(window - 1)), today);
     final products = await _products.watchActive().first;
-    final soldQty = await _sales.soldProductQuantitiesInRange(range);
+    final soldQty = await _netSoldMilliByProduct(range);
     final items = <Map<String, dynamic>>[];
     for (final item in products) {
       final sold = soldQty[item.product.id] ?? 0;
@@ -807,7 +835,7 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
     const windowDays = 14;
     final today = _today;
     final range = DayRange(today.plusDays(-(windowDays - 1)), today);
-    final soldQty = await _sales.soldProductQuantitiesInRange(range);
+    final soldQty = await _netSoldMilliByProduct(range);
 
     final candidates = <Map<String, dynamic>>[];
     for (final item in products) {
@@ -855,22 +883,6 @@ WHERE r.is_deleted = 0 AND s.is_deleted = 0
       if (budgetMinor > 0 && spent + cost > budgetMinor) continue;
       suggestions.add(candidate);
       spent += cost;
-    }
-    if (suggestions.isEmpty && budgetMinor > 0) {
-      final byCost = [...candidates]
-        ..sort(
-          (first, second) => (first['total_minor'] as int).compareTo(
-            second['total_minor'] as int,
-          ),
-        );
-      for (final candidate in byCost) {
-        if (suggestions.length >= safeLimit) break;
-        final cost = candidate['total_minor'] as int;
-        if (spent + cost <= budgetMinor) {
-          suggestions.add(candidate);
-          spent += cost;
-        }
-      }
     }
     return <String, dynamic>{
       'budget_minor': budgetMinor,
