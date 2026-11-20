@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -29,6 +30,36 @@ final class _MemorySettingStore implements StoreSoundSettingStore {
 
   @override
   Future<bool> read() async => enabled;
+
+  @override
+  Future<void> write({required bool enabled}) async => this.enabled = enabled;
+}
+
+final class _FailingWriteStore implements StoreSoundSettingStore {
+  new(this.enabled);
+
+  final bool enabled;
+
+  @override
+  Future<bool> read() async => enabled;
+
+  @override
+  Future<void> write({required bool enabled}) async =>
+      throw const FileSystemException('disk full');
+}
+
+final class _SlowReadStore implements StoreSoundSettingStore {
+  new(this.enabled);
+
+  bool enabled;
+  final Completer<void> readGate = Completer<void>();
+
+  @override
+  Future<bool> read() async {
+    final stored = enabled;
+    await readGate.future;
+    return stored;
+  }
 
   @override
   Future<void> write({required bool enabled}) async => this.enabled = enabled;
@@ -88,6 +119,55 @@ void main() {
     await container.read(storeSoundPlayerProvider).playNow(StoreSound.scanned);
     expect(output.played, isEmpty);
     expect(store.enabled, isFalse);
+  });
+
+  test('a failed save puts the switch back and reports the error', () async {
+    final container = containerWith(
+      _RecordingSoundOutput(),
+      _FailingWriteStore(true),
+    );
+    await container.read(storeSoundsEnabledProvider.future);
+    await expectLater(
+      container
+          .read(storeSoundsEnabledProvider.notifier)
+          .setEnabled(enabled: false),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(container.read(storeSoundsEnabledProvider).value, isTrue);
+  });
+
+  test('two failed saves leave the switch on the saved choice', () async {
+    final container = containerWith(
+      _RecordingSoundOutput(),
+      _FailingWriteStore(true),
+    );
+    await container.read(storeSoundsEnabledProvider.future);
+    final notifier = container.read(storeSoundsEnabledProvider.notifier);
+    final results = await Future.wait([
+      notifier
+          .setEnabled(enabled: false)
+          .then((_) => 'saved', onError: (_) => 'failed'),
+      notifier
+          .setEnabled(enabled: true)
+          .then((_) => 'saved', onError: (_) => 'failed'),
+    ]);
+    expect(results, ['failed', 'failed']);
+    expect(container.read(storeSoundsEnabledProvider).value, isTrue);
+  });
+
+  test('a choice made before the setting loads is kept', () async {
+    final output = _RecordingSoundOutput();
+    final store = _SlowReadStore(true);
+    final container = containerWith(output, store);
+    final notifier = container.read(storeSoundsEnabledProvider.notifier);
+    final choice = notifier.setEnabled(enabled: false);
+    store.readGate.complete();
+    await choice;
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(storeSoundsEnabledProvider).value, isFalse);
+    expect(store.enabled, isFalse);
+    await container.read(storeSoundPlayerProvider).playNow(StoreSound.scanned);
+    expect(output.played, isEmpty);
   });
 
   test('a sound that fails is logged, never thrown', () async {

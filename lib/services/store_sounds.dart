@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
@@ -106,23 +107,29 @@ final storeSoundsEnabledProvider =
     );
 
 class StoreSoundsEnabledNotifier extends AsyncNotifier<bool> {
+  bool _saved = FileStoreSoundSettingStore.enabledByDefault;
+  int _latestChoice = 0;
+
   @override
   Future<bool> build() async {
     try {
-      return await ref.read(storeSoundSettingStoreProvider).read();
+      _saved = await ref.read(storeSoundSettingStoreProvider).read();
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('sound.setting', error, stack);
-      return FileStoreSoundSettingStore.enabledByDefault;
+      _saved = FileStoreSoundSettingStore.enabledByDefault;
     }
+    return _saved;
   }
 
   Future<void> setEnabled({required bool enabled}) async {
-    final previous = state;
+    await future;
+    final choice = ++_latestChoice;
     state = AsyncData(enabled);
     try {
       await ref.read(storeSoundSettingStoreProvider).write(enabled: enabled);
+      _saved = enabled;
     } on Object {
-      state = previous;
+      if (choice == _latestChoice) state = AsyncData(_saved);
       rethrow;
     }
   }
@@ -137,7 +144,17 @@ final class StoreSoundPlayer {
 
   final Ref _ref;
 
-  void play(StoreSound sound) => unawaited(playNow(sound));
+  void play(StoreSound sound) => unawaited(
+    playNow(sound).catchError(
+      (Object error, StackTrace stack) => FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'store sounds',
+        ),
+      ),
+    ),
+  );
 
   Future<void> playNow(StoreSound sound) async {
     if (!await _ref.read(storeSoundsEnabledProvider.future)) return;

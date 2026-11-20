@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tinda360/core/catalog/product.dart';
 import 'package:tinda360/core/catalog/product_unit.dart';
 import 'package:tinda360/core/catalog/quantity.dart';
@@ -11,7 +11,10 @@ import 'package:tinda360/features/pos/presentation/checkout_sheet.dart';
 import 'package:tinda360/features/pos/presentation/pos_cart_notifier.dart';
 import 'package:tinda360/l10n/app_delegates.dart';
 import 'package:tinda360/l10n/app_localizations.dart';
+import 'package:tinda360/services/service_providers.dart';
 import 'package:tinda360/services/store_sounds.dart';
+
+import '../../support/recording_app_log.dart';
 
 final class _RecordingSoundOutput implements StoreSoundOutput {
   final List<StoreSound> played = [];
@@ -45,12 +48,14 @@ void main() {
     StockedProduct item,
   ) async {
     final output = _RecordingSoundOutput();
+    final log = RecordingAppLog();
     final container = ProviderContainer(
       overrides: [
         storeSoundOutputProvider.overrideWithValue(output),
         storeSoundSettingStoreProvider.overrideWithValue(
           _AlwaysOnSettingStore(),
         ),
+        appLogProvider.overrideWithValue(log),
       ],
     );
     addTearDown(container.dispose);
@@ -80,6 +85,7 @@ void main() {
     );
     await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
+    expect(log.events, isEmpty);
     return (output.played, added);
   }
 
