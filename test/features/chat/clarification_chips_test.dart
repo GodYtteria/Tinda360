@@ -26,15 +26,18 @@ class _RecordingChatNotifier extends ChatNotifier {
 
   final ChatState initialState;
   final List<ClarificationOption> answered = [];
+  final List<ChatMessage> answeredMessages = [];
 
   @override
   ChatState build() => initialState;
 
   @override
   Future<void> answerClarification(
+    ChatMessage clarification,
     ClarificationOption option,
     AppLocalizations localizations,
   ) async {
+    answeredMessages.add(clarification);
     answered.add(option);
   }
 }
@@ -127,6 +130,7 @@ void main() {
     expect(notifier.answered, hasLength(1));
     expect(notifier.answered.single.toolName, 'get_top_products');
     expect(notifier.answered.single.label, 'Top products');
+    expect(notifier.answeredMessages.single.id, 'a1');
   });
 
   testWidgets('chips on an older message are disabled', (tester) async {

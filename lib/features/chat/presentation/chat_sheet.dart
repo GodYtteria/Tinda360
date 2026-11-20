@@ -106,6 +106,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
   }
 
   void _answerClarification(
+    ChatMessage clarification,
     ClarificationOption option,
     AppLocalizations localizations,
   ) {
@@ -114,7 +115,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     unawaited(
       ref
           .read(chatNotifierProvider.notifier)
-          .answerClarification(option, localizations),
+          .answerClarification(clarification, option, localizations),
     );
     _scrollToBottom(force: true);
   }
@@ -233,8 +234,12 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                         }
                       });
                     },
-                    onSelectOption: (option) =>
-                        _answerClarification(option, localizations),
+                    onSelectOption: (clarification, option) =>
+                        _answerClarification(
+                          clarification,
+                          option,
+                          localizations,
+                        ),
                     onOpenTab: widget.onOpenTab == null
                         ? null
                         : (index) {
@@ -374,7 +379,8 @@ class _MessageList extends StatelessWidget {
   final YumiScreen yumiScreen;
   final bool isThinking;
   final ScrollController scrollController;
-  final ValueChanged<ClarificationOption> onSelectOption;
+  final void Function(ChatMessage clarification, ClarificationOption option)
+  onSelectOption;
   final String? revealingMessageId;
   final ValueChanged<String>? onRevealComplete;
   final ValueChanged<int>? onOpenTab;
@@ -420,7 +426,7 @@ class _MessageList extends StatelessWidget {
                     ? null
                     : () => onRevealComplete!(message.id),
                 onSelectOption: index == messages.length - 1 && !isThinking
-                    ? onSelectOption
+                    ? (option) => onSelectOption(message, option)
                     : null,
                 onOpenTab: onOpenTab,
               );
