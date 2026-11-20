@@ -87,23 +87,31 @@ final class IntentRouter {
         ),
       );
     }
-    final candidates = _plausibleToolNames(query);
+    final isConversational = conversationalIntents.contains(
+      keywordMatch.intent,
+    );
+    final storeCandidates = _plausibleToolNames(
+      query,
+      allowWhenNoToolLeads: isConversational,
+    );
+    if (isConversational && storeCandidates.isNotEmpty) {
+      return _answerOrClarify(storeCandidates, keywordMatch);
+    }
     final keywordAgreesWithTopCandidate =
-        candidates.isNotEmpty &&
-        toolNameToIntent(candidates.first) == keywordMatch.intent;
+        storeCandidates.isNotEmpty &&
+        toolNameToIntent(storeCandidates.first) == keywordMatch.intent;
     final keywordCanAnswer =
         keywordFoundIntent &&
-        (candidates.length < minimumClarificationChoices ||
-            keywordAgreesWithTopCandidate ||
-            conversationalIntents.contains(keywordMatch.intent));
+        (storeCandidates.length < minimumClarificationChoices ||
+            keywordAgreesWithTopCandidate);
     if (keywordCanAnswer) {
       return RouteDecision(kind: RouteKind.answerIntent, matched: keywordMatch);
     }
-    if (candidates.length >= minimumClarificationChoices) {
+    if (storeCandidates.length >= minimumClarificationChoices) {
       return RouteDecision(
         kind: RouteKind.clarify,
         matched: keywordMatch,
-        candidateToolNames: candidates,
+        candidateToolNames: storeCandidates,
       );
     }
     return RouteDecision(
@@ -112,11 +120,40 @@ final class IntentRouter {
     );
   }
 
-  List<String> _plausibleToolNames(String query) {
+  RouteDecision _answerOrClarify(
+    List<String> storeCandidates,
+    MatchedQuery keywordMatch,
+  ) {
+    if (storeCandidates.length >= minimumClarificationChoices) {
+      return RouteDecision(
+        kind: RouteKind.clarify,
+        matched: keywordMatch,
+        candidateToolNames: storeCandidates,
+      );
+    }
+    final toolName = storeCandidates.single;
+    return RouteDecision(
+      kind: RouteKind.answerIntent,
+      toolName: toolName,
+      matched: MatchedQuery(
+        intent: toolNameToIntent(toolName),
+        timeframe: keywordMatch.timeframe,
+        normalizedText: keywordMatch.normalizedText,
+      ),
+    );
+  }
+
+  List<String> _plausibleToolNames(
+    String query, {
+    required bool allowWhenNoToolLeads,
+  }) {
     final loadedClassifier = classifier;
     if (loadedClassifier == null) return const <String>[];
-    return loadedClassifier
-        .rankedPredictions(query)
+    final ranked = loadedClassifier.rankedPredictions(query);
+    final noToolLeads =
+        ranked.isNotEmpty && ranked.first.toolName == noToolClass;
+    if (noToolLeads && !allowWhenNoToolLeads) return const <String>[];
+    return ranked
         .where(
           (prediction) =>
               prediction.toolName != noToolClass &&

@@ -147,6 +147,23 @@ void main() {
       }
     });
 
+    test('a greeting in front of a real question does not hide it', () {
+      final decision = router.route('hi, magkano benta kahapon');
+      expect(decision.kind, RouteKind.clarify);
+      expect(decision.candidateToolNames, contains('get_sales_compare'));
+      expect(decision.candidateToolNames, contains('get_sales_summary'));
+    });
+
+    test('an off-topic question is not offered store choices', () {
+      for (final query in ['weather today', 'who won the game last night']) {
+        expect(
+          router.route(query).kind,
+          isNot(RouteKind.clarify),
+          reason: query,
+        );
+      }
+    });
+
     test('without a classifier nothing is clarified', () {
       for (final query in ['benta ngayon', 'zzzz qqqq', '']) {
         expect(
