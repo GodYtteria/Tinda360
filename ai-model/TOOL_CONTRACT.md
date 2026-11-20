@@ -34,7 +34,7 @@ Ikaw si Yumi, AI assistant ng sari-sari store. ...
 <|im_start|>system
 Tools:
 get_sales_summary(timeframe: string)
-get_product_info(product_name: string)
+get_product_info()
 ... (all 20 tools listed)
 <|im_end|>
 <|im_start|>user
@@ -46,9 +46,11 @@ magkano bigas?
 
 ## Tool Call Format
 
+The model writes the tool and any numbers from the question. It never writes `product_name` or `customer_name`: those are hidden from its tool list and stripped from its training targets. The app fills them in from the question and the shop's inventory, by id, before the call is validated and run.
+
 ```
 <tool_call>
-{"name": "get_product_info", "arguments": {"product_name": "bigas"}}
+{"name": "get_product_info", "arguments": {}}
 </tool_call>
 ```
 
@@ -78,24 +80,15 @@ magkano bigas?
 7. txtspk/abbreviations
 8. Emotional (naku, grabe, hay nako)
 
-## Known Limitations
+## Names Are Filled In by the App
 
-- `product_name` extraction unreliable at 5M params (always outputs memorized name)
-- Flutter app handles this via `findMentionedProduct()` database fuzzy matching
-- Fix requires 50M-tinda360 preset with 10K+ examples
-
+- A 5.6M model memorises product names instead of copying them from the question, so names are not its job.
+- `groundProductArgument` resolves the product from the question against the shop's own inventory (`EntityResolver`, by id). One match: it is used. None or several: the app says it is not in the inventory or asks which one.
+- This works for any shop and any inventory without retraining.
 
 ## Progress Notes (runs, not dates)
 
-- Dataset `ai-model/tinda360_tool_calling.jsonl`: 4440 rows, SUKLI-style, canonical tool results (DB-truth), JSON valid, hand-crafted/generated unique, 8 registers, 20 tools.
-- Tool-call distribution (high→low): `get_product_info` (1380), `get_sales_summary`, `get_stock_forecast`, `get_utang_list`, `get_sales_compare`, `get_top_products`, `get_utang_risk`, `get_expenses`, ... (more in 6.b).
-- Generator: `ai-model/build_dataset.py` builds rows from the hand-written `ai-model/queries/*.txt`; tool results come from `ai-model/tool_results.py`.
-- Next: after 50M training+eval, export to `assets/ai/model.gguf`, sync `assets/ai/tokenizer.json`, re-audit dataset JSON + tool JSON validity, then report gate.
-
-
-## Progress Notes - 50M train/eval (runs)
-
-- Data: 4440 rows, SUKLI-style, canonical tool results, JSON valid, hand-crafted/generated unique, 8 registers, 20 tools.
-- Eval on 418-test split (`python eval.py --checkpoint checkpoints/best.pt`): Overall 345/444 = 77.7%; Tool sel 329/428 = 76.9%; No-tool 16/16 = 100.0%; `get_product_info` 123/123 = 100%. Low-tool gaps: slow_moving 29%, store_info 35%, payment_breakdown 25%, product_count 36%, suki 23%, sales_trend 47%, utang_list 65% (imbalance-driven).
-- Exported: `assets/ai/model.gguf` (50M, 121 MB) + `assets/ai/tokenizer.json` synced from `ai-model/tokenizer.json`.
-- To improve low-tool accuracy: more balanced data (lower `get_product_info` share, top up slow_moving/store_info/payment_breakdown/product_count/suki_loyalty/sales_trend/utang_list/expiry_alerts) or more epochs.
+- Dataset `ai-model/tinda360_tool_calling.jsonl`: 4,409 rows, SUKLI-style, tool results from `tool_results.py`, 20 tools, 8 registers. Assistant tool calls carry no names.
+- Sources: hand-written `queries/*.txt` (also train the app's intent classifier), `model_queries/*.txt` (English and Tagalog, model only) and `conversations.jsonl` (recovered multi-turn conversations, model only).
+- Generator: `build_dataset.py`; it drops held-out look-alikes, conflicting labels and rows whose name is not in the question.
+- Blind test: `novel_eval.txt` with `eval_novel.py`; see TRAINING.md for the run history.
